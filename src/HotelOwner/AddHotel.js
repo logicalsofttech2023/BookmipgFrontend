@@ -28,8 +28,8 @@ import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 import axios from "axios";
 import DeleteIcon from "@mui/icons-material/Delete";
-import toast, { Toaster } from 'react-hot-toast';
-
+import toast, { Toaster } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const AddHotel = () => {
   const [hotelName, setHotelName] = useState("");
@@ -47,10 +47,12 @@ const AddHotel = () => {
   const [facilities, setFacilities] = useState([]);
   const [images, setImages] = useState([]);
   const [pricePerNight, setPricePerNight] = useState("");
+  const [originalPricePerNight, setOriginalPricePerNight] = useState("");
+  const [taxesAmount, setTaxesAmount] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const fileInputRef = useRef(null);
   let token = localStorage.getItem("token");
-
+  const navigate = useNavigate();
 
   const handleImageChange = (event) => {
     const files = Array.from(event.target.files);
@@ -77,7 +79,7 @@ const AddHotel = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
+
     // FormData object create करें
     const formData = new FormData();
     formData.append("name", hotelName);
@@ -91,14 +93,16 @@ const AddHotel = () => {
     formData.append("description", description);
     formData.append("rating", rating);
     formData.append("pricePerNight", pricePerNight);
+    formData.append("originalPricePerNight", originalPricePerNight);
+    formData.append("taxesAmount", taxesAmount);
     formData.append("room", room);
-    formData.append("amenities",amenities);
-    formData.append("facilities",facilities);
-  
+    formData.append("amenities", amenities);
+    formData.append("facilities", facilities);
+
     images.forEach((image) => {
       formData.append("images", image);
     });
-  
+
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_BASE_URL}api/admin/addHotel`,
@@ -109,16 +113,19 @@ const AddHotel = () => {
             "Content-Type": "multipart/form-data",
           },
         }
-      );      
+      );
       if (response.status === 200) {
-        toast.success(response?.data?.message)
+        toast.success(response?.data?.message);
+        navigate("/totalHotel");
       }
     } catch (error) {
       toast.error("Error adding hotel");
-      console.error("Error adding hotel:", error.response?.data || error.message);
+      console.error(
+        "Error adding hotel:",
+        error.response?.data || error.message
+      );
     }
   };
-  
 
   const handleAmenitiesChange = (event) => {
     const {
@@ -139,9 +146,9 @@ const AddHotel = () => {
       <Header />
       <div className="container-fluid page-body-wrapper">
         <Sidebar />
-        
+
         <div className="main-panel">
-        <Toaster />
+          <Toaster />
 
           <div className="content-wrapper" style={{ marginTop: "50px" }}>
             <div className="page-header">Add Hotel</div>
@@ -251,11 +258,11 @@ const AddHotel = () => {
                             <Grid item xs={12} sm={6}>
                               <TextField
                                 id="filled-basic"
-                                label="Rooms"
+                                label="Original Price Per Night"
                                 variant="filled"
                                 fullWidth
-                                value={room}
-                                onChange={(e) => setRoom(e.target.value)}
+                                value={originalPricePerNight}
+                                onChange={(e) => setOriginalPricePerNight(e.target.value)}
                                 required
                               />
                             </Grid>
@@ -346,36 +353,65 @@ const AddHotel = () => {
                                     </Box>
                                   )}
                                 >
-                                  {[
-                                    "Bed",
-                                    "Bath",
-                                    "Reception",
-                                    "Parking",
-                                  ].map((facility) => (
-                                    <MenuItem key={facility} value={facility}>
-                                      <Checkbox
-                                        checked={
-                                          facilities.indexOf(facility) > -1
-                                        }
-                                        color="primary"
-                                      />
-                                      <ListItemText primary={facility} />
-                                    </MenuItem>
-                                  ))}
+                                  {["Bed", "Bath", "Reception", "Parking"].map(
+                                    (facility) => (
+                                      <MenuItem key={facility} value={facility}>
+                                        <Checkbox
+                                          checked={
+                                            facilities.indexOf(facility) > -1
+                                          }
+                                          color="primary"
+                                        />
+                                        <ListItemText primary={facility} />
+                                      </MenuItem>
+                                    )
+                                  )}
                                 </Select>
                               </FormControl>
                             </Grid>
-                            <Grid item xs={12}>
+
+                            <Grid item xs={12} sm={6}>
                               <TextField
                                 id="filled-basic"
-                                label="Description"
+                                label="Rooms"
                                 variant="filled"
                                 fullWidth
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
+                                value={room}
+                                onChange={(e) => setRoom(e.target.value)}
                                 required
                               />
                             </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                id="filled-basic"
+                                label="Tex Amount"
+                                variant="filled"
+                                fullWidth
+                                value={taxesAmount}
+                                onChange={(e) => setTaxesAmount(e.target.value)}
+                                required
+                              />
+                            </Grid>
+                            
+                            <Grid item xs={12}>
+                              <fieldset class="message-wrap">
+                                <textarea
+                                  name="message"
+                                  rows="4"
+                                  tabindex="4"
+                                  placeholder="Description"
+                                  value={description}
+                                  onChange={(e) =>
+                                    setDescription(e.target.value)
+                                  }
+                                  style={{ padding: "13px 15px 13px 13px", borderBottom: "1px solid black" }}
+                                ></textarea>
+                              </fieldset>
+                              
+                            </Grid>
+
+                            
                             <Grid item xs={12}>
                               <Button
                                 variant="contained"

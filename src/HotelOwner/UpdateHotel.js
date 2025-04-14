@@ -47,6 +47,8 @@ const UpdateHotel = () => {
   const [facilities, setFacilities] = useState([]);
   const [images, setImages] = useState([]);
   const [pricePerNight, setPricePerNight] = useState("");
+  const [originalPricePerNight, setOriginalPricePerNight] = useState("");
+  const [taxesAmount, setTaxesAmount] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const fileInputRef = useRef(null);
   let token = localStorage.getItem("token");
@@ -63,7 +65,10 @@ const UpdateHotel = () => {
   const fetchHotelData = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}api/user/getHotelById?hotelId=${id}`
+        `${process.env.REACT_APP_BASE_URL}api/user/getHotelById?hotelId=${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       if (response.status === 200) {
         const data = response.data.hotel;
@@ -79,6 +84,8 @@ const UpdateHotel = () => {
         setDescription(data.description);
         setRating(data.rating);
         setPricePerNight(data.pricePerNight);
+        setOriginalPricePerNight(data.originalPricePerNight);
+        setTaxesAmount(data.taxesAmount);
         setRoom(data.room);
         setAmenities(data.amenities || []);
         setFacilities(data.facilities || []);
@@ -111,14 +118,14 @@ const UpdateHotel = () => {
 
   const handleImageDelete = async (index) => {
     const imageToDelete = images[index];
-  
+
     if (!imageToDelete.preview) {
       try {
         console.log("Deleting image:", imageToDelete); // 🔍 Debugging log
-  
+
         // API call hone tak button disable karo
         setLoading(true);
-  
+
         const response = await axios.post(
           `${process.env.REACT_APP_BASE_URL}api/admin/deleteHotelImage`,
           {
@@ -131,11 +138,11 @@ const UpdateHotel = () => {
             },
           }
         );
-  
+
         if (response.status === 200) {
           toast.success("Image deleted successfully");
           fetchHotelData();
-  
+
           // ✅ Backend confirm hone ke baad hi remove karo
           setImages((prevImages) => prevImages.filter((_, i) => i !== index));
         } else {
@@ -151,7 +158,7 @@ const UpdateHotel = () => {
       // Locally uploaded image hai toh sirf frontend se hatao
       setImages((prevImages) => prevImages.filter((_, i) => i !== index));
     }
-  
+
     // Agar koi bhi image nahi bachi toh file input reset karo
     if (images.length === 1 && fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -174,6 +181,8 @@ const UpdateHotel = () => {
     formData.append("description", description);
     formData.append("rating", rating);
     formData.append("pricePerNight", pricePerNight);
+    formData.append("originalPricePerNight", originalPricePerNight);
+    formData.append("taxesAmount", taxesAmount);
     formData.append("room", room);
     formData.append("amenities", amenities);
     formData.append("facilities", facilities);
@@ -344,6 +353,32 @@ const UpdateHotel = () => {
                                 fullWidth
                                 value={room}
                                 onChange={(e) => setRoom(e.target.value)}
+                                required
+                              />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                id="filled-basic"
+                                label="Tex Amount"
+                                variant="filled"
+                                fullWidth
+                                value={taxesAmount}
+                                onChange={(e) => setTaxesAmount(e.target.value)}
+                                required
+                              />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                id="filled-basic"
+                                label="Original Price Per Night"
+                                variant="filled"
+                                fullWidth
+                                value={originalPricePerNight}
+                                onChange={(e) =>
+                                  setOriginalPricePerNight(e.target.value)
+                                }
                                 required
                               />
                             </Grid>

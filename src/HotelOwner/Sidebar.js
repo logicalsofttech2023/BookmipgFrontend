@@ -16,7 +16,7 @@ const Sidebar = () => {
     event.preventDefault();
     setOpenMenus((prev) => {
       const newState = { ...prev, [menu]: !prev[menu] };
-      localStorage.setItem("sidebarMenus", JSON.stringify(newState));  
+      localStorage.setItem("sidebarMenus", JSON.stringify(newState));
       return newState;
     });
   };
@@ -42,7 +42,12 @@ const Sidebar = () => {
         </li>
 
         <li className="nav-item">
-          <Link className={`nav-link ${location.pathname === "/dashboard" ? "active" : ""}`}  to={"/dashboard"}>
+          <Link
+            className={`nav-link ${
+              location.pathname === "/dashboard" ? "active" : ""
+            }`}
+            to={"/dashboard"}
+          >
             <span className="menu-title">Dashboard</span>
             <i className="mdi mdi-home menu-icon" />
           </Link>
@@ -50,75 +55,183 @@ const Sidebar = () => {
 
         {/* Hotel Management */}
         <li className="nav-item">
-          <div className="nav-link d-flex justify-content-between" onClick={(e) => toggleMenu("hotel", e)} style={{ cursor: "pointer" }}>
+          <div
+            className="nav-link d-flex justify-content-between"
+            onClick={(e) => toggleMenu("hotel", e)}
+            style={{ cursor: "pointer" }}
+          >
             <span className="menu-title">Hotel Management</span>
-            <i className={`menu-arrow transition ${openMenus.hotel ? "rotate-180" : "rotate-0"}`} />
+            <i
+              className={`menu-arrow transition ${
+                openMenus.hotel ? "rotate-180" : "rotate-0"
+              }`}
+            />
           </div>
-          <div className="submenu-container" style={{ maxHeight: openMenus.hotel ? "200px" : "0px", overflow: "hidden", transition: "max-height 0.4s ease-in-out" }}>
+          <div
+            className="submenu-container"
+            style={{
+              maxHeight: openMenus.hotel ? "200px" : "0px",
+              overflow: "hidden",
+              transition: "max-height 0.4s ease-in-out",
+            }}
+          >
             <ul className="nav flex-column sub-menu">
               <li className="nav-item">
-                <Link className={`nav-link ${location.pathname === "/addHotel" ? "active" : ""}`}  to={"/addHotel"}>Add Hotel</Link>
+                <Link
+                  className={`nav-link ${
+                    location.pathname === "/addHotel" ? "active" : ""
+                  }`}
+                  to={"/addHotel"}
+                >
+                  Add Hotel
+                </Link>
               </li>
               <li className="nav-item">
-                <Link className={`nav-link ${location.pathname === "/totalHotel" ? "active" : ""}`}  to={"/totalHotel"}>Hotel List</Link>
+                <Link
+                  className={`nav-link ${
+                    location.pathname === "/totalHotel" ? "active" : ""
+                  }`}
+                  to={"/totalHotel"}
+                >
+                  Hotel List
+                </Link>
               </li>
             </ul>
           </div>
         </li>
 
-        {/* Customer Management */}
-        <li className="nav-item">
-          <div className="nav-link d-flex justify-content-between" onClick={(e) => toggleMenu("customer", e)} style={{ cursor: "pointer" }}>
-            <span className="menu-title">Customer Management</span>
-            <i className={`menu-arrow transition ${openMenus.customer ? "rotate-180" : "rotate-0"}`} />
-          </div>
-          <div className="submenu-container" style={{ maxHeight: openMenus.customer ? "200px" : "0px", overflow: "hidden", transition: "max-height 0.4s ease-in-out" }}>
-            <ul className="nav flex-column sub-menu">
-              <li className="nav-item">
-                <Link className={`nav-link ${location.pathname === "/addCostomer" ? "active" : ""}`} to={"/addCostomer"}>Add Customer</Link>
-              </li>
-              <li className="nav-item">
-                <Link className={`nav-link ${location.pathname === "/costomerList" ? "active" : ""}`} to={"/costomerList"}>Customer List</Link>
-              </li>
-            </ul>
-          </div>
-        </li>
+        
 
         {/* Booking Management */}
         <li className="nav-item">
-          <div className="nav-link d-flex justify-content-between" onClick={(e) => toggleMenu("booking", e)} style={{ cursor: "pointer" }}>
+          <div
+            className="nav-link d-flex justify-content-between"
+            onClick={(e) => toggleMenu("booking", e)}
+            style={{ cursor: "pointer" }}
+          >
             <span className="menu-title">Booking Management</span>
-            <i className={`menu-arrow transition ${openMenus.booking ? "rotate-180" : "rotate-0"}`} />
+            <i
+              className={`menu-arrow transition ${
+                openMenus.booking ? "rotate-180" : "rotate-0"
+              }`}
+            />
           </div>
-          <div className="submenu-container" style={{ maxHeight: openMenus.booking ? "200px" : "0px", overflow: "hidden", transition: "max-height 0.4s ease-in-out" }}>
+          <div
+            className="submenu-container"
+            style={{
+              maxHeight: openMenus.booking ? "200px" : "0px",
+              overflow: "hidden",
+              transition: "max-height 0.4s ease-in-out",
+            }}
+          >
             <ul className="nav flex-column sub-menu">
               <li className="nav-item">
-                <Link className={`nav-link ${location.pathname === "/bookingList" ? "active" : ""}`} to={"/bookingList"}>Booking List</Link>
+                <Link
+                  className={`nav-link ${
+                    location.pathname === "/bookingList" ? "active" : ""
+                  }`}
+                  to={"/bookingList"}
+                >
+                  Booking List
+                </Link>
               </li>
               <li className="nav-item">
-                <Link className={`nav-link ${location.pathname === "/cancelledBooking" ? "active" : ""}`} to={"/cancelledBooking"}>Cancelled Booking List</Link>
+                <Link
+                  className={`nav-link ${
+                    location.pathname === "/cancelledBooking" ? "active" : ""
+                  }`}
+                  to={"/cancelledBooking"}
+                >
+                  Cancelled Booking List
+                </Link>
               </li>
               <li className="nav-item">
-                <Link className={`nav-link ${location.pathname === "/upcomingBooking" ? "active" : ""}`} to={"/upcomingBooking"}>Upcoming Booking List</Link>
+                <Link
+                  className={`nav-link ${
+                    location.pathname === "/upcomingBooking" ? "active" : ""
+                  }`}
+                  to={"/upcomingBooking"}
+                >
+                  Upcoming Booking List
+                </Link>
               </li>
               <li className="nav-item">
-                <Link className={`nav-link ${location.pathname === "/completedBooking" ? "active" : ""}`} to={"/completedBooking"}>Completed Booking List</Link>
+                <Link
+                  className={`nav-link ${
+                    location.pathname === "/completedBooking" ? "active" : ""
+                  }`}
+                  to={"/completedBooking"}
+                >
+                  Completed Booking List
+                </Link>
               </li>
             </ul>
           </div>
         </li>
 
         {/* Contact Us */}
-        <li className="nav-item">
-          <Link className={`nav-link ${location.pathname === "/hotelOwnerContactUs" ? "active" : ""}`} to={"/hotelOwnerContactUs"}>
+        <li
+          className={`nav-item ${
+            location.pathname === "/hotelOwnerContactUs" ? "active" : ""
+          }` }
+        >
+          <Link
+            className={`nav-link ${
+              location.pathname === "/hotelOwnerContactUs" ? "active" : ""
+            } `}
+            to={"/hotelOwnerContactUs"}
+          >
             <span className="menu-title">Contact Us</span>
             <i className="mdi mdi-phone menu-icon" />
           </Link>
         </li>
 
+        <li
+          className={`nav-item ${
+            location.pathname === "/hotelOwnerPrivacyPolicy" ? "active" : ""
+          }`}
+        >
+          <Link
+            className={`nav-link ${
+              location.pathname === "/hotelOwnerPrivacyPolicy" ? "active" : ""
+            }`}
+            to={"/hotelOwnerPrivacyPolicy"}
+          >
+            <span className="menu-title">Privacy Policy</span>
+            <i className="mdi mdi-shield-lock menu-icon" />
+          </Link>
+        </li>
+
+        <li
+          className={`nav-item ${
+            location.pathname === "/hotelOwnerTermsAndCondition" ? "active" : ""
+          }`}
+        >
+          <Link
+            className={`nav-link ${
+              location.pathname === "/hotelOwnerTermsAndCondition"
+                ? "active"
+                : ""
+            }`}
+            to={"/hotelOwnerTermsAndCondition"}
+          >
+            <span className="menu-title">Terms And Condition</span>
+            <i className="mdi mdi-file-document menu-icon" />
+          </Link>
+        </li>
+
         {/* About Us */}
-        <li className="nav-item">
-          <Link className={`nav-link ${location.pathname === "/hotelOwnerAboutUs" ? "active" : ""}`} to={"/hotelOwnerAboutUs"}>
+        <li
+          className={`nav-item ${
+            location.pathname === "/hotelOwnerAboutUs" ? "active" : ""
+          }`}
+        >
+          <Link
+            className={`nav-link ${
+              location.pathname === "/hotelOwnerAboutUs" ? "active" : ""
+            }`}
+            to={"/hotelOwnerAboutUs"}
+          >
             <span className="menu-title">About Us</span>
             <i className="mdi mdi-information menu-icon" />
           </Link>

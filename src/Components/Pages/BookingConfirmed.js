@@ -1,43 +1,141 @@
-import React, { useRef } from "react";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+import React, { useEffect, useRef, useState } from "react";
+import axios from "axios";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+  Radio,
+  RadioGroup,
+} from "@mui/material";
+import toast, { Toaster } from "react-hot-toast";
+import { motion } from "framer-motion";
+import { useReactToPrint } from "react-to-print";
 
 const BookingConfirmed = () => {
-  const pdfRef = useRef();
+  let token = localStorage.getItem("token");
+  const [bookingData, setBookingData] = useState("");
+  const { id } = useParams();
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [selectedReason, setSelectedReason] = useState([]);
+  const navigate = useNavigate();
+  const componentRef = useRef(null);
 
-  const handleDownloadPDF = () => {
-    const input = pdfRef.current;
-    html2canvas(input, { scale: 2 }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-      pdf.save("booking_confirmation.pdf");
-    });
+  const reactToPrintContent = () => componentRef.current;
+
+  const handlePrint = useReactToPrint({
+    documentTitle: "Booking Confirmation",
+  });
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    setSelectedReason([]);
+    setOpen(false);
   };
+
+  const reasons = [
+    "Change in travel plans",
+    "Found a better deal",
+    "Emergency situation",
+    "Flight or train cancellation",
+    "Bad hotel reviews",
+    "Work-related reasons",
+    "Personal reasons",
+    "Other",
+  ];
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    getBookingData();
+  }, []);
+
+  const getBookingData = () => {
+    axios
+      .get(`${process.env.REACT_APP_BASE_URL}api/user/getBookingById`, {
+        params: { bookingId: id },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        if (response?.status === 200) {
+          setBookingData(response?.data?.booking);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching booking data:", error);
+      });
+  };
+
+  const handleCancelBooking = async () => {
+    if (!selectedReason) {
+      toast.error("Please select a cancellation reason.");
+      return;
+    }
+
+    const data = {
+      bookingId: id,
+      reason: selectedReason,
+    };
+
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_BASE_URL}api/user/cancelBooking`, // Ensure proper API URL formation
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Booking cancelled successfully!");
+        handleClose();
+        setTimeout(() => {
+          navigate("/bookingHistory");
+        }, 2000);
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Error cancelling booking. Please try again."
+      );
+    }
+  };
+
   return (
-    <div style={{ paddingTop: "70px", width: "80%", margin: "24px auto" }}>
-        <div className="center" >
+    <div style={{ width: "80%", margin: "24px auto" }}>
+      <Toaster />
+      <div className="center">
         <button
-        onClick={handleDownloadPDF}
-        style={{
-          backgroundColor: "#d32f2f",
-          color: "#fff",
-          padding: "10px 20px",
-          border: "none",
-          borderRadius: "5px",
-          fontSize: "16px",
-          cursor: "pointer",
-          marginTop: "20px",
-        }}
-      >
-        Print
-      </button>
-        </div>
-        
-      <div ref={pdfRef}>
-      
+          onClick={() => handlePrint(reactToPrintContent)}
+          style={{
+            backgroundColor: "#d32f2f",
+            color: "#fff",
+            padding: "10px 20px",
+            border: "none",
+            borderRadius: "5px",
+            fontSize: "16px",
+            cursor: "pointer",
+            marginTop: "20px",
+          }}
+        >
+          Print
+        </button>
+      </div>
+
+      <div ref={componentRef}>
         {/* Confirmation Message */}
         <div
           style={{
@@ -65,7 +163,7 @@ const BookingConfirmed = () => {
           >
             You will soon receive an email confirmation on{" "}
             <span style={{ fontWeight: "700", color: "#1a73e8" }}>
-              rodawar2019@gmail.com
+              {bookingData?.user?.email}
             </span>
           </div>
         </div>
@@ -84,9 +182,18 @@ const BookingConfirmed = () => {
           <div>
             <p>
               <strong>Booking ID:</strong>{" "}
-              <span style={{ color: "#1a73e8" }}>AT669537</span>
+              <span style={{ color: "#1a73e8" }}>{bookingData?.bookingId}</span>
             </p>
-            <p>Booked by Roopsingh on Mon, 24 Feb 2025</p>
+            <p>
+              Booked by {bookingData?.user?.name} on {new Date(bookingData?.checkInDate).toLocaleDateString(
+                    "en-GB",
+                    {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    }
+                  )}
+            </p>
           </div>
           <div
             style={{ border: "1px solid #d6d6d6", margin: "24px 0px" }}
@@ -100,31 +207,49 @@ const BookingConfirmed = () => {
               marginTop: "24px",
               padding: "20px",
               backgroundColor: "#fff",
+              gap: "20px",
+              justifyContent: "space-between",
             }}
           >
-            <div style={{ flex: "2", paddingRight: "20px" }}>
+            <div
+              style={{
+                flex: "2",
+                paddingRight: "20px",
+                minWidth: "250px",
+              }}
+            >
               <h2
-                style={{ fontSize: "22px", fontWeight: "bold", color: "#333", lineHeight: "30px" }}
+                style={{
+                  fontSize: "22px",
+                  fontWeight: "bold",
+                  color: "#333",
+                  lineHeight: "30px",
+                }}
               >
-                Hotel O New Delhi Railway Station formerly Le Alfanso
+                {bookingData?.hotel?.name}
               </h2>
-              <p style={{ fontSize: "16px", color: "#555", marginTop: "10px" }}>Le Alfanso</p>
+
               <p style={{ fontSize: "14px", color: "#777", marginTop: "10px" }}>
-                4/4, DB Gupta Road, Near Boi Arya Nagar, Paharganj, Near Railway
-                Station, Delhi
+                {bookingData?.hotel?.address}
               </p>
               <p style={{ fontSize: "14px", color: "#444", marginTop: "10px" }}>
-                <strong>Landmark:</strong> New Delhi Railway
+                <strong>City:</strong> {bookingData?.hotel?.city}
               </p>
             </div>
             <div
-              style={{ flex: "1", display: "flex", justifyContent: "center" }}
+              style={{
+                flex: "1",
+                display: "flex",
+                justifyContent: "center",
+                minWidth: "250px",
+              }}
             >
               <img
                 src="https://images.oyoroomscdn.com/uploads/hotel_image/47524/medium/wuaxijxwmbxe.jpg"
                 alt="Hotel"
                 style={{
                   width: "100%",
+                  maxWidth: "300px",
                   height: "auto",
                   borderRadius: "8px",
                   objectFit: "cover",
@@ -138,71 +263,65 @@ const BookingConfirmed = () => {
           ></div>
 
           {/* Guest & Stay Details Section */}
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "space-between",
-              marginTop: "24px",
-              padding: "20px",
-              backgroundColor: "#fff",
-            }}
-          >
-            <div style={{ flex: "2", paddingRight: "20px" }}>
-              <p style={{ lineHeight: "30px" }}>
-                <strong style={{ color: "rgb(51, 51, 51)", display: "block" }}>
-                  Primary Guest:
-                </strong>
-                Roopsingh
-              </p>
-              <p style={{ lineHeight: "30px" }}>
-                <strong style={{ color: "rgb(51, 51, 51)", display: "block" }}>
-                  Mobile Number:
-                </strong>
-                7224959699
-              </p>
-              <p style={{ lineHeight: "30px" }}>
-                <strong style={{ color: "rgb(51, 51, 51)", display: "block" }}>
-                  Email Address:
-                </strong>
-                rodawar2019@gmail.com
-              </p>
-            </div>
+          <div className="container mt-4 p-3 bg-white">
+            <div className="row g-3">
+              {/* Primary Guest Details */}
+              <div className="col-md-4 col-6">
+                <p className="mb-4">
+                  <strong className="d-block text-dark">Primary Guest:</strong>
+                  {bookingData?.user?.name}
+                </p>
+                <p className="mb-4">
+                  <strong className="d-block text-dark">Mobile Number:</strong>
+                  {bookingData?.user?.phone}
+                </p>
+                <p className="mb-4">
+                  <strong className="d-block text-dark">Email Address:</strong>
+                  {bookingData?.user?.email}
+                </p>
+              </div>
 
-            <div style={{ flex: "2" }}>
-              <p style={{ lineHeight: "30px" }}>
-                <strong style={{ color: "rgb(51, 51, 51)", display: "block" }}>
-                  Check In:
-                </strong>
-                24 Feb 2025, 12:00 PM
-              </p>
-              <p style={{ lineHeight: "30px" }}>
-                <strong style={{ color: "rgb(51, 51, 51)", display: "block" }}>
-                  Check Out:
-                </strong>
-                25 Feb 2025, 11:00 AM
-              </p>
-              <p style={{ lineHeight: "30px" }}>
-                <strong style={{ color: "rgb(51, 51, 51)", display: "block" }}>
-                  Stay Duration:
-                </strong>
-                1 Night
-              </p>
-            </div>
+              {/* Check-in & Stay Details */}
+              <div className="col-md-4 col-6">
+                <p className="mb-4">
+                  <strong className="d-block text-dark">Check In:</strong>
+                  {new Date(bookingData?.checkInDate).toLocaleDateString(
+                    "en-GB",
+                    {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    }
+                  )}
+                </p>
+                <p className="mb-4">
+                  <strong className="d-block text-dark">Check Out:</strong>
+                  {new Date(bookingData?.checkOutDate).toLocaleDateString(
+                    "en-GB",
+                    {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    }
+                  )}
+                </p>
+                <p className="mb-4">
+                  <strong className="d-block text-dark">Stay Duration:</strong>1
+                  Night
+                </p>
+              </div>
 
-            <div style={{ flex: "1" }}>
-              <p style={{ lineHeight: "30px" }}>
-                <strong style={{ color: "rgb(51, 51, 51)", display: "block" }}>
-                  Guests:
-                </strong>
-                1 Guest
-              </p>
-              <p style={{ lineHeight: "30px" }}>
-                <strong style={{ color: "rgb(51, 51, 51)", display: "block" }}>
-                  Room Type:
-                </strong>
-                Deluxe
-              </p>
+              {/* Guest & Room Details */}
+              <div className="col-md-4 col-6">
+                <p className="mb-4">
+                  <strong className="d-block text-dark">Guests:</strong>
+                  {bookingData?.adults + bookingData?.children} Guest
+                </p>
+                <p className="mb-4">
+                  <strong className="d-block text-dark">Room:</strong>
+                  {bookingData?.room}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -234,8 +353,9 @@ const BookingConfirmed = () => {
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                padding: "10px",
+                paddingTop: "10px",
                 borderBottom: "1px solid #d6d6d6",
+                flexWrap: "wrap",
               }}
             >
               <span
@@ -250,7 +370,7 @@ const BookingConfirmed = () => {
                   color: "#d32f2f",
                 }}
               >
-                ₹1078
+                ₹{bookingData?.totalPrice}
               </span>
             </div>
 
@@ -261,6 +381,8 @@ const BookingConfirmed = () => {
                 justifyContent: "space-between",
                 alignItems: "center",
                 marginTop: "10px",
+                flexWrap: "wrap",
+                gap: "15px",
               }}
             >
               <p
@@ -269,6 +391,7 @@ const BookingConfirmed = () => {
                   color: "#777",
                   margin: "0",
                   flex: "1",
+                  minWidth: "250px",
                 }}
               >
                 Your payment option is <strong>"Pay At Hotel"</strong>. You will
@@ -289,7 +412,9 @@ const BookingConfirmed = () => {
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
-                  marginLeft: "15px",
+                  minWidth: "120px",
+                  justifyContent: "center",
+                  fontWeight: "800",
                 }}
               >
                 Pay Now
@@ -317,28 +442,39 @@ const BookingConfirmed = () => {
           <div
             style={{
               display: "flex",
+              flexWrap: "wrap",
               justifyContent: "space-between",
               marginTop: "24px",
               padding: "20px",
               backgroundColor: "#fff",
+              gap: "20px",
             }}
           >
             {/* Things to Know */}
-            <div style={{ flex: "1" }}>
+            <div style={{ flex: "1", minWidth: "250px" }}>
               <h3>Things to Know</h3>
               <ul>{/* Add list items here */}</ul>
             </div>
 
             {/* Support & Cancellation */}
-            <div style={{ flex: "1", textAlign: "right" }}>
+            <div
+              style={{
+                flex: "1",
+                textAlign: "right",
+                minWidth: "250px",
+              }}
+            >
               <p>
                 <strong>Something not right?</strong>{" "}
-                <a
-                  href="/yo/?checkIn=2025-02-24&id=AT669537&phone=7224959699"
+                <Link
+                  target="_blank" 
+                  to={`https://wa.me/1234567890?text=${encodeURIComponent(
+                    "Hello, I want to book a room for 2024-02-24 with ID AT669537"
+                  )}`}
                   style={{ color: "#1a73e8", textDecoration: "none" }}
                 >
                   Chat with us
-                </a>{" "}
+                </Link>{" "}
                 for help.
               </p>
               <p
@@ -347,21 +483,77 @@ const BookingConfirmed = () => {
                   fontWeight: "bold",
                   cursor: "pointer",
                 }}
+                onClick={handleOpen}
               >
                 Cancel Booking
               </p>
               <p>
-                <a
-                  href="/terms/"
+                <Link
+                  to="/termsAndCondition"
                   style={{ color: "#1a73e8", textDecoration: "none" }}
                 >
                   Read OYO's Terms and Conditions
-                </a>
+                </Link>
               </p>
             </div>
           </div>
         </div>
       </div>
+      <Dialog
+        style={{ height: "80%", top: "100px" }}
+        open={open}
+        onClose={handleClose}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle
+          style={{ fontWeight: "700" }}
+          className="text-xl font-semibold text-gray-800"
+        >
+          Cancel Booking
+        </DialogTitle>
+        <DialogContent className="p-6 overflow-y-auto custom-scrollbar">
+          <FormControl component="fieldset" className="w-full">
+            <RadioGroup
+              value={selectedReason}
+              onChange={(e) => setSelectedReason(e.target.value)}
+              className="space-y-3"
+            >
+              {reasons.map((reason) => (
+                <motion.div
+                  key={reason}
+                  whileHover={{ scale: 1.05 }}
+                  className="rounded-lg bg-gray-100 p-3 transition-all"
+                >
+                  <FormControlLabel
+                    value={reason}
+                    control={<Radio color="primary" />}
+                    label={<span className="text-gray-700">{reason}</span>}
+                    className="w-full"
+                  />
+                </motion.div>
+              ))}
+            </RadioGroup>
+          </FormControl>
+        </DialogContent>
+        <DialogActions className="p-4 border-t">
+          <Button
+            onClick={handleClose}
+            color="secondary"
+            className="text-gray-600 hover:text-gray-900 transition-all"
+          >
+            Close
+          </Button>
+          <Button
+            onClick={handleCancelBooking}
+            style={{ backgroundColor: "red", fontWeight: "700" }}
+            variant="contained"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition-all"
+          >
+            Confirm Cancellation
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

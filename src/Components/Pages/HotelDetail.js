@@ -18,13 +18,12 @@ import {
 import { FaRegCheckCircle } from "react-icons/fa";
 import { DateRangePicker } from "rsuite";
 
-const PropertyDetail = () => {
+const HotelDetail = () => {
   const [ratings, setratings] = useState();
   const [listingData, setlistingData] = useState();
-  const [messgae, setmessgae] = useState();
+  const [messages, setMessages] = useState();
   const [Reviews, setReviews] = useState();
   const [count, setCount] = useState();
-  const [favdata, setfavdata] = useState();
   const navigate = useNavigate();
   let listingID = localStorage.getItem("ListingId");
   const loginId = localStorage.getItem("token");
@@ -41,6 +40,7 @@ const PropertyDetail = () => {
     children: 0,
   });
   const [selectedRooms, setSelectedRooms] = useState(1);
+  const [isFavorite, setIsFavorite] = useState(true);
 
   const handleGuestChange = (type, value) => {
     setSelectedGuests((prev) => ({
@@ -54,6 +54,7 @@ const PropertyDetail = () => {
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     fetchHotel();
     getReview();
     fetchCoupons();
@@ -63,13 +64,18 @@ const PropertyDetail = () => {
     if (!hotelId) return;
     try {
       const res = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}api/user/getHotelById`,
+        `${process.env.REACT_APP_BASE_URL}api/user/getHotelByIdForWeb`,
         {
           params: { hotelId: hotelId },
+          headers: {
+            Authorization: `Bearer ${loginId}`,
+          },
         }
       );
       console.log("Hotel Data:", res);
+
       setlistingData(res.data.hotel);
+      setIsFavorite(res?.data?.hotel?.isFavorite || false);
     } catch (error) {
       console.error("Error fetching hotel:", error.response?.data || error);
     }
@@ -104,8 +110,72 @@ const PropertyDetail = () => {
   const handleRatingClick = (rating) => {
     setratings(rating);
   };
+  const addFavorite = async () => {
+    if (!hotelId || isFavorite) return;
+    if (!loginId) {
+      swal({
+        title: "Please Login First!",
+        icon: "error",
+      }).then(() => {
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      });
+      return;
+    }
+    try {
+      const apiEndpoint = `${process.env.REACT_APP_BASE_URL}api/user/addFavorite`;
 
-  const ReviewDetails = (e) => {
+      await axios.post(
+        apiEndpoint,
+        { hotelId },
+        {
+          headers: { Authorization: `Bearer ${loginId}` },
+        }
+      );
+
+      toast.success("Added to Favorites");
+
+      setIsFavorite(true);
+    } catch (error) {
+      console.error("Error adding favorite:", error.response?.data || error);
+    }
+  };
+
+  const removeFavorite = async () => {
+    if (!loginId) {
+      swal({
+        title: "Please Login First!",
+        icon: "error",
+      }).then(() => {
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      });
+      return;
+    }
+    if (!hotelId || !isFavorite) return;
+    try {
+      const apiEndpoint = `${process.env.REACT_APP_BASE_URL}api/user/removeFavorite`;
+
+      await axios.post(
+        apiEndpoint,
+        { hotelId },
+        {
+          headers: { Authorization: `Bearer ${loginId}` },
+        }
+      );
+
+      toast.success("Removed from Favorites");
+
+      // Update local state
+      setIsFavorite(false);
+    } catch (error) {
+      console.error("Error removing favorite:", error.response?.data || error);
+    }
+  };
+
+  const addReview = async (e) => {
     e.preventDefault();
     if (!loginId) {
       swal({
@@ -118,90 +188,39 @@ const PropertyDetail = () => {
       });
       return;
     }
-    if (ratings === undefined) {
-      toast.error("Please select a rating");
+
+    if (!hotelId || !ratings || !messages) {
+      toast.error("Please provide all required fields.");
       return;
     }
 
-    let formData;
+    const formData = new FormData();
+    formData.append("hotelId", hotelId);
+    formData.append("rating", ratings);
+    formData.append("review", messages);
 
-    if (images.length > 0) {
-      formData = new FormData();
-      formData.append("userId", loginId);
-      formData.append("propertyId", listingID);
-      formData.append("message", messgae);
-      formData.append("review", ratings);
+    // Append multiple images
+    images.forEach((image) => {
+      formData.append("images", image);
+    });
 
-      images.forEach((image) => {
-        formData.append("images", image);
-      });
-    } else {
-      formData = {
-        userId: loginId,
-        propertyId: listingID,
-        message: messgae,
-        review: ratings,
-      };
-    }
-
-    axios
-      .post("http://157.66.191.24:3089/website/add_review", formData)
-      .then((res) => {
-        getReview();
-        swal(res.data.msg, {
-          icon: "success",
-        });
-      })
-      .catch((error) => {
-        if (error.response.status === 400) {
-          toast.error(error.response.data.msg);
+    try {
+      const res = await axios.post(
+        `${process.env.REACT_APP_BASE_URL}api/user/addReview`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${loginId}`,
+          },
         }
-      });
-  };
-
-  const addFavorite = (item) => {
-    if (!loginId) {
-      swal({
-        title: "Please Login First!",
-        icon: "error",
-      }).then(() => {
-        setTimeout(() => {
-          navigate("/login");
-        }, 2000);
-      });
-      return;
+      );
+      fetchHotel();
+      toast.success("Review added successfully!");
+    } catch (error) {
+      console.error("Error submitting review:", error.response?.data || error);
+      toast.error(error?.response?.data?.message);
     }
-    const data = {
-      userId: loginId,
-      propertyId: listingID,
-      lead_status: "1",
-      favourite_status: item,
-    };
-
-    axios
-      .post(`http://157.66.191.24:3089/website/add_lead_property`, data)
-      .then((res) => {
-        fetchHotel();
-        Getuserfavorite();
-        toast.success("Favorite status updated");
-      })
-      .catch(() => {});
-  };
-
-  useEffect(() => {
-    Getuserfavorite();
-  }, [0]);
-  const Getuserfavorite = () => {
-    const data = {
-      userId: loginId,
-      propertyId: listingID,
-    };
-    axios
-      .post("http://157.66.191.24:3089/website/get_favourite_property", data)
-      .then((res) => {
-        setfavdata(res?.data?.data[0]);
-      })
-      .catch((error) => {});
   };
 
   const shareUrl = window.location.href;
@@ -234,7 +253,7 @@ const PropertyDetail = () => {
     }
   };
 
-  const originalPricePerNight = listingData?.originalPricePerNight || 6389;
+  const originalPricePerNight = listingData?.originalPricePerNight;
   const discountedPricePerNight = listingData?.pricePerNight || 0;
   const discountPercentage = discountedPricePerNight
     ? Math.round((1 - discountedPricePerNight / originalPricePerNight) * 100)
@@ -250,8 +269,9 @@ const PropertyDetail = () => {
     );
   }
 
-  const subtotal = discountedPricePerNight * totalNights;
-  const taxesAmount = listingData?.taxesAmount || 680;
+  const total = discountedPricePerNight * totalNights;
+  const subtotal = total * selectedRooms;
+  const taxesAmount = listingData?.taxesAmount;
   const totalBeforeDiscount = subtotal + taxesAmount;
   const originalTotalPrice = originalPricePerNight * totalNights;
   const totalSavings = originalTotalPrice - subtotal;
@@ -301,9 +321,17 @@ const PropertyDetail = () => {
   const finalPrice = totalBeforeDiscount - discountAmount;
 
   const handleBooking = (id) => {
+    if (!loginId) {
+      swal({
+        title: "Please Login First!",
+        icon: "error",
+      }).then(() => {
+        navigate("/login");
+      });
+      return;
+    }
     if (!selectedDates || !selectedDates[0] || !selectedDates[1]) {
       toast.error("Please select check-in and check-out dates.");
-      
       return;
     }
 
@@ -421,8 +449,8 @@ const PropertyDetail = () => {
 
                 <div className="box-2 text-end">
                   <div className="icon-boxs flex">
-                    {favdata?.favourite_status == "1" ? (
-                      <a onClick={() => addFavorite("0")} href="#">
+                    {isFavorite ? (
+                      <a onClick={removeFavorite} href="#">
                         <svg
                           width={20}
                           height={20}
@@ -440,7 +468,7 @@ const PropertyDetail = () => {
                         </svg>
                       </a>
                     ) : (
-                      <a onClick={() => addFavorite("1")} href="#">
+                      <a onClick={addFavorite} href="#">
                         <svg
                           width={18}
                           height={18}
@@ -461,8 +489,8 @@ const PropertyDetail = () => {
 
                     <a data-toggle="modal" data-target="#popup_bid231" href="#">
                       <svg
-                        width={18}
-                        height={18}
+                        width="18"
+                        height="18"
                         viewBox="0 0 18 18"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -470,13 +498,12 @@ const PropertyDetail = () => {
                         <path
                           d="M5.41251 8.18025C5.23091 7.85348 4.94594 7.59627 4.60234 7.44899C4.25874 7.3017 3.87596 7.27268 3.51408 7.36648C3.1522 7.46029 2.83171 7.6716 2.60293 7.96725C2.37414 8.2629 2.25 8.62616 2.25 9C2.25 9.37384 2.37414 9.73709 2.60293 10.0327C2.83171 10.3284 3.1522 10.5397 3.51408 10.6335C3.87596 10.7273 4.25874 10.6983 4.60234 10.551C4.94594 10.4037 5.23091 10.1465 5.41251 9.81975M5.41251 8.18025C5.54751 8.42325 5.62476 8.70225 5.62476 9C5.62476 9.29775 5.54751 9.5775 5.41251 9.81975M5.41251 8.18025L12.587 4.19475M5.41251 9.81975L12.587 13.8052M12.587 4.19475C12.6922 4.39285 12.8358 4.568 13.0095 4.70995C13.1832 4.85189 13.3834 4.95779 13.5985 5.02146C13.8135 5.08512 14.0392 5.10527 14.2621 5.08072C14.4851 5.05617 14.7009 4.98742 14.897 4.87849C15.093 4.76957 15.2654 4.62264 15.404 4.44631C15.5427 4.26998 15.6448 4.06778 15.7043 3.85154C15.7639 3.63529 15.7798 3.40934 15.751 3.18689C15.7222 2.96445 15.6494 2.74997 15.5368 2.556C15.3148 2.17375 14.9518 1.89385 14.5256 1.77646C14.0995 1.65907 13.6443 1.71356 13.2579 1.92821C12.8715 2.14287 12.5848 2.50056 12.4593 2.92439C12.3339 3.34823 12.3797 3.80436 12.587 4.19475ZM12.587 13.8052C12.4794 13.999 12.4109 14.2121 12.3856 14.4323C12.3603 14.6526 12.3787 14.8756 12.4396 15.0888C12.5005 15.3019 12.6028 15.501 12.7406 15.6746C12.8784 15.8482 13.0491 15.993 13.2429 16.1006C13.4367 16.2083 13.6498 16.2767 13.87 16.302C14.0902 16.3273 14.3133 16.309 14.5264 16.2481C14.7396 16.1872 14.9386 16.0849 15.1122 15.947C15.2858 15.8092 15.4306 15.6385 15.5383 15.4447C15.7557 15.0534 15.8087 14.5917 15.6857 14.1612C15.5627 13.7308 15.2737 13.3668 14.8824 13.1494C14.491 12.932 14.0293 12.8789 13.5989 13.0019C13.1684 13.1249 12.8044 13.4139 12.587 13.8052Z"
                           stroke="#8E8E93"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        ></path>
                       </svg>
                     </a>
-                    {/* <ShareProperty propertyId={listingID} /> */}
                   </div>
                   <div className="moneys fs-30 fw-7 lh-45 text-color-3">
                     <span
@@ -498,7 +525,7 @@ const PropertyDetail = () => {
                         marginLeft: "10px",
                       }}
                     >
-                      ₹6389
+                      ₹{listingData?.originalPricePerNight}
                     </span>
                   </div>
                 </div>
@@ -513,7 +540,11 @@ const PropertyDetail = () => {
                 <div className="box-img box-1">
                   {listingData?.images[0] ? (
                     <img
-                      style={{ height: "540px", borderRadius: "5px" }}
+                      style={{
+                        height: "100%",
+                        borderRadius: "5px",
+                        objectFit: "cover",
+                      }}
                       className="img-1"
                       src={
                         `${process.env.REACT_APP_BASE_URL}` +
@@ -536,7 +567,7 @@ const PropertyDetail = () => {
                         style={{
                           borderRadius: "5px",
                           objectFit: "cover",
-                          height: "262px",
+                          height: "100%",
                           width: "100%",
                         }}
                         src={`http://157.66.191.24:3089/uploads/${
@@ -548,7 +579,11 @@ const PropertyDetail = () => {
                     </div>
                   ) : listingData?.images[1] ? (
                     <img
-                      style={{ height: "262px", borderRadius: "5px" }}
+                      style={{
+                        height: "262px",
+                        borderRadius: "5px",
+                        objectFit: "cover",
+                      }}
                       className="img-2"
                       src={
                         `${process.env.REACT_APP_BASE_URL}` +
@@ -567,7 +602,11 @@ const PropertyDetail = () => {
                   <div className="img-box flex">
                     {listingData?.images[2] ? (
                       <img
-                        style={{ height: "262px", borderRadius: "5px" }}
+                        style={{
+                          height: "100%",
+                          borderRadius: "5px",
+                          objectFit: "cover",
+                        }}
                         className="img-3"
                         src={
                           `${process.env.REACT_APP_BASE_URL}` +
@@ -586,6 +625,7 @@ const PropertyDetail = () => {
                       {listingData?.images[3] ? (
                         <img
                           className="img-4"
+                          style={{ objectFit: "cover" }}
                           src={
                             `${process.env.REACT_APP_BASE_URL}` +
                             listingData?.images[3]
@@ -620,8 +660,16 @@ const PropertyDetail = () => {
                             strokeLinejoin="round"
                           />
                         </svg>
-                        <h3 className="cursor-pointer">Show all</h3>
-                        <h3 className="cursor-pointer">
+                        <h3
+                          style={{ fontSize: "16px", lineHeight: "20px" }}
+                          className="cursor-pointer"
+                        >
+                          Show all
+                        </h3>
+                        <h3
+                          style={{ fontSize: "16px", lineHeight: "20px" }}
+                          className="cursor-pointer"
+                        >
                           {listingData?.images?.length} Photos
                         </h3>
                       </div>
@@ -693,7 +741,7 @@ const PropertyDetail = () => {
                   style={{
                     overflow: "scroll",
                     overflowX: "hidden",
-                    height: "700px",
+                    height: "auto",
                   }}
                   className="wrap-review wrap-style"
                 >
@@ -919,7 +967,14 @@ const PropertyDetail = () => {
                         </h4>
                         <div className="inner block">
                           {/* Adults Selection */}
-                          <div style={{ width: "calc(100% - 20px)", marginLeft: "20px", marginTop: "20px" }} className="group-select">
+                          <div
+                            style={{
+                              width: "calc(100% - 20px)",
+                              marginLeft: "20px",
+                              marginTop: "20px",
+                            }}
+                            className="group-select"
+                          >
                             <select
                               className="nice-select"
                               value={selectedGuests.adults}
@@ -930,7 +985,7 @@ const PropertyDetail = () => {
                                 )
                               }
                             >
-                              {[...Array(11).keys()].map((num) => (
+                              {[...Array(4).keys()].map((num) => (
                                 <option key={num} value={num}>
                                   {num} Adult{num !== 1 ? "s" : ""}
                                 </option>
@@ -939,7 +994,14 @@ const PropertyDetail = () => {
                           </div>
 
                           {/* Children Selection */}
-                          <div style={{ width: "calc(100% - 20px)", marginLeft: "20px", marginTop: "20px" }} className="group-select">
+                          <div
+                            style={{
+                              width: "calc(100% - 20px)",
+                              marginLeft: "20px",
+                              marginTop: "20px",
+                            }}
+                            className="group-select"
+                          >
                             <select
                               className="nice-select"
                               value={selectedGuests.children}
@@ -950,7 +1012,7 @@ const PropertyDetail = () => {
                                 )
                               }
                             >
-                              {[...Array(11).keys()].map((num) => (
+                              {[...Array(4).keys()].map((num) => (
                                 <option key={num} value={num}>
                                   {num} Child{num !== 1 ? "ren" : ""}
                                 </option>
@@ -978,7 +1040,7 @@ const PropertyDetail = () => {
                               handleRoomChange(Number(e.target.value))
                             }
                           >
-                            {[...Array(11).keys()].slice(1).map((num) => (
+                            {[...Array(4).keys()].slice(1).map((num) => (
                               <option key={num} value={num}>
                                 {num} Room{num !== 1 ? "s" : ""}
                               </option>
@@ -988,19 +1050,19 @@ const PropertyDetail = () => {
                       </div>
 
                       {/* Coupon Code Section */}
-                      <div style={{ marginTop: "20px" }}>
-                        <h4
-                          style={{
-                            fontSize: "16px",
-                            fontWeight: "600",
-                            lineHeight: "34px",
-                          }}
-                        >
-                          Apply Coupon
-                        </h4>
+                      {coupons.length > 0 && (
+                        <div style={{ marginTop: "20px" }}>
+                          <h4
+                            style={{
+                              fontSize: "16px",
+                              fontWeight: "600",
+                              lineHeight: "34px",
+                            }}
+                          >
+                            Apply Coupon
+                          </h4>
 
-                        {/* Show available coupons */}
-                        {coupons.length > 0 && (
+                          {/* Show available coupons */}
                           <div style={{ marginBottom: "8px" }}>
                             <p
                               style={{
@@ -1040,54 +1102,57 @@ const PropertyDetail = () => {
                               ))}
                             </ul>
                           </div>
-                        )}
 
-                        <input
-                          type="text"
-                          placeholder="Enter Coupon Code"
-                          value={
-                            isCouponApplied
-                              ? `${couponCode} (Applied)`
-                              : couponCode
-                          }
-                          onChange={(e) => {
-                            setCouponCode(e.target.value);
-                            setIsCouponApplied(false);
-                          }}
-                          style={{
-                            width: "100%",
-                            padding: "10px",
-                            marginTop: "8px",
-                            fontSize: "14px",
-                            border: "1px solid #ccc",
-                            borderRadius: "4px",
-                            color: isCouponApplied ? "green" : "black",
-                            fontWeight: isCouponApplied ? "bold" : "normal",
-                          }}
-                        />
-                        <button
-                          onClick={applyCoupon}
-                          style={{
-                            marginTop: "10px",
-                            backgroundColor: isCouponApplied ? "gray" : "red",
-                            color: "#fff",
-                            border: "none",
-                            padding: "10px 20px",
-                            fontWeight: "600",
-                            borderRadius: "4px",
-                            cursor: isCouponApplied ? "not-allowed" : "pointer",
-                          }}
-                          disabled={isCouponApplied}
-                        >
-                          {isCouponApplied ? "Applied" : "Apply Coupon"}
-                        </button>
+                          {/* Coupon Input and Apply Button */}
+                          <input
+                            type="text"
+                            placeholder="Enter Coupon Code"
+                            value={
+                              isCouponApplied
+                                ? `${couponCode} (Applied)`
+                                : couponCode
+                            }
+                            onChange={(e) => {
+                              setCouponCode(e.target.value);
+                              setIsCouponApplied(false);
+                            }}
+                            style={{
+                              width: "100%",
+                              padding: "10px",
+                              marginTop: "8px",
+                              fontSize: "14px",
+                              border: "1px solid #ccc",
+                              borderRadius: "4px",
+                              color: isCouponApplied ? "green" : "black",
+                              fontWeight: isCouponApplied ? "bold" : "normal",
+                            }}
+                          />
+                          <button
+                            onClick={applyCoupon}
+                            style={{
+                              marginTop: "10px",
+                              backgroundColor: isCouponApplied ? "gray" : "red",
+                              color: "#fff",
+                              border: "none",
+                              padding: "10px 20px",
+                              fontWeight: "600",
+                              borderRadius: "4px",
+                              cursor: isCouponApplied
+                                ? "not-allowed"
+                                : "pointer",
+                            }}
+                            disabled={isCouponApplied}
+                          >
+                            {isCouponApplied ? "Applied" : "Apply Coupon"}
+                          </button>
 
-                        {errorMessage && (
-                          <p style={{ color: "red", marginTop: "5px" }}>
-                            {errorMessage}
-                          </p>
-                        )}
-                      </div>
+                          {errorMessage && (
+                            <p style={{ color: "red", marginTop: "5px" }}>
+                              {errorMessage}
+                            </p>
+                          )}
+                        </div>
+                      )}
 
                       {/* Savings & Total Price Section */}
                       <div
@@ -1160,17 +1225,27 @@ const PropertyDetail = () => {
                         style={{
                           width: "100%",
                           padding: "12px 0",
-                          backgroundColor: "#0c0a15",
+                          backgroundColor: listingData?.isAvailable
+                            ? "#0c0a15"
+                            : "#ccc",
                           color: "#fff",
                           fontSize: "16px",
                           fontWeight: "600",
                           border: "none",
                           borderRadius: "4px",
-                          cursor: "pointer",
+                          cursor: listingData?.isAvailable
+                            ? "pointer"
+                            : "not-allowed",
                         }}
-                        onClick={() => handleBooking(listingData?._id)}
+                        onClick={() =>
+                          listingData?.isAvailable &&
+                          handleBooking(listingData?._id)
+                        }
+                        disabled={!listingData?.isAvailable}
                       >
-                        Book Now
+                        {listingData?.isAvailable
+                          ? "Book Now"
+                          : "Room Not Available"}
                       </button>
                     </div>
 
@@ -1194,7 +1269,11 @@ const PropertyDetail = () => {
                       </p>
                       <p>
                         By proceeding, you agree to our{" "}
-                        <strong>Guest Policies</strong>.
+                        <strong>
+                          {" "}
+                          <Link to={"/guestPolicy"}>Guest Policies</Link>{" "}
+                        </strong>
+                        .
                       </p>
                     </div>
                   </div>
@@ -1205,7 +1284,7 @@ const PropertyDetail = () => {
                     <div id="comments" className="comments">
                       <div className="respond-comment">
                         <form
-                          onSubmit={ReviewDetails}
+                          onSubmit={addReview}
                           className="comment-form form-submit"
                         >
                           <fieldset className="mb-1">
@@ -1248,9 +1327,9 @@ const PropertyDetail = () => {
                             <label className="fw-6">Your review</label>
                             <textarea
                               required
-                              value={messgae}
+                              value={messages}
                               onChange={(e) => {
-                                setmessgae(e.target.value);
+                                setMessages(e.target.value);
                               }}
                               id="comment-message"
                               name="message"
@@ -1374,10 +1453,15 @@ const PropertyDetail = () => {
                             {}
                             {listingData?.images?.map((data) => {
                               return (
-                                <div className="col-md-4 mb-3">
+                                <div className="col-md-12 mb-3">
                                   <div className="img-box flex">
                                     <img
                                       className="img-3"
+                                      style={{
+                                        width: "100%",
+                                        borderRadius: "5px",
+                                        objectFit: "cover",
+                                      }}
                                       src={
                                         `${process.env.REACT_APP_BASE_URL}` +
                                         data
@@ -1462,6 +1546,7 @@ const PropertyDetail = () => {
               class="close"
               data-dismiss="modal"
               aria-label="Close"
+              style={{ top: "-4px", right: "2px" }}
             >
               <span aria-hidden="true">×</span>
             </button>
@@ -1469,18 +1554,34 @@ const PropertyDetail = () => {
               <div class="wrap-modal flex">
                 <div class="content" style={{ height: "100%" }}>
                   <div>
-                    <div className="icon-boxs flex" style={{ gap: "15px" }}>
+                    <div className="icon-boxs flex">
                       {/* Social Media Share Buttons */}
-                      <FacebookShareButton url={shareUrl} quote={title}>
+                      <FacebookShareButton
+                        style={{ margin: "auto" }}
+                        url={shareUrl}
+                        quote={title}
+                      >
                         <FacebookIcon size={32} round />
                       </FacebookShareButton>
-                      <TwitterShareButton url={shareUrl} title={title}>
+                      <TwitterShareButton
+                        style={{ margin: "auto" }}
+                        url={shareUrl}
+                        title={title}
+                      >
                         <TwitterIcon size={32} round />
                       </TwitterShareButton>
-                      <LinkedinShareButton url={shareUrl} title={title}>
+                      <LinkedinShareButton
+                        style={{ margin: "auto" }}
+                        url={shareUrl}
+                        title={title}
+                      >
                         <LinkedinIcon size={32} round />
                       </LinkedinShareButton>
-                      <WhatsappShareButton url={shareUrl} title={title}>
+                      <WhatsappShareButton
+                        style={{ margin: "auto" }}
+                        url={shareUrl}
+                        title={title}
+                      >
                         <WhatsappIcon size={32} round />
                       </WhatsappShareButton>
                     </div>
@@ -1495,4 +1596,4 @@ const PropertyDetail = () => {
   );
 };
 
-export default PropertyDetail;
+export default HotelDetail;

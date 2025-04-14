@@ -3,72 +3,122 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 
 const About = () => {
+  const [termsData, setTermsData] = useState("");
+  const token = localStorage.getItem("token");
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    getTermsData();
+  }, []);
 
- const [About, setAbout] = useState();
-
-useEffect(() => {
-  window.scrollTo(0, 0);
-  GetAbout();
-}, [0]);
-
-const GetAbout = () => {
- 
-
-  axios
-    .get(`${process.env.REACT_APP_API_KEY}website/about_us`)
-    .then((res) => {
-      setAbout(res?.data?.data[0]);
-    })
-    .catch((error) => {});
-};
+  const getTermsData = () => {
+    axios
+      .get(
+        `${process.env.REACT_APP_BASE_URL}api/user/getAllPolicy?type=about`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => {
+        console.log(res?.data?.policy);
+        setTermsData(res?.data?.policy);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
   return (
     <>
-<div>
-  
-  <section className="flat-title flat-title52">
-    <div className="container6">
-      <div className="row">
-        <div className="col-lg-12">
-          <div className="title-inner style">
-            <div className="title-group fs-12">
-              <Link className="home fw-6 text-color-3" to="/">
-                Home
-              </Link>
-              <span>About</span>
+      <div>
+        <section class="flat-title ">
+          <div class="container">
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="title-inner style">
+                  <div class="title-group fs-12">
+                    <a class="home fw-6 text-color-3" href="index.html">
+                      Home
+                    </a>
+                    <span>Privacy Policy</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <div className="policy__container">
+          <div className="policy__termtabswrap">
+            <h5
+              style={{
+                textAlign: "center",
+                fontSize: "24px",
+                fontWeight: "bold",
+                color: "#333",
+              }}
+            >
+              BookMIPG Rooms Privacy Notice
+            </h5>
+          </div>
+
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "1180px",
+              minWidth: "310px",
+              margin: "20px auto",
+              borderRadius: "8px",
+
+              padding: "30px",
+              backgroundColor: "#fff",
+              lineHeight: "1.6",
+            }}
+          >
+            <div>
+              <div
+                className="policy__hero"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "20px",
+                }}
+              >
+                <h1
+                  style={{
+                    margin: "0",
+                    fontSize: "28px",
+                    fontWeight: "bold",
+                    color: "#222",
+                  }}
+                >
+                  About Us:
+                </h1>
+                <span
+                  style={{ fontSize: "14px", fontWeight: "600", color: "#555" }}
+                >
+                  Last updated:{" "}
+                  {new Date(termsData?.updatedAt).toLocaleDateString()}
+                </span>
+              </div>
+
+              <div className="policy__section">
+                <div
+                  className="text-1 text-color-2"
+                  style={{
+                    fontSize: "16px",
+                    color: "#444",
+                    textAlign: "justify",
+                    marginBottom: "15px",
+                    fontFamily: `"Poppins", sans-serif`,
+                  }}
+                  dangerouslySetInnerHTML={{ __html: termsData.content }}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
-  
-  <section className="flat-about" style={{marginTop: '-100px', padding: '60px 0 30px'}}>
-    <div className="container6">
-      <div className="row">
-        <div className="col-lg-12 col-md-12">
-          <div className="heading-about">
-            <h2 style={{marginBottom: 10}}></h2>
-            <h4>
-              {About?.title}
-            </h4>
-            <div className>
-              
-              
-
-              <p
-                                className="font-2 fw-5 font-italic text-color-2"
-                                dangerouslySetInnerHTML={{
-                                  __html: About?.description,
-                                }}
-                              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-</div>
-
     </>
   );
 };

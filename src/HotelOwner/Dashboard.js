@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { FaUserTie } from "react-icons/fa";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
@@ -8,8 +8,49 @@ import  logo1  from "./assets/images/logo-mini.svg";
 import face1 from "./assets/images/faces/face1.jpg"
 import circle from "./assets/images/dashboard/circle.svg";
 import "./Dashboard.css";
+import axios from "axios";
+import { FaHotel, FaClipboardList, FaClock, FaCheckCircle, FaTimesCircle, FaCalendarAlt } from "react-icons/fa";
+
 
 const Dashboard = () => {
+  let token = localStorage.getItem("token");
+  const [totalBooking, setTotalBooking] = useState(0);
+  const [totalHotel, setTotalHotel] = useState(0);
+  const [totalPendingBooking, setTotalPendingBooking] = useState(0);
+  const [totalCompletedBooking, setTotalCompletedBooking] = useState(0);
+  const [totalCancelledBooking, setTotalCancelledBooking] = useState(0);
+  const [totalUpcomingBooking, setTotalUpcomingBooking] = useState(0);
+
+
+
+  const dashboardCount = async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/user/hotelOwnerData`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        setTotalBooking(response.data.totalBookings);
+        setTotalHotel(response.data.totalHotel);
+        setTotalPendingBooking(response.data.totalPendingBooking);
+        setTotalCompletedBooking(response.data.totalCompletedBooking);
+        setTotalCancelledBooking(response.data.totalCancelledBooking);
+        setTotalUpcomingBooking(response.data.totalUpcomingBooking);
+        console.log("Dashboard data fetched successfully", response.data);
+      }
+      console.log("Dashboard data fetched successfully");
+    } catch (error) {
+      console.error("Error fetching dashboard data", error);
+    }
+  };
+  
+  useEffect(() => {
+    dashboardCount();
+  }, []);
+
   return (
     <div className="container-scroller">  
       <Header/>
@@ -35,52 +76,84 @@ const Dashboard = () => {
               </nav>
             </div>
             <div className="row">
-              <div className="col-md-4 stretch-card grid-margin">
-                <div className="card bg-gradient-danger card-img-holder text-white">
-                  <div className="card-body">
-                    <img
-                      src={circle}
-                      className="card-img-absolute"
-                      alt="circle-image"
-                    />
-                    <h4 className="font-weight-normal mb-3">
-                      Total Booking{" "}
-                    </h4>
-                    <h2 className="mb-5">15,0000</h2>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-4 stretch-card grid-margin">
-                <div className="card bg-gradient-info card-img-holder text-white">
-                  <div className="card-body">
-                    <img
-                      src={circle}
-                      className="card-img-absolute"
-                      alt="circle-image"
-                    />
-                    <h4 className="font-weight-normal mb-3">
-                      Total Rooms{" "}
-                    </h4>
-                    <h2 className="mb-5">45,6334</h2>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-4 stretch-card grid-margin">
-                <div className="card bg-gradient-success card-img-holder text-white">
-                  <div className="card-body">
-                    <img
-                      src={circle}
-                      className="card-img-absolute"
-                      alt="circle-image"
-                    />
-                    <h4 className="font-weight-normal mb-3">
-                      Total Costomer{" "}
-                    </h4>
-                    <h2 className="mb-5">95,5741</h2>
-                  </div>
-                </div>
-              </div>
-            </div>
+      <div className="col-md-4 stretch-card grid-margin">
+        <div className="card bg-gradient-danger card-img-holder text-white">
+          <div className="card-body">
+            <img src={circle} className="card-img-absolute" alt="circle" />
+            <h4 className="font-weight-normal mb-3">
+              <FaClipboardList className="me-2" />
+              Total Booking
+            </h4>
+            <h2 className="mb-5">{totalBooking}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div className="col-md-4 stretch-card grid-margin">
+        <div className="card bg-gradient-info card-img-holder text-white">
+          <div className="card-body">
+            <img src={circle} className="card-img-absolute" alt="circle" />
+            <h4 className="font-weight-normal mb-3">
+              <FaHotel className="me-2" />
+              Total Hotels
+            </h4>
+            <h2 className="mb-5">{totalHotel}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div className="col-md-4 stretch-card grid-margin">
+        <div className="card bg-gradient-warning card-img-holder text-white">
+          <div className="card-body">
+            <img src={circle} className="card-img-absolute" alt="circle" />
+            <h4 className="font-weight-normal mb-3">
+              <FaClock className="me-2" />
+              Pending Bookings
+            </h4>
+            <h2 className="mb-5">{totalPendingBooking}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div className="col-md-4 stretch-card grid-margin">
+        <div className="card bg-gradient-success card-img-holder text-white">
+          <div className="card-body">
+            <img src={circle} className="card-img-absolute" alt="circle" />
+            <h4 className="font-weight-normal mb-3">
+              <FaCheckCircle className="me-2" />
+              Completed Bookings
+            </h4>
+            <h2 className="mb-5">{totalCompletedBooking}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div className="col-md-4 stretch-card grid-margin">
+        <div className="card bg-gradient-dark card-img-holder text-white">
+          <div className="card-body">
+            <img src={circle} className="card-img-absolute" alt="circle" />
+            <h4 className="font-weight-normal mb-3">
+              <FaTimesCircle className="me-2" />
+              Cancelled Bookings
+            </h4>
+            <h2 className="mb-5">{totalCancelledBooking}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div className="col-md-4 stretch-card grid-margin">
+        <div className="card bg-gradient-primary card-img-holder text-white">
+          <div className="card-body">
+            <img src={circle} className="card-img-absolute" alt="circle" />
+            <h4 className="font-weight-normal mb-3">
+              <FaCalendarAlt className="me-2" />
+              Upcoming Bookings
+            </h4>
+            <h2 className="mb-5">{totalUpcomingBooking}</h2>
+          </div>
+        </div>
+      </div>
+    </div>
             
             
           </div>

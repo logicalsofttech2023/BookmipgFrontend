@@ -15,7 +15,7 @@ import {
   Divider,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import HotelIcon from "@mui/icons-material/Hotel";
@@ -28,6 +28,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import face1 from "./assets/images/faces/face1.jpg";
 import logo from "./assets/raw-logo-bookmipg-original.png";
 import EventIcon from "@mui/icons-material/Event";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 
 const Header = () => {
@@ -36,7 +37,7 @@ const Header = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const location = useLocation();
-
+  const navigate = useNavigate();
 
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
@@ -46,12 +47,21 @@ const Header = () => {
     setOpenSubmenu((prev) => ({ ...prev, [menu]: !prev[menu] }));
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
+
   return (
     <>
       <AppBar position="fixed">
         <Toolbar>
           {isMobile && (
-            <IconButton edge="start" color="inherit" onClick={toggleDrawer(true)}>
+            <IconButton
+              edge="start"
+              color="inherit"
+              onClick={toggleDrawer(true)}
+            >
               <MenuIcon />
             </IconButton>
           )}
@@ -67,36 +77,58 @@ const Header = () => {
           <IconButton color="inherit">
             <Avatar src={face1} alt="User" />
           </IconButton>
+
+          <IconButton color="inherit" onClick={handleLogout} title="Logout">
+            <LogoutIcon />
+          </IconButton>
         </Toolbar>
       </AppBar>
 
-      <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} sx={{ "& .MuiDrawer-paper": { backgroundColor: "#ffffff", color: "#333" } }}>
+      <Drawer
+        anchor="left"
+        open={drawerOpen}
+        onClose={toggleDrawer(false)}
+        sx={{
+          "& .MuiDrawer-paper": { backgroundColor: "#ffffff", color: "#333" },
+        }}
+      >
         <List sx={{ width: 250 }}>
           {[
             { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
             { text: "Hotel Management", icon: <HotelIcon />, submenu: "hotel" },
-            { text: "Customer Management", icon: <PeopleIcon />, submenu: "customer" },
-            { text: "Booking Management", icon: <EventIcon />, submenu: "booking" },
-          ].map((item, index) => (
-            <>
+
+            {
+              text: "Booking Management",
+              icon: <EventIcon />,
+              submenu: "booking",
+            },
+          ].map((item) => (
+            <React.Fragment key={item.text}>
               <ListItem
                 button
-                key={item.text}
                 component={item.path ? Link : "div"}
                 to={item.path || "#"}
-                onClick={item.submenu ? () => toggleSubmenu(item.submenu) : undefined}
+                onClick={
+                  item.submenu ? () => toggleSubmenu(item.submenu) : undefined
+                }
                 sx={{
-                  backgroundColor: location.pathname === item.path ? "#e3f2fd" : "inherit",
+                  backgroundColor:
+                    location.pathname === item.path ? "#e3f2fd" : "inherit",
                   color: "#333",
-                  '&:hover': { backgroundColor: "#f0f0f0" },
+                  "&:hover": { backgroundColor: "#f0f0f0" },
                 }}
               >
                 <ListItemIcon sx={{ color: "#555" }}>{item.icon}</ListItemIcon>
                 <ListItemText primary={item.text} />
-                {item.submenu && (openSubmenu[item.submenu] ? <ExpandLess /> : <ExpandMore />)}
+                {item.submenu &&
+                  (openSubmenu[item.submenu] ? <ExpandLess /> : <ExpandMore />)}
               </ListItem>
               {item.submenu && (
-                <Collapse in={openSubmenu[item.submenu]} timeout="auto" unmountOnExit>
+                <Collapse
+                  in={openSubmenu[item.submenu]}
+                  timeout="auto"
+                  unmountOnExit
+                >
                   <List component="div" disablePadding>
                     {item.submenu === "hotel" && (
                       <>
@@ -123,13 +155,21 @@ const Header = () => {
                         <ListItem button component={Link} to="/bookingList">
                           <ListItemText primary="Booking List" />
                         </ListItem>
-                        <ListItem button component={Link} to="/cancelledBooking">
+                        <ListItem
+                          button
+                          component={Link}
+                          to="/cancelledBooking"
+                        >
                           <ListItemText primary="Cancelled Booking List" />
                         </ListItem>
                         <ListItem button component={Link} to="/upcomingBooking">
                           <ListItemText primary="Upcoming Booking List" />
                         </ListItem>
-                        <ListItem button component={Link} to="/completedBooking">
+                        <ListItem
+                          button
+                          component={Link}
+                          to="/completedBooking"
+                        >
                           <ListItemText primary="Completed Booking List" />
                         </ListItem>
                       </>
@@ -137,8 +177,38 @@ const Header = () => {
                   </List>
                 </Collapse>
               )}
-            </>
+            </React.Fragment>
           ))}
+
+          <Divider />
+
+          <ListItem button component={Link} to="/hotelOwnerContactUs">
+            <ListItemIcon>
+              <ContactMailIcon />
+            </ListItemIcon>
+            <ListItemText primary="Contact Us" />
+          </ListItem>
+
+          <ListItem button component={Link} to="/hotelOwnerPrivacyPolicy">
+            <ListItemIcon>
+              <InfoIcon />
+            </ListItemIcon>
+            <ListItemText primary="Privacy Policy" />
+          </ListItem>
+
+          <ListItem button component={Link} to="/hotelOwnerTermsAndCondition">
+            <ListItemIcon>
+              <InfoIcon />
+            </ListItemIcon>
+            <ListItemText primary="Terms and Condition" />
+          </ListItem>
+
+          <ListItem button component={Link} to="/hotelOwnerAboutUs">
+            <ListItemIcon>
+              <InfoIcon />
+            </ListItemIcon>
+            <ListItemText primary="About Us" />
+          </ListItem>
         </List>
       </Drawer>
     </>

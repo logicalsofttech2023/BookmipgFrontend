@@ -114,11 +114,11 @@ const BookingSummary = () => {
               Authorization: `Bearer ${token}`,
             },
           }
-        );
+        );        
 
         if (response.status === 201) {
           toast.success("Booking Successful!");
-          navigate("/bookingConfirmed");
+          navigate(`/bookingConfirmed/${response?.data?.booking?._id}`);
         }
       } catch (error) {
         console.error("Error:", error);

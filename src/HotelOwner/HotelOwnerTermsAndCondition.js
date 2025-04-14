@@ -6,7 +6,7 @@ import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 import axios from "axios";
 
-const HotelOwnerAboutUs = () => {
+const HotelOwnerTermsAndCondition = () => {
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
   const [aboutUsData, setAboutUsData] = useState("");
@@ -16,13 +16,13 @@ const HotelOwnerAboutUs = () => {
       const response = await axios.get(
         `${process.env.REACT_APP_BASE_URL}api/admin/getPolicy`,
         {
-          params: { type: "about" },
+          params: { type: "terms" },
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       if (response.status === 200) {
-        setAboutUsData(response?.data?.policy?.content || "");
+        setAboutUsData(response?.data?.policy?.content || ""); // Ensure a default value
       }
     } catch (error) {
       console.error("Error fetching About Us content:", error);
@@ -34,6 +34,7 @@ const HotelOwnerAboutUs = () => {
   useEffect(() => {
     fetchAboutUs();
   }, []);
+
   return (
     <div className="container-scroller">
       <Header />
@@ -41,12 +42,12 @@ const HotelOwnerAboutUs = () => {
         <Sidebar />
         <div className="main-panel">
           <div className="content-wrapper" style={{ marginTop: "50px" }}>
-            <div className="page-header">About Us</div>
-            <div class="row" data-select2-id="11">
-              <div class="col-12 grid-margin stretch-card">
-                <div class="card">
-                  <div class="card-body">
-                    <h4 class="card-title mb-5">About Us</h4>
+            <div className="page-header">Terms And Condition</div>
+            <div className="row">
+              <div className="col-12 grid-margin stretch-card">
+                <div className="card">
+                  <div className="card-body">
+                    <h4 className="card-title mb-5">Terms And Condition</h4>
                     {loading ? (
                       <p>Loading...</p>
                     ) : (
@@ -57,7 +58,6 @@ const HotelOwnerAboutUs = () => {
               </div>
             </div>
           </div>
-
           <Footer />
         </div>
       </div>
@@ -65,4 +65,4 @@ const HotelOwnerAboutUs = () => {
   );
 };
 
-export default HotelOwnerAboutUs;
+export default HotelOwnerTermsAndCondition;

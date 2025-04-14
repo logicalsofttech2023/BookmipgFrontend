@@ -36,8 +36,6 @@ const Navbar = () => {
   let role = localStorage.getItem("roleType");
 
   const loginId = localStorage.getItem("token");
-  console.log(loginId);
-  
 
   let Logout = () => {
     swal({
@@ -70,12 +68,7 @@ const Navbar = () => {
                     <div className="logo-box flex">
                       <div className="logo">
                         <Link to="/">
-                          <img
-                            src={logo}
-                            alt
-                            width={197}
-                            height={48}
-                          />
+                          <img src={logo} alt width={197} height={48} />
                         </Link>
                       </div>
                     </div>
@@ -88,310 +81,440 @@ const Navbar = () => {
                         >
                           <ul className="navigation clearfix">
                             <li className="dropdown2">
-                              <Link to="#">Bangalore</Link>
+                              <Link>Madhya Pradesh</Link>
                               <ul>
                                 <li>
-                                  <h4>Popular Localities</h4>
+                                  <h4 style={{ color: "red" }}>
+                                    Popular Localities
+                                  </h4>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="/PropertyListSidebar">
-                                    Koramangala
+                                  <Link to="/hotelList?city=Indore">
+                                    Indore
                                   </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Indiranagar</Link>
+                                  <Link to="/hotelList?city=Bhopal">
+                                    Bhopal
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">MG Road</Link>
+                                  <Link to="/hotelList?city=Jabalpur">
+                                    Jabalpur
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Whitefield</Link>
+                                  <Link to="/hotelList?city=Gwalior">
+                                    Gwalior
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Jayanagar</Link>
+                                  <Link to="/hotelList?city=Ujjain">
+                                    Ujjain
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">BTM Layout</Link>
+                                  <Link to="/hotelList?city=Sagar">Sagar</Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Hebbal</Link>
+                                  <Link to="/hotelList?city=Ratlam">
+                                    Ratlam
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Ulsoor</Link>
+                                  <Link to="/hotelList?city=Satna">Satna</Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Bannerghatta Road</Link>
+                                  <Link to="/hotelList?city=Rewa">Rewa</Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Rajajinagar</Link>
+                                  <Link to="/hotelList?city=Dewas">Dewas</Link>
                                 </li>
                                 <li>
-                                  <h5 style={{ color: "#0275d8" }}>
-                                    All Off Bangalore <IoIosArrowForward />
+                                  <h5 style={{ color: "black" }}>
+                                    All of Madhya Pradesh <IoIosArrowForward />
                                   </h5>
                                 </li>
                               </ul>
                             </li>
 
                             <li className="dropdown2">
-                              <Link to="#">Chennai</Link>
+                              <Link>Chennai</Link>
                               <ul>
                                 <li>
-                                  <h4>Popular Localities</h4>
+                                  <h4 style={{ color: "red" }}>
+                                    Popular Localities
+                                  </h4>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">T Nagar</Link>
+                                  <Link to="/hotelList?city=T Nagar">
+                                    T Nagar
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Adyar</Link>
+                                  <Link to="/hotelList?city=Adyar">Adyar</Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Mylapore</Link>
+                                  <Link to="/hotelList?city=Mylapore">
+                                    Mylapore
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Velachery</Link>
+                                  <Link to="/hotelList?city=Velachery">
+                                    Velachery
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Nungambakkam</Link>
+                                  <Link to="/hotelList?city=Nungambakkam">
+                                    Nungambakkam
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Alwarpet</Link>
+                                  <Link to="/hotelList?city=Alwarpet">
+                                    Alwarpet
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Anna Nagar</Link>
+                                  <Link to="/hotelList?city=Anna Nagar">
+                                    Anna Nagar
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Besant Nagar</Link>
+                                  <Link to="/hotelList?city=Besant Nagar">
+                                    Besant Nagar
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Royapettah</Link>
+                                  <Link to="/hotelList?city=Royapettah">
+                                    Royapettah
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Kodambakkam</Link>
+                                  <Link to="/hotelList?city=Kodambakkam">
+                                    Kodambakkam
+                                  </Link>
                                 </li>
                                 <li>
-                                  <h5 style={{ color: "#0275d8" }}>
-                                    All Off Chennai <IoIosArrowForward />
+                                  <h5 style={{ color: "black" }}>
+                                    All of Chennai <IoIosArrowForward />
                                   </h5>
                                 </li>
                               </ul>
                             </li>
 
                             <li className="dropdown2">
-                              <Link to="#">Delhi</Link>
+                              <Link>Delhi</Link>
                               <ul>
                                 <li>
-                                  <h4>Popular Localities</h4>
+                                  <h4 style={{ color: "red" }}>
+                                    Popular Localities
+                                  </h4>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Connaught Place</Link>
+                                  <Link to="/hotelList?city=Connaught Place">
+                                    Connaught Place
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Hauz Khas</Link>
+                                  <Link to="/hotelList?city=Hauz Khas">
+                                    Hauz Khas
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Karol Bagh</Link>
+                                  <Link to="/hotelList?city=Karol Bagh">
+                                    Karol Bagh
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Lajpat Nagar</Link>
+                                  <Link to="/hotelList?city=Lajpat Nagar">
+                                    Lajpat Nagar
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Greater Kailash</Link>
+                                  <Link to="/hotelList?city=Greater Kailash">
+                                    Greater Kailash
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">South Extension</Link>
+                                  <Link to="/hotelList?city=South Extension">
+                                    South Extension
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Punjabi Bagh</Link>
+                                  <Link to="/hotelList?city=Punjabi Bagh">
+                                    Punjabi Bagh
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Vasant Kunj</Link>
+                                  <Link to="/hotelList?city=Vasant Kunj">
+                                    Vasant Kunj
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Saket</Link>
+                                  <Link to="/hotelList?city=Saket">Saket</Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Defence Colony</Link>
+                                  <Link to="/hotelList?city=Defence Colony">
+                                    Defence Colony
+                                  </Link>
                                 </li>
                                 <li>
-                                  <h5 style={{ color: "#0275d8" }}>
-                                    All Off Delhi <IoIosArrowForward />
+                                  <h5 style={{ color: "black" }}>
+                                    All of Delhi <IoIosArrowForward />
                                   </h5>
                                 </li>
                               </ul>
                             </li>
 
                             <li className="dropdown2">
-                              <Link to="#">Gurgaon</Link>
+                              <Link>Gurgaon</Link>
                               <ul>
                                 <li>
-                                  <h4>Popular Localities</h4>
+                                  <h4 style={{ color: "red" }}>
+                                    Popular Localities
+                                  </h4>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Cyber City</Link>
+                                  <Link to="/hotelList?city=Cyber City">
+                                    Cyber City
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">MG Road</Link>
+                                  <Link to="/hotelList?city=MG Road">
+                                    MG Road
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">DLF Phase 1</Link>
+                                  <Link to="/hotelList?city=DLF Phase 1">
+                                    DLF Phase 1
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">DLF Phase 2</Link>
+                                  <Link to="/hotelList?city=DLF Phase 2">
+                                    DLF Phase 2
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Sohna Road</Link>
+                                  <Link to="/hotelList?city=Sohna Road">
+                                    Sohna Road
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Sector 29</Link>
+                                  <Link to="/hotelList?city=Sector 29">
+                                    Sector 29
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Golf Course Road</Link>
+                                  <Link to="/hotelList?city=Golf Course Road">
+                                    Golf Course Road
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Saket</Link>
+                                  <Link to="/hotelList?city=Saket">Saket</Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Udyog Vihar</Link>
+                                  <Link to="/hotelList?city=Udyog Vihar">
+                                    Udyog Vihar
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">New Gurgaon</Link>
+                                  <Link to="/hotelList?city=New Gurgaon">
+                                    New Gurgaon
+                                  </Link>
                                 </li>
                                 <li>
-                                  <h5 style={{ color: "#0275d8" }}>
-                                    All Off Gurgaon <IoIosArrowForward />
+                                  <h5 style={{ color: "black" }}>
+                                    All of Gurgaon <IoIosArrowForward />
                                   </h5>
                                 </li>
                               </ul>
                             </li>
 
                             <li className="dropdown2">
-                              <Link to="#">Hyderabad</Link>
+                              <Link>Hyderabad</Link>
                               <ul>
                                 <li>
-                                  <h4>Popular Localities</h4>
+                                  <h4 style={{ color: "red" }}>
+                                    Popular Localities
+                                  </h4>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Banjara Hills</Link>
+                                  <Link to="/hotelList?city=Banjara Hills">
+                                    Banjara Hills
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Jubilee Hills</Link>
+                                  <Link to="/hotelList?city=Jubilee Hills">
+                                    Jubilee Hills
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Hitech City</Link>
+                                  <Link to="/hotelList?city=Hitech City">
+                                    Hitech City
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Gachibowli</Link>
+                                  <Link to="/hotelList?city=Gachibowli">
+                                    Gachibowli
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Kondapur</Link>
+                                  <Link to="/hotelList?city=Kondapur">
+                                    Kondapur
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Kukatpally</Link>
+                                  <Link to="/hotelList?city=Kukatpally">
+                                    Kukatpally
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Madhapur</Link>
+                                  <Link to="/hotelList?city=Madhapur">
+                                    Madhapur
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Ameerpet</Link>
+                                  <Link to="/hotelList?city=Ameerpet">
+                                    Ameerpet
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Secunderabad</Link>
+                                  <Link to="/hotelList?city=Secunderabad">
+                                    Secunderabad
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Hafeezpet</Link>
+                                  <Link to="/hotelList?city=Hafeezpet">
+                                    Hafeezpet
+                                  </Link>
                                 </li>
                                 <li>
-                                  <h5 style={{ color: "#0275d8" }}>
-                                    All Off Hyderabad <IoIosArrowForward />
+                                  <h5 style={{ color: "black" }}>
+                                    All of Hyderabad <IoIosArrowForward />
                                   </h5>
                                 </li>
                               </ul>
                             </li>
 
                             <li className="dropdown2">
-                              <Link to="#">Kolkata</Link>
+                              <Link>Kolkata</Link>
                               <ul>
                                 <li>
-                                  <h4>Popular Localities</h4>
+                                  <h4 style={{ color: "red" }}>
+                                    Popular Localities
+                                  </h4>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Salt Lake</Link>
+                                  <Link to="/hotelList?city=Salt Lake">
+                                    Salt Lake
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Park Street</Link>
+                                  <Link to="/hotelList?city=Park Street">
+                                    Park Street
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Esplanade</Link>
+                                  <Link to="/hotelList?city=Esplanade">
+                                    Esplanade
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Ballygunge</Link>
+                                  <Link to="/hotelList?city=Ballygunge">
+                                    Ballygunge
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Alambazar</Link>
+                                  <Link to="/hotelList?city=Alambazar">
+                                    Alambazar
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Behala</Link>
+                                  <Link to="/hotelList?city=Behala">
+                                    Behala
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Howrah</Link>
+                                  <Link to="/hotelList?city=Howrah">
+                                    Howrah
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Garia</Link>
+                                  <Link to="/hotelList?city=Garia">Garia</Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Shyambazar</Link>
+                                  <Link to="/hotelList?city=Shyambazar">
+                                    Shyambazar
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Tollygunge</Link>
+                                  <Link to="/hotelList?city=Tollygunge">
+                                    Tollygunge
+                                  </Link>
                                 </li>
                                 <li>
-                                  <h5 style={{ color: "#0275d8" }}>
-                                    All Off Kolkata <IoIosArrowForward />
+                                  <h5 style={{ color: "black" }}>
+                                    All of Kolkata <IoIosArrowForward />
                                   </h5>
                                 </li>
                               </ul>
                             </li>
 
                             <li className="dropdown2">
-                              <Link to="#">Mumbai</Link>
+                              <Link>Mumbai</Link>
                               <ul>
                                 <li>
-                                  <h4>Popular Localities</h4>
+                                  <h4 style={{ color: "red" }}>
+                                    Popular Localities
+                                  </h4>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Bandra</Link>
+                                  <Link to="/hotelList?city=Bandra">
+                                    Bandra
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Andheri</Link>
+                                  <Link to="/hotelList?city=Andheri">
+                                    Andheri
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Juhu</Link>
+                                  <Link to="/hotelList?city=Juhu">Juhu</Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Colaba</Link>
+                                  <Link to="/hotelList?city=Colaba">
+                                    Colaba
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Lower Parel</Link>
+                                  <Link to="/hotelList?city=Lower Parel">
+                                    Lower Parel
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Worli</Link>
+                                  <Link to="/hotelList?city=Worli">Worli</Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Malabar Hill</Link>
+                                  <Link to="/hotelList?city=Malabar Hill">
+                                    Malabar Hill
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Kandivali</Link>
+                                  <Link to="/hotelList?city=Kandivali">
+                                    Kandivali
+                                  </Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Thane</Link>
+                                  <Link to="/hotelList?city=Thane">Thane</Link>
                                 </li>
                                 <li className="hover-effect">
-                                  <Link to="#">Borivali</Link>
+                                  <Link to="/hotelList?city=Borivali">
+                                    Borivali
+                                  </Link>
                                 </li>
                                 <li>
-                                  <h5 style={{ color: "#0275d8" }}>
-                                    All Off Mumbai <IoIosArrowForward />
+                                  <h5 style={{ color: "black" }}>
+                                    All of Mumbai <IoIosArrowForward />
                                   </h5>
                                 </li>
                               </ul>
@@ -429,28 +552,136 @@ const Navbar = () => {
                               </svg>
                             </Link>
                             <div className="dropdown-menu">
-                              <ul style={{ width: "100%", padding: "0px" }}>
+                              <ul
+                                style={{
+                                  width: "100%",
+                                  padding: 0,
+                                  listStyle: "none",
+                                }}
+                              >
+                                {loginId && (
+                                  <>
+                                    <li>
+                                      <Link
+                                        style={{
+                                          color: "black",
+                                          textDecoration: "none",
+                                        }}
+                                        onMouseOver={(e) =>
+                                          (e.target.style.color = "red")
+                                        }
+                                        onMouseOut={(e) =>
+                                          (e.target.style.color = "black")
+                                        }
+                                        to="/bookingHistory"
+                                      >
+                                        My Booking
+                                      </Link>
+                                    </li>
+                                    <li>
+                                      <Link
+                                        style={{
+                                          color: "black",
+                                          textDecoration: "none",
+                                        }}
+                                        onMouseOver={(e) =>
+                                          (e.target.style.color = "red")
+                                        }
+                                        onMouseOut={(e) =>
+                                          (e.target.style.color = "black")
+                                        }
+                                        to="/myFavorites"
+                                      >
+                                        My Favorites
+                                      </Link>
+                                    </li>
+                                    <li>
+                                      <Link
+                                        style={{
+                                          color: "black",
+                                          textDecoration: "none",
+                                        }}
+                                        onMouseOver={(e) =>
+                                          (e.target.style.color = "red")
+                                        }
+                                        onMouseOut={(e) =>
+                                          (e.target.style.color = "black")
+                                        }
+                                        to="/costomerProfile"
+                                      >
+                                        My Profile
+                                      </Link>
+                                    </li>
+                                  </>
+                                )}
                                 <li>
-                                  <Link to="/bookingHistory">My Booking</Link>
+                                  <Link
+                                    style={{
+                                      color: "black",
+                                      textDecoration: "none",
+                                    }}
+                                    onMouseOver={(e) =>
+                                      (e.target.style.color = "red")
+                                    }
+                                    onMouseOut={(e) =>
+                                      (e.target.style.color = "black")
+                                    }
+                                    to="/contactus"
+                                  >
+                                    Contact Us
+                                  </Link>
                                 </li>
                                 <li>
-                                  <Link to="/costomerProfile">My Profile</Link>
+                                  <Link
+                                    style={{
+                                      color: "black",
+                                      textDecoration: "none",
+                                    }}
+                                    onMouseOver={(e) =>
+                                      (e.target.style.color = "red")
+                                    }
+                                    onMouseOut={(e) =>
+                                      (e.target.style.color = "black")
+                                    }
+                                    to="/About"
+                                  >
+                                    About Us
+                                  </Link>
                                 </li>
                                 <li>
-                                  <Link to="/contactus">Contact Us</Link>
-                                </li>
-                                <li>
-                                  <Link to="/About">About Us</Link>
-                                </li>
-                                <li>
-                                  {" "}
                                   {loginId ? (
-                                    <Link onClick={Logout} to="#">
+                                    <Link
+                                      style={{
+                                        color: "black",
+                                        textDecoration: "none",
+                                      }}
+                                      onMouseOver={(e) =>
+                                        (e.target.style.color = "red")
+                                      }
+                                      onMouseOut={(e) =>
+                                        (e.target.style.color = "black")
+                                      }
+                                      onClick={Logout}
+                                    >
                                       Logout
                                     </Link>
                                   ) : (
-                                    <Link to="/Login">Login</Link>
-                                  )}{" "}
+                                    <Link
+                                      style={{
+                                        color: "black",
+                                        textDecoration: "none",
+                                      }}
+                                      onMouseOver={(e) =>
+                                        (e.target.style.color = "red")
+                                      }
+                                      onMouseOut={(e) =>
+                                        (e.target.style.color = "black")
+                                      }
+                                      to="/Login"
+                                    >
+                                      Login
+                                    </Link>
+                                  )}
                                 </li>
                               </ul>
                             </div>
@@ -501,40 +732,56 @@ const Navbar = () => {
                         className="dropdown2 current"
                         onClick={() => toggleDropdown("cities")}
                       >
-                        <Link to="#">Cities</Link>
+                        <Link to="/hotelList">Cities</Link>
                         <ul
                           style={{
-                            overflow: "scroll",
-                            height: "300px",
+                            overflowY: "auto",
+                            maxHeight: "300px",
                             display: dropdownOpen.cities ? "block" : "none",
                           }}
                         >
                           {cities?.map((city, index) => (
                             <li
-                              style={{ borderBottom: "1px solid #f3f3f3" }}
+                              style={{
+                                borderBottom: "1px solid #f3f3f3",
+                                padding: "8px 12px",
+                              }}
                               key={index}
                               data-value={city}
                             >
-                              <Link to="#">{city}</Link>
+                              <Link
+                                to={`/hotelList?city=${encodeURIComponent(
+                                  city
+                                )}`}
+                                onClick={menuClose}
+                              >
+                                {city}
+                              </Link>
                             </li>
                           ))}
                         </ul>
-                        <div className="dropdown2-btn" />
                       </li>
-                      <li>
-                        <Link to="#">My Booking</Link>
-                      </li>
-                      <li>
-                        <Link to="#">My Profile</Link>
-                      </li>
-                      <li>
-                        <Link to="#">About Us</Link>
-                      </li>
+
+                      {loginId && (
+                        <>
+                          <li>
+                            <Link to="/bookingHistory">My Booking</Link>
+                          </li>
+                          <li>
+                            <Link to="/costomerProfile">My Profile</Link>
+                          </li>
+                          <li>
+                            <Link to="/myFavorites">My Favorites</Link>
+                          </li>
+                        </>
+                      )}
                       <li>
                         {!loginId ? (
-                          <Link to="#">Login</Link>
+                          <Link to="/login">Login</Link>
                         ) : (
-                          <Link to="#">Logout</Link>
+                          <Link to="#" onClick={Logout}>
+                            Logout
+                          </Link>
                         )}
                       </li>
                     </ul>
