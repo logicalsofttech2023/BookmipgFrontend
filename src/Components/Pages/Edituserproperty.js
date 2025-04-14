@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import UserSidebar from "../NavFooter/UserSidebar";
 import cities from "../Auth/cities";
 import toast, { Toaster } from "react-hot-toast";
-import secureLocalStorage from "react-secure-storage";
+
 import axios from "axios";
 import { Navigate, useNavigate } from "react-router-dom";
 import swal from "sweetalert";
@@ -519,7 +519,7 @@ const Edituserproperty = () => {
     ],
   };
 
-  let role = secureLocalStorage.getItem("roleType");
+  let role = localStorage.getItem("roleType");
   const handleCheckboxChang = (event) => {
     const { value, checked } = event.target;
     setsuitables((prevState) => {
@@ -619,8 +619,8 @@ const Edituserproperty = () => {
 
   const states = Object?.keys(citiesByState);
 
-  let listingID = secureLocalStorage.getItem("ListingId");
-  let loginuserId = secureLocalStorage.getItem("loginuserid");
+  let listingID = localStorage.getItem("ListingId");
+  let loginuserId = localStorage.getItem("loginuserid");
   const [statese, setstatese] = useState(false);
 
   const Propertiesdata = (e) => {

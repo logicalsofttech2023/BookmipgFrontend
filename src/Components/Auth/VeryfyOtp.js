@@ -2,11 +2,10 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
 
 const VeryfyOtp = () => {
   const [counter, setCounter] = useState(60);
-  const [trues, settrues] = useState(false)
+  const [trues, settrues] = useState(false);
   useEffect(() => {
     if (counter > 0) {
       const timer = setTimeout(() => setCounter(counter - 1), 1000);
@@ -14,9 +13,8 @@ const VeryfyOtp = () => {
     }
   }, [counter]);
 
-  let loginotp = secureLocalStorage.getItem("loginotp");
-  let loginuserId = secureLocalStorage.getItem("loginuseridd");
-  let loginmobileNumber = secureLocalStorage.getItem("loginmobilenumber");
+  let loginOtp = localStorage.getItem("loginOtp");
+  let loginMobileNumber = localStorage.getItem("loginMobileNumber");
   const [otp, setOtp] = useState(new Array(4).fill(""));
 
   const Navigate = useNavigate();
@@ -47,79 +45,62 @@ const VeryfyOtp = () => {
 
   const Verifyotp = (e) => {
     e.preventDefault();
-
+  
     const userdata = {
-      userId: loginuserId,
+      phone: loginMobileNumber,
+      countryCode: "91",
       otp: otp?.join(""),
     };
 
     axios
-      .post(`http://157.66.191.24:3089/website/verify_otp`, userdata)
+      .post(`${process.env.REACT_APP_BASE_URL}api/auth/verifyOtp`, userdata)
       .then((response) => {
-        toast.success(response.data.msg);
-        secureLocalStorage.setItem("loginotp", response.data.data.otp);
-        settrues(true)
-        if (response.data.data.role_type == "Individual") {
-          secureLocalStorage.setItem("loginuserid", response.data.data.userId);
-          secureLocalStorage.setItem("roleType", response.data.data.role_type);
-
-          setTimeout(() => {
-            Navigate("/MyFavorite");
-          }, 3000);
-        } else if (response.data.data.role_type == "Agent") {
-          secureLocalStorage.setItem("loginuserid", response.data.data.userId);
-          secureLocalStorage.setItem("roleType", response.data.data.role_type);
-          setTimeout(() => {
-            Navigate("/AgentProfile");
-          }, 3000);
-        } else if (response.data.data.role_type == "Developer") {
-          secureLocalStorage.setItem("loginuserid", response.data.data.userId);
-          secureLocalStorage.setItem("roleType", response.data.data.role_type);
-          setTimeout(() => {
-            Navigate("/AgentProfile");
-          }, 3000);
-        } else {
-          secureLocalStorage.setItem(
-            "loginuseriderd",
-            response.data.data.userId
-          );
-          secureLocalStorage.setItem("roleType", response.data.data.role_type);
-
+        if (response.data.token == "") {
+          toast.success(response.data.message);
           setTimeout(() => {
             Navigate("/Register");
           }, 3000);
+        } else {
+          if (response.data.data.role == "user") {
+            localStorage.setItem("token", response.data.token);
+            toast.success(response.data.message);
+            setTimeout(() => {
+              Navigate("/");
+            }, 3000);
+          }
+          else{
+            localStorage.setItem("token", response.data.token);
+            toast.success(response.data.message);
+            setTimeout(() => {
+              Navigate("/dashboard");
+            }, 3000);
+          }
         }
       })
       .catch((error) => {
+        console.log(error);
         if (error.response && error.response.status === 400) {
-          toast.error(error.response.data.msg);
-        } else {
+          toast.error(error.response.data.message);
         }
       });
   };
   const resendOtp = () => {
     if (counter === 0) {
       const userdata = {
-        mobile_no: loginmobileNumber,
+        phone: loginMobileNumber,
       };
 
       axios
-        .post(`http://157.66.191.24:3089/website/resend_otp`, userdata)
+        .post(`${process.env.REACT_APP_BASE_URL}api/auth/resendOtp`, userdata)
         .then((response) => {
-          toast.success(response.data.msg);
-          secureLocalStorage.setItem("loginotp", response.data.data.otp);
-          secureLocalStorage.setItem("loginuserid", response.data.data.userId);
-          secureLocalStorage.setItem(
-            "loginmobilenumber",
-            response.data.data.mobile_no
-          );
-
+          toast.success(response.data.message);
+          localStorage.setItem("loginOtp", response.data.data.otp);
           setOtp(new Array(4).fill(""));
           setCounter(60);
         })
         .catch((error) => {
           if (error.response && error.response.status === 400) {
-            toast.error(error.response.data.msg);
+            toast.error(error.response.data.message);
           } else {
             toast.error("An error occurred while resending OTP.");
           }
@@ -323,11 +304,11 @@ const VeryfyOtp = () => {
               <div id="comments" className="comments bg-white">
                 <div className="heading-box center">
                   <div className="heading-title fs-20 fw-7 lh-45 ">
-                    <font className="color-popup text-color-3">{loginotp}</font>{" "}
+                    <font className="color-popup text-color-3">{loginOtp}</font>{" "}
                     Confirm OTP to Continue
                   </div>
                   We have sent you message with 4 digit verification <br />
-                  code (OTP) on <br /> +91 {loginmobileNumber}{" "}
+                  code (OTP) on <br /> +91 {loginMobileNumber}{" "}
                   <Link
                     className="font-2 fw-7 fs-13 color-popup text-color-3"
                     to="/Login"
@@ -369,20 +350,29 @@ const VeryfyOtp = () => {
                           textAlign: "center",
                         }}
                       >
-                        {trues === true ? 
-                        <div
-                          type="submit"
-                          style={{ backgroundColor: "#58BF93", color: "white" }}
-                          className="search-field"
-                        >
-                          Processing
-                        </div> : <button
-                          type="submit"
-                          style={{ backgroundColor: "#58BF93", color: "white" }}
-                          className="search-field"
-                        >
-                          Confirm to Otp
-                        </button> }
+                        {trues === true ? (
+                          <div
+                            type="submit"
+                            style={{
+                              backgroundColor: "#58BF93",
+                              color: "white",
+                            }}
+                            className="search-field"
+                          >
+                            Processing
+                          </div>
+                        ) : (
+                          <button
+                            type="submit"
+                            style={{
+                              backgroundColor: "#58BF93",
+                              color: "white",
+                            }}
+                            className="search-field"
+                          >
+                            Confirm to Otp
+                          </button>
+                        )}
                       </div>
                     </div>
                   </form>

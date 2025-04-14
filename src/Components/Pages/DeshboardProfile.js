@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import UserSidebar from "../NavFooter/UserSidebar";
-import secureLocalStorage from "react-secure-storage";
+
 import axios from "axios";
 import cities from "../Auth/cities";
 import toast, { Toaster } from "react-hot-toast";
@@ -24,10 +24,10 @@ const DeshboardProfile = () => {
 
   const [mobile, setmobile] = useState();
 
-  const Role = secureLocalStorage.getItem("roleType");
+  const Role = localStorage.getItem("roleType");
 
-  let loginid = secureLocalStorage.getItem("loginuserid");
-  let loginmobileNumber = secureLocalStorage.getItem("loginmobilenumber");
+  let loginid = localStorage.getItem("loginuserid");
+  let loginmobileNumber = localStorage.getItem("loginmobilenumber");
 
   useEffect(() => {
     window.scrollTo(0, 0);

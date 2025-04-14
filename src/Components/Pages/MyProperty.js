@@ -3,7 +3,7 @@ import UserSidebar from "../NavFooter/UserSidebar";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import swal from "sweetalert";
-import secureLocalStorage from "react-secure-storage";
+
 
 const MyProperty = () => {
   const [Listingdata, setListingdata] = useState();
@@ -11,7 +11,7 @@ const MyProperty = () => {
   const [Dashboarddata, setDashboarddata] = useState();
   const [MessageData, setMessageData] = useState();
   const [length, setlength] = useState();
-  let loginid = secureLocalStorage.getItem("loginuserid");
+  let loginid = localStorage.getItem("loginuserid");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -422,7 +422,7 @@ const MyProperty = () => {
                                           <h4 className="link-style-1 text-capitalize">
                                             <Link
                                               onClick={() => {
-                                                secureLocalStorage.setItem(
+                                                localStorage.setItem(
                                                   "ListingId",
                                                   data?._id
                                                 );
@@ -482,7 +482,7 @@ const MyProperty = () => {
                                           <li className>
                                             <Link
                                               onClick={() => {
-                                                secureLocalStorage.setItem(
+                                                localStorage.setItem(
                                                   "ListingId",
                                                   data?._id
                                                 );

@@ -1,14 +1,14 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import secureLocalStorage from 'react-secure-storage'
+import localStorage from 'react-secure-storage'
 
 const Topdeveloperhomepage = () => {
 
   const [TopDevelopers, setTopDevelopers] = useState();
   const Navigate = useNavigate();
 
-  let cityes = secureLocalStorage.getItem("cityname");
+  let cityes = localStorage.getItem("cityname");
   useEffect(() => {
     GetallPdevelopers();
   }, [cityes]);
@@ -36,7 +36,7 @@ const Topdeveloperhomepage = () => {
             <div className="col-lg-12">
             <div className="heading-section center mb-4">
               <h2 style={{ fontSize: 26, lineHeight: "normal", color: "#333" }}>
-              Top Developers in {secureLocalStorage.getItem("cityname")}
+              Top Developers in {localStorage.getItem("cityname")}
               </h2>
              
             </div>
@@ -44,7 +44,7 @@ const Topdeveloperhomepage = () => {
             {TopDevelopers?.length > 0 ?  
   TopDevelopers?.slice(0, 6)?.map((data) => {
     return (
-            <div style={{cursor:'pointer',}} className="col-lg-4 col-md-6" onClick={(()=>{secureLocalStorage.setItem("agencisesId",data.developerId)
+            <div style={{cursor:'pointer',}} className="col-lg-4 col-md-6" onClick={(()=>{localStorage.setItem("agencisesId",data.developerId)
               Navigate("/AgenciesDetails")
             })}>
               <div className="box box-agencies hover-img2" style={{background:'#fff'}}>

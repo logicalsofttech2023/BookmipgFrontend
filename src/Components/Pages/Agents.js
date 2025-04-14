@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
+
 import swal from "sweetalert";
 const Agents = () => {
   const [dataofAgent, setdataofAgent] = useState();
@@ -11,10 +11,10 @@ const Agents = () => {
 
   const [topagent, settopagent] = useState();
   const navigate = useNavigate();
-  let cityes = secureLocalStorage.getItem("cityname");
+  let cityes = localStorage.getItem("cityname");
 
   const [roletype, setRoletype] = useState("All Agents");
-  const loginid = secureLocalStorage.getItem("loginuserid");
+  const loginid = localStorage.getItem("loginuserid");
   const handleRoleChange = (role) => {
     setRoletype(role);
   };
@@ -263,7 +263,7 @@ const Agents = () => {
                                   <Link
                                     to="/agentsdetails"
                                     onClick={() => {
-                                      secureLocalStorage.setItem(
+                                      localStorage.setItem(
                                         "agentdetailsId",
                                         data.agentId
                                       );
@@ -403,7 +403,7 @@ const Agents = () => {
                                           <Link
                                             to="/agentsdetails"
                                             onClick={() => {
-                                              secureLocalStorage.setItem(
+                                              localStorage.setItem(
                                                 "agentdetailsId",
                                                 data.agentId
                                               );
@@ -682,7 +682,7 @@ const Agents = () => {
                                 <Link
                                   to="/agentsdetails"
                                   onClick={() => {
-                                    secureLocalStorage.setItem(
+                                    localStorage.setItem(
                                       "agentdetailsId",
                                       data.agentId
                                     );
@@ -815,7 +815,7 @@ const Agents = () => {
                                         <Link
                                           to="/agentsdetails"
                                           onClick={() => {
-                                            secureLocalStorage.setItem(
+                                            localStorage.setItem(
                                               "agentdetailsId",
                                               data.agentId
                                             );
@@ -1091,7 +1091,7 @@ const Agents = () => {
                               className="fs-16 lh-24"
                               to="/agentsdetails"
                               onClick={() => {
-                                secureLocalStorage.setItem(
+                                localStorage.setItem(
                                   "agentdetailsId",
                                   data.agentId
                                 );

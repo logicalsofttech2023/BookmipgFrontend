@@ -1,137 +1,130 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import face1 from "./assets/images/faces/face1.jpg";
 
 const Sidebar = () => {
+  const location = useLocation();
+
+  const getInitialMenuState = () => {
+    const savedState = localStorage.getItem("sidebarMenus");
+    return savedState ? JSON.parse(savedState) : {};
+  };
+
+  const [openMenus, setOpenMenus] = useState(getInitialMenuState);
+
+  const toggleMenu = (menu, event) => {
+    event.preventDefault();
+    setOpenMenus((prev) => {
+      const newState = { ...prev, [menu]: !prev[menu] };
+      localStorage.setItem("sidebarMenus", JSON.stringify(newState));  
+      return newState;
+    });
+  };
+
+  useEffect(() => {
+    localStorage.setItem("sidebarMenus", JSON.stringify(openMenus));
+  }, [location.pathname]);
+
   return (
-    <div>
-      <div className="app-sidebar sidebar-shadow">
-        <div className="app-header__logo">
-          <div className="logo-src" style={{ backgroundImage: "" }} />
-          <div className="header__pane ml-auto">
-            <div>
-              <button
-                type="button"
-                className="hamburger close-sidebar-btn hamburger--elastic"
-                data-class="closed-sidebar"
-              >
-                <span className="hamburger-box">
-                  <span className="hamburger-inner" />
-                </span>
-              </button>
+    <nav className="sidebar sidebar-offcanvas" id="sidebar">
+      <ul className="nav">
+        <li className="nav-item nav-profile">
+          <div className="nav-link">
+            <div className="nav-profile-image">
+              <img src={face1} alt="profile" />
+              <span className="login-status online" />
+            </div>
+            <div className="nav-profile-text d-flex flex-column">
+              <span className="font-weight-bold mb-2">Hello Test</span>
+              <span className="text-secondary text-small">Hotel Owner</span>
             </div>
           </div>
-        </div>
-        <div className="app-header__mobile-menu">
-          <div>
-            <button
-              type="button"
-              className="hamburger hamburger--elastic mobile-toggle-nav"
-            >
-              <span className="hamburger-box">
-                <span className="hamburger-inner" />
-              </span>
-            </button>
-          </div>
-        </div>
-        <div className="app-header__menu">
-          <span>
-            <button
-              type="button"
-              className="btn-icon btn-icon-only btn btn-primary btn-sm mobile-toggle-header-nav"
-            >
-              <span className="btn-icon-wrapper">
-                <i className="fa fa-ellipsis-v fa-w-6" />
-              </span>
-            </button>
-          </span>
-        </div>{" "}
-        <div className="scrollbar-sidebar">
-          <div className="app-sidebar__inner">
-            <ul className="vertical-nav-menu">
-              <li className="app-sidebar__heading">Dashboards</li>
-              <li>
-                <a href="/dashboard" className="mm-active">
-                  <i className="metismenu-icon pe-7s-rocket" />
-                  Dashboard
-                </a>
-              </li>
-              <li className="app-sidebar__heading">Hotel Management</li>
-              <li>
-                <a href="#">
-                  <i className="metismenu-icon fas fa-hotel" />
-                  Hotel
-                  <i className="metismenu-state-icon pe-7s-angle-down caret-left" />
-                </a>
-                <ul>
-                  <li>
-                    <a href="/addHotel">
-                      <i className="metismenu-icon" />
-                      Add Hotel
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/totalHotel">
-                      <i className="metismenu-icon" />
-                      Total Hotel
-                    </a>
-                  </li>
-                  <li>
-                    <a href="elements-dropdowns.html">
-                      <i className="metismenu-icon"></i>Total Room
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <li className="app-sidebar__heading">Booking Management</li>
-              <li>
-                <a href="#">
-                  <i className="metismenu-icon pe-7s-date" />
-                  Booking
-                  <i className="metismenu-state-icon pe-7s-angle-down caret-left" />
-                </a>
-                <ul>
-                  <li>
-                    <a href="/addHotel">
-                      <i className="metismenu-icon" />
-                      All Booking
-                    </a>
-                  </li>
-                  <li>
-                    <a href="elements-dropdowns.html">
-                      <i className="metismenu-icon"></i>Cancelled Booking
-                    </a>
-                  </li>
-                  <li>
-                    <a href="elements-icons.html">
-                      <i className="metismenu-icon"></i>Completed Booking
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <li className="app-sidebar__heading">Costomer Management</li>
-              <li>
-                <a href="forms-controls.html">
-                  <i className="metismenu-icon pe-7s-users" />
-                  Costomers List
-                </a>
-              </li>
+        </li>
 
-              <li className="app-sidebar__heading">Support</li>
-              <li>
-                <a href="contact.html">
-                  <i className="metismenu-icon pe-7s-mail"></i> Contact Us
-                </a>
+        <li className="nav-item">
+          <Link className={`nav-link ${location.pathname === "/dashboard" ? "active" : ""}`}  to={"/dashboard"}>
+            <span className="menu-title">Dashboard</span>
+            <i className="mdi mdi-home menu-icon" />
+          </Link>
+        </li>
+
+        {/* Hotel Management */}
+        <li className="nav-item">
+          <div className="nav-link d-flex justify-content-between" onClick={(e) => toggleMenu("hotel", e)} style={{ cursor: "pointer" }}>
+            <span className="menu-title">Hotel Management</span>
+            <i className={`menu-arrow transition ${openMenus.hotel ? "rotate-180" : "rotate-0"}`} />
+          </div>
+          <div className="submenu-container" style={{ maxHeight: openMenus.hotel ? "200px" : "0px", overflow: "hidden", transition: "max-height 0.4s ease-in-out" }}>
+            <ul className="nav flex-column sub-menu">
+              <li className="nav-item">
+                <Link className={`nav-link ${location.pathname === "/addHotel" ? "active" : ""}`}  to={"/addHotel"}>Add Hotel</Link>
               </li>
-              <li>
-                <a href="about.html">
-                  <i className="metismenu-icon pe-7s-info"></i> About Us
-                </a>
+              <li className="nav-item">
+                <Link className={`nav-link ${location.pathname === "/totalHotel" ? "active" : ""}`}  to={"/totalHotel"}>Hotel List</Link>
               </li>
             </ul>
           </div>
-        </div>
-      </div>{" "}
-    </div>
+        </li>
+
+        {/* Customer Management */}
+        <li className="nav-item">
+          <div className="nav-link d-flex justify-content-between" onClick={(e) => toggleMenu("customer", e)} style={{ cursor: "pointer" }}>
+            <span className="menu-title">Customer Management</span>
+            <i className={`menu-arrow transition ${openMenus.customer ? "rotate-180" : "rotate-0"}`} />
+          </div>
+          <div className="submenu-container" style={{ maxHeight: openMenus.customer ? "200px" : "0px", overflow: "hidden", transition: "max-height 0.4s ease-in-out" }}>
+            <ul className="nav flex-column sub-menu">
+              <li className="nav-item">
+                <Link className={`nav-link ${location.pathname === "/addCostomer" ? "active" : ""}`} to={"/addCostomer"}>Add Customer</Link>
+              </li>
+              <li className="nav-item">
+                <Link className={`nav-link ${location.pathname === "/costomerList" ? "active" : ""}`} to={"/costomerList"}>Customer List</Link>
+              </li>
+            </ul>
+          </div>
+        </li>
+
+        {/* Booking Management */}
+        <li className="nav-item">
+          <div className="nav-link d-flex justify-content-between" onClick={(e) => toggleMenu("booking", e)} style={{ cursor: "pointer" }}>
+            <span className="menu-title">Booking Management</span>
+            <i className={`menu-arrow transition ${openMenus.booking ? "rotate-180" : "rotate-0"}`} />
+          </div>
+          <div className="submenu-container" style={{ maxHeight: openMenus.booking ? "200px" : "0px", overflow: "hidden", transition: "max-height 0.4s ease-in-out" }}>
+            <ul className="nav flex-column sub-menu">
+              <li className="nav-item">
+                <Link className={`nav-link ${location.pathname === "/bookingList" ? "active" : ""}`} to={"/bookingList"}>Booking List</Link>
+              </li>
+              <li className="nav-item">
+                <Link className={`nav-link ${location.pathname === "/cancelledBooking" ? "active" : ""}`} to={"/cancelledBooking"}>Cancelled Booking List</Link>
+              </li>
+              <li className="nav-item">
+                <Link className={`nav-link ${location.pathname === "/upcomingBooking" ? "active" : ""}`} to={"/upcomingBooking"}>Upcoming Booking List</Link>
+              </li>
+              <li className="nav-item">
+                <Link className={`nav-link ${location.pathname === "/completedBooking" ? "active" : ""}`} to={"/completedBooking"}>Completed Booking List</Link>
+              </li>
+            </ul>
+          </div>
+        </li>
+
+        {/* Contact Us */}
+        <li className="nav-item">
+          <Link className={`nav-link ${location.pathname === "/hotelOwnerContactUs" ? "active" : ""}`} to={"/hotelOwnerContactUs"}>
+            <span className="menu-title">Contact Us</span>
+            <i className="mdi mdi-phone menu-icon" />
+          </Link>
+        </li>
+
+        {/* About Us */}
+        <li className="nav-item">
+          <Link className={`nav-link ${location.pathname === "/hotelOwnerAboutUs" ? "active" : ""}`} to={"/hotelOwnerAboutUs"}>
+            <span className="menu-title">About Us</span>
+            <i className="mdi mdi-information menu-icon" />
+          </Link>
+        </li>
+      </ul>
+    </nav>
   );
 };
 

@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
+import axios from "axios";
+import Skeleton from "@mui/material/Skeleton";
 
 const Projecthomepage = () => {
   const settings = {
@@ -34,8 +36,35 @@ const Projecthomepage = () => {
     ],
   };
 
+  const [nearByHotelData, setNearByHotelData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchNearByHotels();
+  }, []);
+
+  const fetchNearByHotels = async () => {
+    const data = {
+      latitude: "22.748008854901506",
+      longitude: "75.89517523281924",
+    };
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_BASE_URL}api/user/getNearbyHotels`,
+        data
+      );
+      if (response?.status === 200) {
+        setNearByHotelData(response?.data?.hotels);
+      }
+    } catch (error) {
+      console.error("Error fetching hotels:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <section className=" bg-white mt-4  mb-3  wg-search-area home5-two">
+    <section className="bg-white mt-4 mb-3 wg-search-area home5-two">
       <div className="container6">
         <div className="row">
           <div className="col-lg-12">
@@ -47,182 +76,97 @@ const Projecthomepage = () => {
                 alignItems: "center",
               }}
             >
-              <h2 style={{ color: "rgb(51, 51, 51)", fontSize: "26px", lineHeight: "normal"}} >Populer Hotels
-              </h2>
-              
-              <Link className="arrow-slider" to="#">
-                {" "}
-              </Link>
+              <h2 style={{ color: "#333", fontSize: "26px" }}>Nearby Hotels</h2>
             </div>
           </div>
 
-          <div className="img-style swiper-container-initialized swiper-container-horizontal swiper-container-pointer-events">
-            <div
-              aria-live="polite"
-              style={{
-                width: "100%",
-                "-webkit-transform": "translate3d(0px, 0px, 0px)",
-                "-ms-transform": "translate3d(0px, 0px, 0px)",
-                transform: "translate3d(0px, 0px, 0px)",
-              }}
-            >
+          <div className="img-style">
+            {loading ? (
               <Slider {...settings}>
-                <div
-                  className="swiper-slides swiper-slide swiper-slide-active"
-                  role="group"
-                  aria-label="1 / 6"
-                  style={{ width: "256px", "margin-right": "27px" }}
-                >
-                  <div
-                    className="box hover-img"
-                    style={{ paddingLeft: "5px", paddingRight: "5px" }}
-                  >
-                    <div className="images relative img-style">
-                      <a href="#">
-                        <img
-                          style={{ borderRadius: "10px" }}
-                          src="https://lid.zoocdn.com/u/1024/768/533fd4eb0450f9aa9797470c9546bbaeacefdd6d.jpg:p"
-                          alt="images"
-                        />
-                      </a>
-                    </div>
-                    <div className="content">
-                      <div className="money fs-18 fw-6 text-color-1 mb-0 mt-2">
-                        <Link to="/Furniture">Hotel O Sudipti Resort</Link>
-                        <p className="text-color-1">Vijay Nagar, Indore</p>
-                      </div>
-                    </div>
+                {Array.from(new Array(3)).map((_, index) => (
+                  <div key={index} style={{ padding: "5px" }}>
+                    <Skeleton
+                      variant="rectangular"
+                      width={256}
+                      height={180} // Increased height
+                      style={{ borderRadius: "10px" }}
+                    />
+                    <Skeleton
+                      width="80%"
+                      height={20}
+                      style={{ marginTop: "10px" }}
+                    />
+                    <Skeleton width="50%" height={18} />
                   </div>
-                </div>
-                <div
-                  className="swiper-slides swiper-slide swiper-slide-next"
-                  role="group"
-                  aria-label="2 / 6"
-                  style={{ width: "256px", "margin-right": "27px" }}
-                >
-                  <div
-                    className="box hover-img"
-                    style={{ paddingLeft: "5px", paddingRight: "5px" }}
-                  >
-                    <div className="images relative img-style">
-                      <img
-                        style={{ borderRadius: "10px" }}
-                        src="https://lid.zoocdn.com/u/480/360/15cb57a44905a7fb1c10a1ae2174b993ec4ccea6.jpg:p"
-                        alt="images"
-                      />
-                    </div>
-                    <div className="content">
-                      <div className="money fs-18 fw-6 text-color-1 mb-0 mt-2">
-                        <Link to="/Furniture">Hotel O Sudipti Resort</Link>
-                        <p className="text-color-1">Vijay Nagar, Indore</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="swiper-slides swiper-slide"
-                  role="group"
-                  aria-label="3 / 6"
-                  style={{ width: "256px", "margin-right": "27px" }}
-                >
-                  <div
-                    className="box hover-img"
-                    style={{ paddingLeft: "5px", paddingRight: "5px" }}
-                  >
-                    <div className="images relative img-style">
-                      <img
-                        style={{ borderRadius: "10px" }}
-                        src="https://lid.zoocdn.com/u/1024/768/5b4e6b736561ff2c26b03390a13f815d87b20cf4.jpg:p"
-                        alt="images"
-                      />
-                    </div>
-                    <div className="content">
-                      <div className="money fs-18 fw-6 text-color-1 mb-0 mt-2">
-                        <Link to="/Furniture">Hotel O Sudipti Resort</Link>
-                        <p className="text-color-1">Vijay Nagar, Indore</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  className="swiper-slides swiper-slide swiper-slide-next"
-                  role="group"
-                  aria-label="2 / 6"
-                  style={{ width: "256px", "margin-right": "27px" }}
-                >
-                  <div
-                    className="box hover-img"
-                    style={{ paddingLeft: "5px", paddingRight: "5px" }}
-                  >
-                    <div className="images relative img-style">
-                      <img
-                        style={{ borderRadius: "10px" }}
-                        src="https://lid.zoocdn.com/u/1024/768/6ba88baf2162239285e7c21883048bb95bdaf093.jpg:p"
-                        alt="images"
-                      />
-                    </div>
-                    <div className="content">
-                      <div className="money fs-18 fw-6 text-color-1 mb-0 mt-2">
-                        <Link to="/Furniture">Hotel O Sudipti Resort</Link>
-                        <p className="text-color-1">Vijay Nagar, Indore</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="swiper-slides swiper-slide swiper-slide-next"
-                  role="group"
-                  aria-label="2 / 6"
-                  style={{ width: "256px", "margin-right": "27px" }}
-                >
-                  <div
-                    className="box hover-img"
-                    style={{ paddingLeft: "5px", paddingRight: "5px" }}
-                  >
-                    <div className="images relative img-style">
-                      <img
-                        style={{ borderRadius: "10px" }}
-                        src="https://lid.zoocdn.com/u/1024/768/5b4e6b736561ff2c26b03390a13f815d87b20cf4.jpg:p"
-                        alt="images"
-                      />
-                    </div>
-                    <div className="content">
-                      <div className="money fs-18 fw-6 text-color-1 mb-0 mt-2">
-                        <Link to="/Furniture">Hotel O Sudipti Resort</Link>
-                        <p className="text-color-1">Vijay Nagar, Indore</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="swiper-slides swiper-slide swiper-slide-next"
-                  role="group"
-                  aria-label="2 / 6"
-                  style={{ width: "256px", "margin-right": "27px" }}
-                >
-                  <div
-                    className="box hover-img"
-                    style={{ paddingLeft: "5px", paddingRight: "5px" }}
-                  >
-                    <div className="images relative img-style">
-                      <img
-                        style={{ borderRadius: "10px" }}
-                        src="https://lid.zoocdn.com/u/480/360/15cb57a44905a7fb1c10a1ae2174b993ec4ccea6.jpg:p"
-                        alt="images"
-                      />
-                    </div>
-                    <div className="content">
-                      <div className="money fs-18 fw-6 text-color-1 mb-0 mt-2">
-                        <Link to="/Furniture">Hotel O Sudipti Resort</Link>
-                        <p className="text-color-1">Vijay Nagar, Indore</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </Slider>
-             
-            </div>
+            ) : nearByHotelData && nearByHotelData.length > 0 ? (
+              <Slider {...settings}>
+                {nearByHotelData.map((hotel) => (
+                  <div
+                    key={hotel._id}
+                    className="swiper-slide"
+                    style={{ width: "256px", marginRight: "27px" }}
+                  >
+                    <div className="box hover-img" style={{ padding: "5px" }}>
+                      <div className="images relative img-style">
+                        <Link to="#">
+                          <img
+                            style={{
+                              borderRadius: "10px",
+                              height: "200px",
+                              objectFit: "cover",
+                              width: "100%",
+                            }}
+                            src={`${process.env.REACT_APP_BASE_URL}${hotel.images[0]}`}
+                            alt={hotel.name}
+                          />
+                        </Link>
+                      </div>
+                      <div className="content">
+                        <div className="money fw-6 text-color-1 mb-0 mt-2">
+                          <Link
+                            style={{
+                              color: "#fff",
+                              fontSize: "16px",
+                              fontWeight: "bold",
+                              display: "block",
+                            }}
+                            to={`/hotel/${hotel._id}`}
+                          >
+                            {hotel.name}
+                          </Link>
+                          <p
+                            style={{
+                              fontSize: "14px",
+                              margin: "2px 0 0",
+                              color: "rgba(255, 255, 255, 0.5)",
+                            }}
+                          >
+                            {hotel.address.length > 30
+                              ? hotel.address.slice(0, 30) + "..."
+                              : hotel.address}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </Slider>
+            ) : (
+              <div className="content-inner tab-content">
+                <div style={{ textAlign: "center" }}>
+                  <h2>
+                    <img
+                      width={150}
+                      src="https://themesflat.co/html/dreamhomehtml/assets/images/icon/footer-icon-2.png"
+                      alt="No hotels Found"
+                    />
+                  </h2>
+                  <h3 className="mt-3">No hotels Found</h3>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

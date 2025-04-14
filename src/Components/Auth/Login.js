@@ -2,12 +2,10 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
 
 const Login = () => {
-  const [trues, settrues] = useState(false)
   const Navigate = useNavigate();
-
+  const [loading, setLoading] = useState(false);
   const [mobile, setMobile] = useState("");
 
   const handleChange = (e) => {
@@ -21,28 +19,31 @@ const Login = () => {
     e.preventDefault();
 
     const userdata = {
-      mobile_no: mobile,
+      phone: mobile,
+      countryCode: "91",
     };
 
     axios
-      .post(`http://157.66.191.24:3089/website/signup`, userdata)
+      .post(`${process.env.REACT_APP_BASE_URL}api/auth/generateOtp`, userdata)
       .then((response) => {
-        toast.success(response.data.msg);
-
-        secureLocalStorage.setItem("loginotp", response.data.data.otp);
-        secureLocalStorage.setItem("loginuseridd", response.data.data.userId);
-        secureLocalStorage.setItem(
-          "loginmobilenumber",
-          response.data.data.mobile_no
-        );
-settrues(true)
-        setTimeout(() => {
-          Navigate("/VeryfyOtp");
-        }, 3000);
+        console.log(response.data.data.phone);
+        
+        if (response.status === 200) {
+          toast.success(response.data.message);
+          localStorage.setItem("loginOtp", response.data.data.otp);
+          localStorage.setItem(
+            "loginMobileNumber",
+            response.data.data.phone
+          );
+          setLoading(true);
+          setTimeout(() => {
+            Navigate("/VeryfyOtp");
+          }, 3000);
+        }
       })
       .catch((error) => {
         if (error.response && error.response.status === 400) {
-          toast.error(error.response.data.msg);
+          toast.error(error.response.data.message);
         } else {
         }
       });
@@ -70,7 +71,8 @@ settrues(true)
             <div className="col-lg-8 col-md-8">
               <div className="heading-section">
                 <h2 className="font-2 fw-8">
-                There’s a smarter way to BookmiPG around </h2>
+                  There’s a smarter way to BookmiPG around{" "}
+                </h2>
                 <p className="text-color-">
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
                   sed tristique metus proin id lorem odio
@@ -230,9 +232,7 @@ settrues(true)
                   <div className="content">
                     <h5 className="text-color-4">Email us</h5>
                     <a href="info:hellosupport@gmail.com">
-                      <h4 className="fw-4 text-color-3">
-                        example@gmail.com
-                      </h4>
+                      <h4 className="fw-4 text-color-3">example@gmail.com</h4>
                     </a>
                   </div>
                 </div>
@@ -290,31 +290,39 @@ settrues(true)
                         }}
                       >
                         {" "}
-                        {trues === true ? 
-                        <div
-                          style={{ backgroundColor: "#58BF93", color: "white" }}
-                          type="submit"
-                          className="search-field"
-                          placeholder="Enter Phone Number"
-                          value
-                          name="s"
-                          title="Search for"
-                          required
-                        >
-                          Processing
-                        </div>
-                        :  <button
-                        style={{ backgroundColor: "#58BF93", color: "white" }}
-                        type="submit"
-                        className="search-field"
-                        placeholder="Enter Phone Number"
-                        value
-                        name="s"
-                        title="Search for"
-                        required
-                      >
-                        Processed to login
-                      </button>}
+                        {loading === true ? (
+                          <div
+                            style={{
+                              backgroundColor: "#58BF93",
+                              color: "white",
+                            }}
+                            type="submit"
+                            className="search-field"
+                            placeholder="Enter Phone Number"
+                            value
+                            name="s"
+                            title="Search for"
+                            required
+                          >
+                            Processing
+                          </div>
+                        ) : (
+                          <button
+                            style={{
+                              backgroundColor: "#58BF93",
+                              color: "white",
+                            }}
+                            type="submit"
+                            className="search-field"
+                            placeholder="Enter Phone Number"
+                            value
+                            name="s"
+                            title="Search for"
+                            required
+                          >
+                            Processed to login
+                          </button>
+                        )}
                       </div>
                     </form>
                     <div className="text-box text-center fs-13">

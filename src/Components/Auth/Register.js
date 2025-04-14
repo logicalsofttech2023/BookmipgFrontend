@@ -2,104 +2,69 @@ import axios from "axios";
 import React, { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
 import cities from "./cities";
 
 const Register = () => {
   const Navigate = useNavigate();
   const [name, setName] = useState();
   const [email, setEmail] = useState();
-
-
-const [selectedType, setSelectedType] = useState('');
-  
-  const handleTypeChange = (type) => {
-    setSelectedType(type);
-  };
-
-  const options = ['Buyers', 'Seller']
-  const [roletype, setRoletype] = useState("Individual");
+  const [roleType, setRoleType] = useState("user");
 
   const handleRoleChange = (role) => {
-    setRoletype(role);
+    setRoleType(role);
   };
 
-  const [selectedCity, setSelectedCity] = useState("");
-
-  const handleCityChange = (e) => {
-    setSelectedCity(e.target.getAttribute("data-value"));
-  };
-
-  let loginuserId = secureLocalStorage.getItem("loginuseriderd");
-  let loginmobileNumber = secureLocalStorage.getItem("loginmobilenumber");
-  const userSignupdata = (e) => {
+  let loginMobileNumber = localStorage.getItem("loginMobileNumber");
+  const handleRegister = (e) => {
     e.preventDefault();
 
-    if (!selectedCity) {
-      toast.error("Please select a city.");
+    if (!roleType) {
+      toast.error("Please select a role.");
       return;
     }
-    if (roletype == "Individual" && !selectedType) {
-      toast.error("Please select a type.");
-      return;
-    }
-    const formData = new FormData();
-    formData.append("userId", loginuserId);
-    formData.append("name", name);
-    formData.append("email", email ? email : "");
-    formData.append("mobile_no", loginmobileNumber);
-    formData.append("role_type", roletype);
-  
-    formData.append("city_name", selectedCity);
-    formData.append("user_type",selectedType)
+    const userdata = {
+      phone: loginMobileNumber,
+      countryCode: "91",
+      name: name,
+      email: email,
+      role: roleType,
+    };
 
     axios
-      .post(`http://157.66.191.24:3089/website/update_user`, formData)
+      .post(`${process.env.REACT_APP_BASE_URL}api/auth/completeRegistration`, userdata)
       .then((response) => {
-        toast.success(response.data.msg);
-
-        if (response.data.data.role_type == "Individual") {
-          secureLocalStorage.setItem("loginuserid", response.data.data.userId);
-          secureLocalStorage.setItem("roleType", response.data.data.role_type);
-
-          setTimeout(() => {
-           
-
-            if(selectedType === "Buyers"){
-              Navigate("/MyFavorite");
-            } else {
-              Navigate("/DashBoard");
-            }
-          }, 3000);
-        } else {
-          secureLocalStorage.setItem("loginuserid", response.data.data.userId);
-          secureLocalStorage.setItem("roleType", response.data.data.role_type);
-          
-          setTimeout(() => {
-            Navigate("/AgentProfile");
-          }, 3000);
+        console.log(response);
+        if (response.status === 201) {
+          toast.success(response.data.message);
+          localStorage.setItem("token", response.data.token);
+          if (response.data.data.role === "user") {
+            setTimeout(() => {
+              Navigate("/");
+            }, 3000);
+          } else {
+            setTimeout(() => {
+              Navigate("/dashboard");
+            }, 3000);
+          }
         }
       })
       .catch((error) => {
         if (error.response && error.response.status === 400) {
-          toast.error(error.response.data.msg);
-        } else {
+          toast.error(error.response.data.message);
         }
       });
   };
   return (
     <>
       <Toaster />
-      <section
-        className="flat-contact page-contact relative bg-23"
-        
-      >
+      <section className="flat-contact page-contact relative bg-23">
         <div className="container6">
           <div className="row">
-          <div className="col-lg-7 col-md-7">
+            <div className="col-lg-7 col-md-7">
               <div className="heading-section">
                 <h2 className="font-2 fw-8">
-                There’s a smarter way to BookmiPG around </h2>
+                  There’s a smarter way to BookmiPG around{" "}
+                </h2>
                 <p className="text-color-">
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
                   sed tristique metus proin id lorem odio
@@ -259,9 +224,7 @@ const [selectedType, setSelectedType] = useState('');
                   <div className="content">
                     <h5 className="text-color-4">Email us</h5>
                     <a href="info:hellosupport@gmail.com">
-                      <h4 className="fw-4 text-color-3">
-                        example@gmail.com
-                      </h4>
+                      <h4 className="fw-4 text-color-3">example@gmail.com</h4>
                     </a>
                   </div>
                 </div>
@@ -275,7 +238,7 @@ const [selectedType, setSelectedType] = useState('');
                 </div>
                 <div className="respond-comment">
                   <form
-                    onSubmit={userSignupdata}
+                    onSubmit={handleRegister}
                     className="comment-form form-submit"
                   >
                     <div className="heading-box start">
@@ -286,15 +249,15 @@ const [selectedType, setSelectedType] = useState('');
                         <ul className="menu-tab tab-title flex flex-wrap center">
                           <li
                             style={{
-                              width:'45%',
-                              
+                              width: "45%",
+
                               border: "none",
-                               height:'40px'
+                              height: "40px",
                             }}
                             className={`sc-buttonborder item-title flex align-center ${
-                              roletype === "Individual" ? "active" : ""
+                              roleType === "user" ? "active" : ""
                             }`}
-                            onClick={() => handleRoleChange("Individual")}
+                            onClick={() => handleRoleChange("user")}
                           >
                             <i className="far fa-check-circle" />
                             <h6 style={{ marginTop: "2px" }} className="inner">
@@ -303,22 +266,21 @@ const [selectedType, setSelectedType] = useState('');
                           </li>
                           <li
                             style={{
-                               width:'50%',
-                             
+                              width: "50%",
                               border: "none",
-                               height:'40px'
+                              height: "40px",
                             }}
                             className={`sc-buttonborder item-title flex align-center ${
-                              roletype === "Agent" ? "active" : ""
+                              roleType === "vendor" ? "active" : ""
                             }`}
-                            onClick={() => handleRoleChange("Agent")}
+                            onClick={() => handleRoleChange("vendor")}
                           >
                             <i className="far fa-check-circle" />
-                            <h6 style={{ marginTop:"2px" }} className="inner">
+                            <h6 style={{ marginTop: "2px" }} className="inner">
                               <Link style={{ fontSize: 12 }}>Hotel Owner</Link>
                             </h6>
-                          </li>&nbsp;
-                          
+                          </li>
+                          &nbsp;
                         </ul>
                       </div>
                     </div>
@@ -348,7 +310,7 @@ const [selectedType, setSelectedType] = useState('');
                         Mobile Number
                       </label>
                       <input
-                        value={loginmobileNumber}
+                        value={loginMobileNumber}
                         type="search"
                         className="search-field"
                         placeholder="Enter Phone Number"
@@ -370,42 +332,9 @@ const [selectedType, setSelectedType] = useState('');
                         type="email"
                         className="search-field"
                         placeholder="Enter Email"
-                        
                       />
                     </div>
-                    <div className="form-group-3 form-style">
-                      <div className="group-select">
-                        <div className="nice-select" tabIndex={0}>
-                          <span className="current">
-                            {selectedCity ? selectedCity : "Choose a city"}
-                          </span>
-                          <ul className="list">
-                            <li
-                              data-value=""
-                              className={`option ${
-                                !selectedCity ? "selected" : ""
-                              }`}
-                              onClick={handleCityChange}
-                            >
-                              Choose a city
-                            </li>
-                            {cities?.map((city, index) => (
-                              <li
-                                key={index}
-                                data-value={city}
-                                className={`option ${
-                                  selectedCity === city ? "selected" : ""
-                                }`}
-                                onClick={handleCityChange}
-                              >
-                                {city}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                    
+
                     <div
                       className="form-group-1 search-form form-style"
                       style={{

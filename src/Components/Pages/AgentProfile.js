@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import AgentSidebar from "../NavFooter/AgentSidebar";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
-import secureLocalStorage from "react-secure-storage";
+
 import swal from "sweetalert";
 import { Link } from "react-router-dom";
 const AgentProfile = () => {
@@ -33,10 +33,10 @@ const AgentProfile = () => {
   const [url, seturl] = useState();
   const [about, setabout] = useState();
   const [transications, settransications] = useState();
-  const Role = secureLocalStorage.getItem("roleType");
+  const Role = localStorage.getItem("roleType");
 
-  let loginid = secureLocalStorage.getItem("loginuserid");
-  let loginmobileNumber = secureLocalStorage.getItem("loginmobilenumber");
+  let loginid = localStorage.getItem("loginuserid");
+  let loginmobileNumber = localStorage.getItem("loginmobilenumber");
 
   useEffect(() => {
     window.scrollTo(0, 0);

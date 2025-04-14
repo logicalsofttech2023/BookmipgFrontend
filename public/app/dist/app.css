@@ -11115,6 +11115,7 @@ body .dribbble img {
 
 .rs-input-group.rs-input-group-inside {
   border-radius: 0px;
+  height: 100%;
 }
 
 .rs-picker-daterange>.rs-input-group.rs-input-group-inside .rs-input{

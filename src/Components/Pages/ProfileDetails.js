@@ -1,11 +1,11 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
+
 import AwesomeSlider from "react-awesome-slider";
 import swal from "sweetalert";
 const ProfileDetails = () => {
-  let userID = secureLocalStorage.getItem("UserdetailsID");
+  let userID = localStorage.getItem("UserdetailsID");
   const [Buy, setBuy] = useState();
   const [AgentData, setAgentData] = useState();
   const [AgentPropertyData, setAgentPropertyData] = useState();
@@ -14,7 +14,7 @@ const ProfileDetails = () => {
   const [Phone,setPhone] = useState();
   const [Message, setMessage]= useState();
   const Navigate = useNavigate();
-  const loginid = secureLocalStorage.getItem("loginuserid");
+  const loginid = localStorage.getItem("loginuserid");
   useEffect(() => {
     window.scrollTo(0, 0);
     GetAgentDetails();
@@ -341,7 +341,7 @@ const ProfileDetails = () => {
                                   <div
                                 style={{ cursor: "pointer" }}
                                 onClick={() => {
-                                  secureLocalStorage.setItem(
+                                  localStorage.setItem(
                                     "ListingId",
                                     data?.propertyId
                                   );
@@ -352,7 +352,7 @@ const ProfileDetails = () => {
                                   <Link
                                     className="text-capitalize"
                                     onClick={() => {
-                                      secureLocalStorage.setItem(
+                                      localStorage.setItem(
                                         "ListingId",
                                         data?.propertyId
                                       );
@@ -373,7 +373,7 @@ const ProfileDetails = () => {
                                   <div className="money fs-20 fw-8 font-2 text-color-3">
                                     <Link
                                       onClick={() => {
-                                        secureLocalStorage.setItem(
+                                        localStorage.setItem(
                                           "ListingId",
                                           data?.propertyId
                                         );

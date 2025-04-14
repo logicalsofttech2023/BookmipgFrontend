@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import secureLocalStorage from "react-secure-storage";
+
 
 const UserSidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -12,7 +12,7 @@ const UserSidebar = () => {
     };
   
     const Logout = () => {
-      secureLocalStorage.clear();
+      localStorage.clear();
       
     };
   return (

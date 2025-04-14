@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
+
 import AgentSidebar from "../NavFooter/AgentSidebar";
 
 const Agentpropertydetails = () => {
@@ -9,7 +9,7 @@ const Agentpropertydetails = () => {
   const [Reviews, setReviews] = useState();
   const [count , setcount] = useState();
   const [Message, setMessage] = useState();
-  let listingID = secureLocalStorage.getItem("ListingId");
+  let listingID = localStorage.getItem("ListingId");
 
   useEffect(() => {
     window.scrollTo(0, 0);

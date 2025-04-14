@@ -2,17 +2,17 @@ import React, { useEffect, useState } from "react";
 import UserSidebar from "../NavFooter/UserSidebar";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import secureLocalStorage from "react-secure-storage";
+
 import swal from "sweetalert";
 const MyAgent = () => {
   const [count, setcount] = useState();
   const [dataofAgent,setdataofAgent] = useState();
   const [topagent, settopagent] = useState();
-  const loginid = secureLocalStorage.getItem("loginuserid");
+  const loginid = localStorage.getItem("loginuserid");
   
   const navigate = useNavigate();
 
-  let cityes = secureLocalStorage.getItem("cityname");
+  let cityes = localStorage.getItem("cityname");
 
   useEffect(()=>{
     window.scrollTo(0, 0);
@@ -193,7 +193,7 @@ const MyAgent = () => {
                                   <Link
                                     to="/agentsdetails"
                                     onClick={() => {
-                                      secureLocalStorage.setItem(
+                                      localStorage.setItem(
                                         "agentdetailsId",
                                         data.agentId
                                       );
@@ -328,7 +328,7 @@ const MyAgent = () => {
                                         </svg>
                                         <Link
                                           to="/agentsdetails" onClick={() => {
-                                            secureLocalStorage.setItem(
+                                            localStorage.setItem(
                                               "agentdetailsId",
                                               data.agentId
                                             );
@@ -605,7 +605,7 @@ const MyAgent = () => {
                               className="fs-16 lh-24"
                               to="/agentsdetails"
                               onClick={() => {
-                                secureLocalStorage.setItem(
+                                localStorage.setItem(
                                   "agentdetailsId",
                                   data.agentId
                                 );

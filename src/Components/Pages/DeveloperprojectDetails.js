@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
+
 import swal from "sweetalert";
 import AgentSidebar from "../NavFooter/AgentSidebar";
 
@@ -15,8 +15,8 @@ const DeveloperprojectDetails = () => {
   const [favdata, setfavdata] = useState();
   const [Message, setMessage] = useState();
   const navigate = useNavigate();
-  let listingID = secureLocalStorage.getItem("ListingId");
-  const loginid = secureLocalStorage.getItem("loginuserid");
+  let listingID = localStorage.getItem("ListingId");
+  const loginid = localStorage.getItem("loginuserid");
   useEffect(() => {
     window.scrollTo(0, 0);
     GetProperty();

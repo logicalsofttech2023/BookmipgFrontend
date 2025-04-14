@@ -4,7 +4,7 @@ import AwesomeSlider from "react-awesome-slider";
 import withAutoplay from "react-awesome-slider/dist/autoplay";
 import "react-awesome-slider/dist/styles.css";
 import { Link, useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
+
 
 const AutoplaySlider = withAutoplay(AwesomeSlider);
 
@@ -13,7 +13,7 @@ const Hotsellingprojecthome = () => {
   const [hotdata, setHotdata] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   
-  const cityName = secureLocalStorage.getItem("cityname");
+  const cityName = localStorage.getItem("cityname");
 
   useEffect(() => {
     if (cityName) { 
@@ -44,7 +44,7 @@ const Hotsellingprojecthome = () => {
                 }}
               >
                 Hot Selling Projects in{" "}
-                {secureLocalStorage.getItem("cityname") || "your city"}
+                {localStorage.getItem("cityname") || "your city"}
               </h2>
             </div>
             <div className="row">
@@ -130,7 +130,7 @@ const Hotsellingprojecthome = () => {
                             }}
                           >
                             <img  onClick={() => {
-                            secureLocalStorage.setItem(
+                            localStorage.setItem(
                               "ListingId",
                               slide?.projectId
                             );
@@ -156,7 +156,7 @@ const Hotsellingprojecthome = () => {
                               style={{cursor:'pointer' }}
                             >
                               <h4  onClick={() => {
-                                  secureLocalStorage.setItem(
+                                  localStorage.setItem(
                                     "ListingId",
                                     slide?.projectId
                                   );
@@ -169,7 +169,7 @@ const Hotsellingprojecthome = () => {
                                     marginBottom: "0px",
                                   }}
                                   onClick={() => {
-                                    secureLocalStorage.setItem(
+                                    localStorage.setItem(
                                       "ListingId",
                                       slide?.projectId
                                     );
@@ -180,7 +180,7 @@ const Hotsellingprojecthome = () => {
                                 </Link>
                               </h4>
                               <p  onClick={() => {
-                                  secureLocalStorage.setItem(
+                                  localStorage.setItem(
                                     "ListingId",
                                     slide?.projectId
                                   );
@@ -189,7 +189,7 @@ const Hotsellingprojecthome = () => {
                                 {slide?.project_description}
                               </p>
                               <div  onClick={() => {
-                                  secureLocalStorage.setItem(
+                                  localStorage.setItem(
                                     "ListingId",
                                     slide?.projectId
                                   );
@@ -205,7 +205,7 @@ const Hotsellingprojecthome = () => {
                                 </Link>
                               </div>
                               <div onClick={() => {
-                                  secureLocalStorage.setItem(
+                                  localStorage.setItem(
                                     "ListingId",
                                     slide?.projectId
                                   );
@@ -433,7 +433,7 @@ export default Hotsellingprojecthome;
 // import withAutoplay from "react-awesome-slider/dist/autoplay";
 // import "react-awesome-slider/dist/styles.css";
 // import { Link } from "react-router-dom";
-// import secureLocalStorage from "react-secure-storage";
+// 
 
 // const AutoplaySlider = withAutoplay(AwesomeSlider);
 
@@ -489,7 +489,7 @@ export default Hotsellingprojecthome;
 //                 }}
 //               >
 //                 Hot Selling Projects in{" "}
-//                 {secureLocalStorage.getItem("cityname") || "your city"}
+//                 {localStorage.getItem("cityname") || "your city"}
 //               </h2>
 //             </div>
 //             <div className="row">
@@ -804,7 +804,7 @@ export default Hotsellingprojecthome;
 // import AwesomeSlider from "react-awesome-slider";
 // import withAutoplay from "react-awesome-slider/dist/autoplay";
 // import 'react-awesome-slider/dist/styles.css';
-// import secureLocalStorage from "react-secure-storage";
+// 
 
 // const AutoplaySlider = withAutoplay(AwesomeSlider);
 
@@ -835,7 +835,7 @@ export default Hotsellingprojecthome;
 //                   color: "#333",
 //                 }}
 //               >
-//                 Hot Selling Projects in {secureLocalStorage.getItem("cityname") || "your city"}
+//                 Hot Selling Projects in {localStorage.getItem("cityname") || "your city"}
 //               </h2>
 //             </div>
 //             <div className="row">

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import secureLocalStorage from "react-secure-storage";
+
 import cities from "../Auth/cities";
 import axios from "axios";
 import swal from "sweetalert";
@@ -33,8 +33,8 @@ const Navbar2 = () => {
   const menuClose = () => {
     setIsMenuOpen(false);
   };
-  let role = secureLocalStorage.getItem("roleType");
-  const loginid = secureLocalStorage.getItem("loginuserid");
+  let role = localStorage.getItem("roleType");
+  const loginid = localStorage.getItem("loginuserid");
 
 
 
@@ -51,7 +51,7 @@ const Navbar2 = () => {
          
          }
         deletebannerimage();
-        secureLocalStorage.clear();
+        localStorage.clear();
 Navigate("/Login")
       } else {
         
@@ -63,7 +63,7 @@ Navigate("/Login")
 
   useEffect(() => {
     const defaultCity = "Mumbai";
-    secureLocalStorage.setItem("cityname", defaultCity);
+    localStorage.setItem("cityname", defaultCity);
   }, []);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -76,7 +76,7 @@ Navigate("/Login")
     setSearchTerm(e.target.value);
   };
   const handleCityClick = (city) => {
-    secureLocalStorage.setItem("cityname", city);
+    localStorage.setItem("cityname", city);
     setIsDropdownOpen(false);
     GetHeaderListing();
   };
@@ -89,11 +89,11 @@ Navigate("/Login")
 
   useEffect(() => {
     GetHeaderListing();
-  }, [secureLocalStorage.getItem("cityname")]);
+  }, [localStorage.getItem("cityname")]);
 
   const GetHeaderListing = () => {
     const data = {
-      city_name: secureLocalStorage.getItem("cityname") || "",
+      city_name: localStorage.getItem("cityname") || "",
     };
     axios
       .post("http://157.66.191.24:3089/website/get_buy_data", data)
@@ -107,11 +107,11 @@ Navigate("/Login")
 
   useEffect(() => {
     GetHeaderListings();
-  }, [secureLocalStorage.getItem("cityname")]);
+  }, [localStorage.getItem("cityname")]);
 
   const GetHeaderListings = () => {
     const data = {
-      city_name: secureLocalStorage.getItem("cityname") || "",
+      city_name: localStorage.getItem("cityname") || "",
     };
     axios
       .post("http://157.66.191.24:3089/website/get_rent_data", data)
@@ -125,11 +125,11 @@ Navigate("/Login")
 
   useEffect(() => {
     GetHeaderProject();
-  }, [secureLocalStorage.getItem("cityname")]);
+  }, [localStorage.getItem("cityname")]);
 
   const GetHeaderProject = () => {
     const data = {
-      city_name: secureLocalStorage.getItem("cityname") || "",
+      city_name: localStorage.getItem("cityname") || "",
     };
     axios
       .post("http://157.66.191.24:3089/website/get_project_data", data)
@@ -146,7 +146,7 @@ Navigate("/Login")
   }, [0]);
   const GetCityAgent = () => {
     const data = {
-      city_name: secureLocalStorage.getItem("cityname"),
+      city_name: localStorage.getItem("cityname"),
     };
     axios
       .post("http://157.66.191.24:3089/website/get_city_agent", data)
@@ -168,7 +168,7 @@ Navigate("/Login")
       .post("http://157.66.191.24:3089/website/user_profile", userdata)
       .then((response) => {
         
-        secureLocalStorage.setItem("subscription",response.data.data.uploaded_status)
+        localStorage.setItem("subscription",response.data.data.uploaded_status)
       })
       .catch((error) => {});
   };
@@ -208,7 +208,7 @@ Navigate("/Login")
                                   setIsDropdownOpen(!isDropdownOpen)
                                 }
                               >
-                                {secureLocalStorage.getItem("cityname")}
+                                {localStorage.getItem("cityname")}
                               </Link>
 
                               {isDropdownOpen && (
@@ -249,19 +249,19 @@ Navigate("/Login")
                                         onClick={() => {
                                           handleCityClick(city);
 
-                                          secureLocalStorage.setItem(
+                                          localStorage.setItem(
                                             "properttype"
                                           );
-                                          secureLocalStorage.setItem(
+                                          localStorage.setItem(
                                             "properttype2"
                                           );
 
-                                          secureLocalStorage.setItem("rooms");
+                                          localStorage.setItem("rooms");
 
-                                          secureLocalStorage.setItem(
+                                          localStorage.setItem(
                                             "selectedBajat"
                                           );
-                                          secureLocalStorage.setItem(
+                                          localStorage.setItem(
                                             "propertiestype"
                                           );
                                         }}
@@ -353,16 +353,16 @@ Navigate("/Login")
                                                     >
                                                       <Link
                                                         onClick={() => {
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype",
                                                             "Sale"
                                                           );
 
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype2",
                                                             item?.building_type_two
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "rooms"
                                                           );
                                                         }}
@@ -423,16 +423,16 @@ Navigate("/Login")
                                                     >
                                                       <Link
                                                         onClick={() => {
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype",
                                                             "Sale"
                                                           );
 
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype2",
                                                             item?.building_type_two
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "rooms"
                                                           );
                                                         }}
@@ -493,16 +493,16 @@ Navigate("/Login")
                                                     >
                                                       <Link
                                                         onClick={() => {
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype",
                                                             "Sale"
                                                           );
 
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype2",
                                                             item?.building_type_two
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "rooms"
                                                           );
                                                         }}
@@ -565,16 +565,16 @@ Navigate("/Login")
                                                     >
                                                       <Link
                                                         onClick={() => {
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype",
                                                             "Sale"
                                                           );
 
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype2",
                                                             item?.building_type_two
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "rooms",
                                                             item?.rooms
                                                           );
@@ -679,16 +679,16 @@ Navigate("/Login")
                                                     >
                                                       <Link
                                                         onClick={() => {
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype",
                                                             "Rent"
                                                           );
 
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype2",
                                                             item?.building_type_two
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "rooms"
                                                           );
                                                         }}
@@ -749,16 +749,16 @@ Navigate("/Login")
                                                     >
                                                       <Link
                                                         onClick={() => {
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype",
                                                             "Rent"
                                                           );
 
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype2",
                                                             item?.building_type_two
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "rooms"
                                                           );
                                                         }}
@@ -819,16 +819,16 @@ Navigate("/Login")
                                                     >
                                                       <Link
                                                         onClick={() => {
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype",
                                                             "Rent"
                                                           );
 
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype2",
                                                             item?.building_type_two
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "rooms"
                                                           );
                                                         }}
@@ -891,16 +891,16 @@ Navigate("/Login")
                                                     >
                                                       <Link
                                                         onClick={() => {
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype",
                                                             "Rent"
                                                           );
 
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype2",
                                                             item?.building_type_two
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "rooms",
                                                             item?.rooms
                                                           );
@@ -1004,17 +1004,17 @@ Navigate("/Login")
                                                     >
                                                       <Link
                                                         onClick={() => {
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "possessionstatus",
                                                             item?.possession_status
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "locality"
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "project_type"
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "project_name"
                                                           );
                                                         }}
@@ -1075,17 +1075,17 @@ Navigate("/Login")
                                                     >
                                                       <Link
                                                         onClick={() => {
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "possessionstatus"
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "locality",
                                                             item?.locality
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "project_type"
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "project_name"
                                                           );
                                                         }}
@@ -1144,17 +1144,17 @@ Navigate("/Login")
                                                     >
                                                       <Link
                                                         onClick={() => {
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "possessionstatus"
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "locality"
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "project_type",
                                                             item?.project_type
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "project_name"
                                                           );
                                                         }}
@@ -1215,16 +1215,16 @@ Navigate("/Login")
                                                     >
                                                       <Link
                                                         onClick={() => {
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "possessionstatus"
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "locality"
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "project_type"
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "project_name",
                                                             item?.project_name
                                                           );
@@ -1285,16 +1285,16 @@ Navigate("/Login")
                                                     >
                                                       <Link
                                                         onClick={() => {
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype",
                                                             "Rent"
                                                           );
 
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "properttype2",
                                                             item?.building_type_two
                                                           );
-                                                          secureLocalStorage.setItem(
+                                                          localStorage.setItem(
                                                             "rooms",
                                                             item?.rooms
                                                           );
@@ -1328,7 +1328,7 @@ Navigate("/Login")
                                       <li className="hover-effect">
                                         <Link to="/Agents">
                                           Agent for{" "}
-                                          {secureLocalStorage.getItem(
+                                          {localStorage.getItem(
                                             "cityname"
                                           )}
                                         </Link>
@@ -1494,13 +1494,13 @@ Navigate("/Login")
                                 onClick={() => {
                                   handleCityClick(city);
 
-                                  secureLocalStorage.setItem("properttype");
-                                  secureLocalStorage.setItem("properttype2");
+                                  localStorage.setItem("properttype");
+                                  localStorage.setItem("properttype2");
 
-                                  secureLocalStorage.setItem("rooms");
+                                  localStorage.setItem("rooms");
 
-                                  secureLocalStorage.setItem("selectedBajat");
-                                  secureLocalStorage.setItem("propertiestype");
+                                  localStorage.setItem("selectedBajat");
+                                  localStorage.setItem("propertiestype");
                                 }}
                                 to="#"
                               >
@@ -1588,16 +1588,16 @@ Navigate("/Login")
                           >
                             <Link
                               onClick={() =>{
-                                secureLocalStorage.setItem(
+                                localStorage.setItem(
                                   "properttype",
                                   "Sale"
                                 )
 
-                                secureLocalStorage.setItem(
+                                localStorage.setItem(
                                   "properttype2",
                                   item?.building_type_two
                                 )
-                                secureLocalStorage.setItem("rooms")
+                                localStorage.setItem("rooms")
                               }
                               }
                               to="/PropertyListSidebar"
@@ -1653,16 +1653,16 @@ Navigate("/Login")
                           >
                             <Link
                               onClick={() =>{
-                                secureLocalStorage.setItem(
+                                localStorage.setItem(
                                   "properttype",
                                   "Sale"
                                 )
 
-                                secureLocalStorage.setItem(
+                                localStorage.setItem(
                                   "properttype2",
                                   item?.building_type_two
                                 )
-                                secureLocalStorage.setItem("rooms")
+                                localStorage.setItem("rooms")
                               }
                               }
                               to="/PropertyListSidebar"
@@ -1718,16 +1718,16 @@ Navigate("/Login")
                           >
                             <Link
                               onClick={() =>{
-                                secureLocalStorage.setItem(
+                                localStorage.setItem(
                                   "properttype",
                                   "Sale"
                                 )
 
-                                secureLocalStorage.setItem(
+                                localStorage.setItem(
                                   "properttype2",
                                   item?.building_type_two
                                 )
-                                secureLocalStorage.setItem("rooms")
+                                localStorage.setItem("rooms")
                               }
                               }
                               to="/PropertyListSidebar"
@@ -1785,16 +1785,16 @@ Navigate("/Login")
                           >
                             <Link
                               onClick={() =>{
-                                secureLocalStorage.setItem(
+                                localStorage.setItem(
                                   "properttype",
                                   "Sale"
                                 )
 
-                                secureLocalStorage.setItem(
+                                localStorage.setItem(
                                   "properttype2",
                                   item?.building_type_two
                                 )
-                                secureLocalStorage.setItem(
+                                localStorage.setItem(
                                   "rooms",
                                   item?.rooms
                                 )
@@ -1900,16 +1900,16 @@ Navigate("/Login")
                                               >
                                                 <Link
                                                   onClick={() => {
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "properttype",
                                                       "Rent"
                                                     );
 
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "properttype2",
                                                       item?.building_type_two
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "rooms"
                                                     );
                                                   }}
@@ -1968,16 +1968,16 @@ Navigate("/Login")
                                               >
                                                 <Link
                                                   onClick={() => {
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "properttype",
                                                       "Rent"
                                                     );
 
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "properttype2",
                                                       item?.building_type_two
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "rooms"
                                                     );
                                                   }}
@@ -2036,16 +2036,16 @@ Navigate("/Login")
                                               >
                                                 <Link
                                                   onClick={() => {
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "properttype",
                                                       "Rent"
                                                     );
 
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "properttype2",
                                                       item?.building_type_two
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "rooms"
                                                     );
                                                   }}
@@ -2106,16 +2106,16 @@ Navigate("/Login")
                                               >
                                                 <Link
                                                   onClick={() => {
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "properttype",
                                                       "Rent"
                                                     );
 
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "properttype2",
                                                       item?.building_type_two
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "rooms",
                                                       item?.rooms
                                                     );
@@ -2220,17 +2220,17 @@ Navigate("/Login")
                                               >
                                                 <Link
                                                   onClick={() => {
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "possessionstatus",
                                                       item?.possession_status
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "locality"
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "project_type"
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "project_name"
                                                     );
                                                   }}
@@ -2289,17 +2289,17 @@ Navigate("/Login")
                                               >
                                                 <Link
                                                   onClick={() => {
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "possessionstatus"
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "locality",
                                                       item?.locality
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "project_type"
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "project_name"
                                                     );
                                                   }}
@@ -2358,17 +2358,17 @@ Navigate("/Login")
                                               >
                                                 <Link
                                                   onClick={() => {
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "possessionstatus"
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "locality"
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "project_type",
                                                       item?.project_type
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "project_name"
                                                     );
                                                   }}
@@ -2429,16 +2429,16 @@ Navigate("/Login")
                                               >
                                                 <Link
                                                   onClick={() => {
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "possessionstatus"
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "locality"
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "project_type"
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "project_name",
                                                       item?.project_name
                                                     );
@@ -2499,16 +2499,16 @@ Navigate("/Login")
                                               >
                                                 <Link
                                                   onClick={() => {
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "properttype",
                                                       "Rent"
                                                     );
 
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "properttype2",
                                                       item?.building_type_two
                                                     );
-                                                    secureLocalStorage.setItem(
+                                                    localStorage.setItem(
                                                       "rooms",
                                                       item?.rooms
                                                     );
@@ -2550,7 +2550,7 @@ Navigate("/Login")
                                 <li onClick={menuClose}>
                                   <Link to="/Agents">
                                     Agent for{" "}
-                                    {secureLocalStorage.getItem("cityname")}
+                                    {localStorage.getItem("cityname")}
                                   </Link>
                                 </li>
                               );

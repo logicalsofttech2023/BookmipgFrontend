@@ -3,207 +3,92 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useState } from "react";
 import axios from "axios";
-import secureLocalStorage from "react-secure-storage";
+
 import AwesomeSlider from "react-awesome-slider";
 import "react-awesome-slider/dist/styles.css";
 import "react-awesome-slider/dist/custom-animations/cube-animation.css";
 import Toplocalty from "./Toplocalty";
-import swal from "sweetalert";
-import cities from "../Auth/cities";
 import Projecthomepage from "./Projecthomepage";
-import Topdeveloperhomepage from "./Topdeveloperhomepage";
-import Hotsellingprojecthome from "./Hotsellingprojecthome";
 import BannerStrip1 from "./BannerStrip1";
 import PopulerDestination from "./PopulerDestination";
-import { DateRangePicker } from 'rsuite';
+import { DateRangePicker } from "rsuite";
+import { FaMapMarkerAlt } from "react-icons/fa";
+import { CiSearch } from "react-icons/ci";
+import { Skeleton } from "@mui/material";
 
 const Home = () => {
-  const placeholders = [
-    'Search by City "Flats by Lodha in Mumbai"',
-    'Search by City "Andheri East Overview"',
-    'Search by City "Prestige Kingfisher Towers"',
-    'Search by City "DLF in Gurgaon"',
-    'Search by City "Powai, Mumbai Overview"',
-    'Search by City "Godrej Platinum"',
-    'Search by City "Sobha in Bangalore"',
-    'Search by City "Whitefield Overview"',
-    'Search by City "Brigade Exotica"',
-    'Search by City "Oberoi Realty in Mumbai"',
-    'Search by City "Juhu Overview"',
-    'Search by City "Raheja Atlantis"',
-  ];
-
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
-  const [Property, setProperty] = useState();
-  const [selectedOption, setSelectedOption] = useState("");
-  const [Name, setName] = useState();
-  const [Email, setEmail] = useState();
-  const [Phone, setPhone] = useState();
-  const [Message, setMessage] = useState();
-
+  const [hotels, setHotels] = useState();
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
-  const [showDropdown, setShowDropdown] = useState(false);
-  //const [cities, setcities] = useState();
-  const [selectedBajat, setselectedBajat] = useState();
-  const [types, setTypes] = useState();
-  const Navigate = useNavigate();
-  const [Cointactusdata, setCointactusdata] = useState();
-    const [selectedDate, setSelectedDate] = useState(null);
-  
-
-  const handleChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-
-    const filtered = cities?.filter((suggestion) =>
-      suggestion.toLowerCase().includes(value.toLowerCase())
-    );
-
-    setFilteredSuggestions(filtered);
-    setShowDropdown(value.length > 0 && filtered.length > 0);
-  };
-
-  const handleSelectSuggestion = (suggestion) => {
-    setSearchTerm(suggestion);
-
-    setShowDropdown(false);
-  };
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [latLong, setLatLong] = useState({ lat: null, lon: null });
 
   useEffect(() => {
-    if (searchTerm) {
-      GetCityProperty();
-    }
-  }, [searchTerm]);
-  const GetCityProperty = () => {
-    const data = {
-      city_name: searchTerm,
-    };
-    axios
-      .post("http://157.66.191.24:3089/website/get_city_property", data)
-      .then((response) => {
-        const typess =
-          response?.data?.data?.flatMap((item) => item?.building_type_two) ||
-          [];
+    getAllHotels();
+  }, []);
 
-        setTypes(typess);
+  const getAllHotels = () => {
+    axios
+      .get(`${process.env.REACT_APP_BASE_URL}api/user/getAllHotelsForWeb`)
+      .then((response) => {
+        if (response.status === 200) {
+          setHotels(response.data?.hotels);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching hotels:", error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setPlaceholderIndex((prevIndex) => (prevIndex + 1) % placeholders.length);
-    }, 1000);
+  const getCurrentLocation = () => {
+    console.log("call");
 
-    return () => clearInterval(intervalId);
-  }, [placeholders.length]);
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude: lat, longitude: lon } = position.coords;
 
-  const [Buy, setBuy] = useState(null);
+          console.log("Latitude:", lat, "Longitude:", lon);
 
-  let cityes = secureLocalStorage.getItem("cityname");
-  const [lengthh, setlengthh] = useState();
-  const [lengthh1, setlengthh1] = useState();
-  useEffect(() => {
-    GetallProperty();
-  }, [Buy, cityes]);
-
-  const GetallProperty = () => {
-    const data = {
-      city_name: cityes ? cityes : "",
-    };
-    axios
-      .post("http://157.66.191.24:3089/website/all_get_Property", data)
-
-      .then((response) => {
-        let filteredData = [];
-
-        if (Buy == "1") {
-          filteredData = response.data.data.filter(
-            (item) => item?.property_listing_type == "Sale"
-          );
-          setlengthh(filteredData?.length);
-        } else if (Buy == "2") {
-          filteredData = response.data.data.filter(
-            (item) => item?.property_listing_type == "Rent"
-          );
-          setlengthh1(filteredData?.length);
-        } else {
-          filteredData = response.data.data;
+          // State update
+          setLatLong({ lat, lon });
+          setSearchTerm(`📍 ${lat.toFixed(6)}, ${lon.toFixed(6)}`);
+        },
+        (error) => {
+          let errorMessage = "Unable to retrieve location.";
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage =
+                "Location access denied. Please enable location services.";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = "Location information is unavailable.";
+              break;
+            case error.TIMEOUT:
+              errorMessage = "Location request timed out.";
+              break;
+            case error.UNKNOWN_ERROR:
+            default:
+              errorMessage = "An unknown error occurred.";
+              break;
+          }
+          console.error("Error getting location:", error);
+          alert(errorMessage);
         }
-
-        setProperty(filteredData?.reverse());
-      })
-      .catch((error) => {});
-  };
-
-  const ContactusDta = (e) => {
-    e.preventDefault();
-
-    const data = {
-      name: Name,
-      email: Email,
-      mobile_no: Phone,
-      property_type: selectedOption,
-      message: Message,
-    };
-
-    axios
-      .post("http://157.66.191.24:3089/website/add_contact_us", data)
-      .then((res) => {
-        swal(res.data.msg, {
-          icon: "success",
-        });
-      })
-      .catch((error) => {});
-    setName("");
-    setEmail("");
-    setPhone("");
-    setMessage("");
-    setSelectedOption("");
-  };
-
-  const handlerHeaderdata = (e) => {
-    e.preventDefault();
-    if (searchTerm) {
-      secureLocalStorage.setItem("cityname", searchTerm);
+      );
     } else {
+      alert("Geolocation is not supported by this browser.");
     }
-    secureLocalStorage.setItem("properttype");
-    secureLocalStorage.setItem("rooms");
-    secureLocalStorage.setItem("properttype2", selectedOption);
-    secureLocalStorage.setItem("selectedBajat", selectedBajat);
-    const data = Math?.random()?.toFixed(2);
-
-    secureLocalStorage.setItem("random", data);
-    Navigate("/PropertyListSidebar");
   };
+
+  // Debugging to check if latLong is updating
   useEffect(() => {
-    GetContactUs();
-  }, [0]);
-  const GetContactUs = () => {
-    axios
-      .get("http://157.66.191.24:3089/website/get_admin_contact_us")
-      .then((res) => {
-        setCointactusdata(res?.data?.data[0]);
-      })
-      .catch((error) => {});
-  };
+    console.log("Updated Location:", latLong);
+  }, [latLong]);
 
-  //   useEffect(()=>{
-  //     GetHeaderApi()
-  //   },[0])
-  //   const GetHeaderApi = () =>{
-  // const data = {
-  //   locality:secureLocalStorage.getItem("location"),
-  //   property_type:secureLocalStorage.getItem("propertiestype"),
-  //   budget:secureLocalStorage.getItem("selectedBajat")
-  // }
-
-  // axios.post("http://157.66.191.24:3089/website/search_property",data).then((res)=>{
-  //   setProperty(res.data.data);
-
-  // }).catch((error)=>{})
-  //   }
   return (
     <>
       {/* slider */}
@@ -256,95 +141,78 @@ const Home = () => {
                         className=" content-inner tab-content flex-center home-slider-box"
                         style={{ top: "-67px" }}
                       ></div>
-                      <form onSubmit={handlerHeaderdata}>
-                        <div className="wd-find-select flex">
-                          <div className="wrap-icon flex align-center justify-center link-style-3">
-                            <div
-                              className="skude form-group-1 gap-2  search-form form-style"
-                              style={{ marginRight: "0px" }}
-                            >
-                              <input
-                                type="search"
-                                className="search-field skude"
-                                placeholder={placeholders[placeholderIndex]}
-                                value={searchTerm}
-                                onChange={handleChange}
-                                style={{
-                                  width: "410px",
-                                  padding: "10px",
-                                  //  borderRadius: '0px',
-                                  // border: '1px solid #ccc',
-                                  borderRadius: "0px",
-                                  borderTopLeftRadius: "5px",
-                                  borderBottomLeftRadius: "5px",
-                                  boxSizing: "border-box",
-                                  lineHeight: "27px",
-                                }}
-                              />
+                      <div className="wd-find-select flex">
+      <div className="wrap-icon flex align-center justify-center link-style-3">
+        <div
+          className="skude form-group-1 search-form form-style"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            position: "relative",
+          }}
+        >
+          {/* Search Input Field */}
+          <input
+            type="search"
+            className="search-field skude"
+            placeholder="Search location..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: "380px",
+              padding: "10px",
+              borderRadius: "0px",
+              borderTopLeftRadius: "5px",
+              borderBottomLeftRadius: "5px",
+              boxSizing: "border-box",
+              lineHeight: "27px",
+              border: "1px solid #ccc",
+              outline: "none",
+            }}
+          />
 
-                              {showDropdown && (
-                                <div
-                                  style={{
-                                    position: "absolute",
-                                    top: "100%",
-                                    left: 0,
-                                    right: 0,
-                                    border: "1px solid #ccc",
-                                    borderTop: "none",
-                                    maxHeight: "300px",
-                                    overflowY: "auto",
-                                    margin: 0,
-                                    padding: 0,
-                                    zIndex: 1000,
-                                    background: "#fff",
-                                  }}
-                                >
-                                  {filteredSuggestions?.map(
-                                    (suggestion, index) => (
-                                      <div
-                                        className="option-select skude"
-                                        key={index}
-                                        onClick={() => {
-                                          handleSelectSuggestion(suggestion);
-                                        }}
-                                        style={{
-                                          padding: "10px",
-                                          cursor: "pointer",
-                                          borderBottom: "1px solid #eee",
-                                          background: "#fff",
-                                          color: "black",
-                                        }}
-                                      >
-                                        {suggestion}
-                                      </div>
-                                    )
-                                  )}
-                                </div>
-                              )}
-                            </div>
+          {/* Location Icon */}
+          <button
+            type="button"
+            onClick={getCurrentLocation}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "5px",
+              padding: "10px",
+              border: "1px solid #ccc",
+              borderLeft: "none",
+              background: "#f8f8f8",
+              cursor: "pointer",
+              borderTopRightRadius: "5px",
+              borderBottomRightRadius: "5px",
+              height: "49px",
+              color: "black",
+              width: "120px",
+              fontSize: "12px",
+            }}
+          >
+            <FaMapMarkerAlt color="red" />
+            <span style={{ width: "50px" }}>Near me</span>
+          </button>
+        </div>
 
-                            <div
-                              
-                              style={{ width: "100%" }}
-                            >
-                              <DateRangePicker showOneCalendar />
-                            </div>
-                            <button
-                              type="submit"
-                              className="sc-button skude"
-                              style={{ borderStyle: "none", height: "52px" }}
-                            >
-                              <div
-                                type="submit"
-                                class="button-search sc-btn-top"
-                              >
-                                <i className="far fa-search text-color-1" />
-                                &nbsp; Search Now
-                              </div>
-                            </button>
-                          </div>
-                        </div>
-                      </form>
+        <div style={{ width: "100%" }}>
+          <DateRangePicker showOneCalendar />
+        </div>
+
+        <button
+          type="button"
+          className="sc-button skude"
+          style={{ borderStyle: "none", height: "52px" }}
+        >
+          <div className="button-search sc-btn-top">
+            <CiSearch style={{ margin: "0px" }} /> Search Now
+          </div>
+        </button>
+      </div>
+    </div>
                     </div>
                   </div>
                 </div>
@@ -353,6 +221,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      
 
       <section
         className="flat-featured wg-dream home mb-0"
@@ -370,200 +240,177 @@ const Home = () => {
               </div>
               <div className="flat-tabs themesflat-tabs">
                 <div className="content-tab">
-                  {Property?.length > 0 ? (
+                  {loading ? (
                     <div className="content-inner tab-content">
                       <div className="wrap-item flex">
-                        {/* all_get_Property */}
-                        {Property?.slice(0, 8)?.map((data) => {
-                          return (
-                            <div className="box box-dream hv-one">
-                              <div className="image-group relative">
-                                <span className="featured fs-12 fw-6">
-                                  Company-Serviced
-                                </span>
+                        {[...Array(6)].map((_, index) => (
+                          <div key={index} className="box box-dream hv-one">
+                            <Skeleton
+                              variant="rectangular"
+                              width={284}
+                              height={210}
+                            />
+                            <div className="content">
+                              <Skeleton width="80%" height={30} />
+                              <Skeleton width="60%" height={20} />
+                              <Skeleton width="40%" height={20} />
+                              <Skeleton width="100%" height={15} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : hotels?.length > 0 ? (
+                    <div className="content-inner tab-content">
+                      <div className="wrap-item flex">
+                        {hotels?.slice(0, 8).map((data, index) => (
+                          <div key={index} className="box box-dream hv-one">
+                            <div className="image-group relative">
+                              <span className="featured fs-12 fw-6">
+                                Company-Serviced
+                              </span>
+                              <div className="item active custom-slider">
+                                <AwesomeSlider
+                                  style={{
+                                    "--slider-height-percentage": "210px",
+                                    "--slider-width-percentage": "284px",
+                                    "--organic-arrow-height": "17px",
+                                    "--organic-arrow-color": "#fff",
+                                    "--control-button-opacity": 1,
+                                    "--animation-duration": "100ms",
+                                  }}
+                                  bullets={false}
+                                  mobileTouch={true}
+                                >
+                                  {data?.images?.map((imageName, imgIndex) => (
+                                    <div
+                                      key={imgIndex}
+                                      data-src={`${process.env.REACT_APP_BASE_URL}${imageName}`}
+                                      style={{ width: "100%" }}
+                                    />
+                                  ))}
+                                </AwesomeSlider>
+                              </div>
+                            </div>
 
-                                <div className="item active custom-slider">
-                                  <AwesomeSlider
-                                    style={{
-                                      "--slider-height-percentage": "210px",
-                                      "--slider-width-percentage": "284px",
-                                      "--organic-arrow-height": "17px",
-                                      "--organic-arrow-color": "#fff",
-                                      "--control-button-opacity": 1,
-                                      "--animation-duration": "100ms",
-                                    }}
-                                    bullets={false}
-                                    mobileTouch={true}
-                                  >
-                                    {data?.images?.map((imageName, index) => (
-                                      <div
-                                        style={{ width: "100%" }}
-                                        key={index}
-                                        data-src={`http://157.66.191.24:3089/uploads/${imageName}`}
-                                      />
-                                    ))}
-                                  </AwesomeSlider>
+                            <div className="content">
+                              <div
+                                style={{ cursor: "pointer" }}
+                                onClick={() => {
+                                  localStorage.setItem("ListingId", data?._id);
+                                  navigate(`/hotelsDetail/${data?._id}`);
+                                }}
+                              >
+                                <h3 className="link-style-1">
+                                  <Link to={`/hotelsDetail/${data?._id}`}>
+                                    <span className="text-capitalize">
+                                      {data?.name}
+                                    </span>
+                                  </Link>
+                                </h3>
+                                <div
+                                  className="text-address"
+                                  style={{ marginBottom: "5px" }}
+                                >
+                                  <p className="p-12">
+                                    {data?.address}, {data?.city}, {data?.state}
+                                  </p>
+                                </div>
+                                <div className="fs-16 fw-6 text-color-3">
+                                  <Link>₹ {data?.pricePerNight}</Link>
+                                </div>
+
+                                <div className="fs-16 fw-6 text-color-3">
+                                  <div className="rating">
+                                    <span className="rating-stars">
+                                      {[...Array(5)].map((_, i) => (
+                                        <i
+                                          key={i}
+                                          className={`fas fa-star ${
+                                            i < Math.floor(data.rating)
+                                              ? "filled"
+                                              : i < data.rating
+                                              ? "half"
+                                              : ""
+                                          }`}
+                                        />
+                                      ))}
+                                    </span>
+                                    <span className="rating-value">
+                                      {data.rating}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="services">
+                                  <ul className="service-list">
+                                    {data?.amenities
+                                      ?.slice(0, 4)
+                                      .map((amenity, idx) => (
+                                        <li key={idx}>
+                                          <i className="fas fa-check"></i>{" "}
+                                          {amenity}
+                                        </li>
+                                      ))}
+                                    {data?.amenities?.length > 4 && (
+                                      <li style={{ color: "red" }}>
+                                        {" "}
+                                        +{data?.amenities?.length - 4} more
+                                      </li>
+                                    )}
+                                  </ul>
                                 </div>
                               </div>
 
-                              <div className="content">
+                              <div
+                                style={{ cursor: "pointer" }}
+                                onClick={() => {
+                                  localStorage.setItem(
+                                    "UserdetailsID",
+                                    data?.owner
+                                  );
+                                  navigate("/ProfileDetails");
+                                }}
+                                className="days-box flex justify-space align-center"
+                              >
                                 <div
-                                  style={{ cursor: "pointer" }}
-                                  onClick={() => {
-                                    secureLocalStorage.setItem(
-                                      "ListingId",
-                                      data?._id
-                                    );
-                                    Navigate("/PropertyDetail");
-                                  }}
+                                  className="img-author hv-tool"
+                                  data-tooltip={data?.name}
                                 >
-                                  <h3 className="link-style-1">
-                                    <Link to="/PropertyDetail">
-                                      <Link className="text-capitalize">
-                                        {data?.building_name}
-                                      </Link>
-                                    </Link>
-                                  </h3>
-                                  <Link>
-                                    <div
-                                      className="text-address"
-                                      style={{ marginBottom: "5px" }}
-                                    >
-                                      <p className="p-12">
-                                        {data?.locality} {data?.city_name}
-                                      </p>
-                                    </div>
-                                  </Link>
-
-                                  <div className="fs-16 fw-6 text-color-3">
-                                    <Link>
-                                      ₹
-                                      {data?.price
-                                        ? `${(data?.price / 100000)?.toFixed(
-                                            2
-                                          )}`
-                                        : `${(
-                                            data?.rent_amount / 100000
-                                          )?.toFixed(2)}`}
-                                    </Link>
-                                  </div>
-
-                                  <div className="fs-16 fw-6 text-color-3">
-                                    <Link>
-                                      {/* Custom Rating Section */}
-                                      <div className="rating">
-                                        <span className="rating-stars">
-                                          {/* Display stars for 4.9 */}
-                                          {[...Array(5)].map((_, i) => (
-                                            <i
-                                              key={i}
-                                              className={`fas fa-star ${
-                                                i < 4
-                                                  ? "filled"
-                                                  : i < 4.9
-                                                  ? "half"
-                                                  : ""
-                                              }`}
-                                            />
-                                          ))}
-                                        </span>
-                                        <span className="rating-value">
-                                          4.9
-                                        </span>
-                                      </div>
-                                    </Link>
-                                  </div>
-
-                                  {/* Services Section */}
-                                  <div className="services">
-                                    <ul className="service-list">
-                                      <li>
-                                        <i className="fas fa-wifi"></i> Free
-                                        Wifi
-                                      </li>
-                                      <li>
-                                        <i className="fas fa-tv"></i> AV TV
-                                      </li>
-                                      <li>
-                                        <i className="fas fa-sun"></i> Geyser
-                                      </li>
-                                      <li>
-                                        <i className="fas fa-plug"></i> Power
-                                        Backup
-                                      </li>
-                                      
-                                    </ul>
-                                  </div>
-
-                                  <div
-                                    className="icon-box flex"
+                                  <img
                                     style={{
-                                      paddingBottom: "8px",
-                                      marginBottom: "8px",
+                                      height: "40px",
+                                      width: "40px",
+                                      borderRadius: "50px",
                                     }}
-                                  >
-                                    {/* Any additional icons can go here */}
-                                  </div>
+                                    src={
+                                      data?.user_image
+                                        ? `http://157.66.191.24:3089/uploads/${data?.user_image}`
+                                        : "assets/images/author/author-2.jpg"
+                                    }
+                                    alt="Owner"
+                                  />
                                 </div>
-
-                                <div
-                                  style={{ cursor: "pointer" }}
-                                  onClick={() => {
-                                    secureLocalStorage.setItem(
-                                      "UserdetailsID",
-                                      data?.userId
-                                    );
-                                    Navigate("/ProfileDetails");
-                                  }}
-                                  className="days-box flex justify-space align-center"
-                                >
-                                  <div
-                                    className="img-author hv-tool"
-                                    data-tooltip={data?.name}
-                                  >
-                                    {data?.user_image ? (
-                                      <img
-                                        style={{
-                                          height: "40px",
-                                          width: "40px",
-                                          borderRadius: "50px",
-                                        }}
-                                        src={
-                                          `http://157.66.191.24:3089/uploads/` +
-                                          data?.user_image
-                                        }
-                                        alt="images"
-                                      />
-                                    ) : (
-                                      <img
-                                        src="assets/images/author/author-2.jpg"
-                                        alt="images"
-                                      />
-                                    )}
-                                  </div>
-
-                                  <div className="days">
-                                    {data?.updatedAt?.slice(0, 10)}
-                                  </div>
+                                <div className="days">
+                                  {data?.updatedAt?.slice(0, 10)}
                                 </div>
                               </div>
                             </div>
-                          );
-                        })}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ) : (
                     <div className="content-inner tab-content">
-                      {" "}
                       <div style={{ textAlign: "center" }}>
                         <h2>
                           <img
                             width={150}
                             src="https://themesflat.co/html/dreamhomehtml/assets/images/icon/footer-icon-2.png"
-                            alt="No Property Found"
+                            alt="No hotels Found"
                           />
                         </h2>
-                        <h3 className="mt-3">No Property Found</h3>
+                        <h3 className="mt-3">No hotels Found</h3>
                       </div>
                     </div>
                   )}
@@ -578,7 +425,7 @@ const Home = () => {
       <Projecthomepage />
       <PopulerDestination />
 
-      <Toplocalty />
+      {/* <Toplocalty /> */}
       <BannerStrip1 />
       {/* <Topdeveloperhomepage /> */}
 

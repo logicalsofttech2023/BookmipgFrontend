@@ -1,10 +1,8 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { Link, useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import swal from "sweetalert";
-import ShareProperty from "./ShareProperty";
 import {
   FacebookShareButton,
   TwitterShareButton,
@@ -18,39 +16,75 @@ import {
   WhatsappIcon,
 } from "react-share";
 import { FaRegCheckCircle } from "react-icons/fa";
-import {
-  FaTemperatureHigh,
-  FaTv,
-  FaShower,
-  FaWifi,
-  FaBatteryFull,
-  FaCreditCard,
-} from "react-icons/fa"; // Importing icons for each amenity
+import { DateRangePicker } from "rsuite";
 
 const PropertyDetail = () => {
   const [ratings, setratings] = useState();
-  const [Listingdata, setListingdata] = useState();
+  const [listingData, setlistingData] = useState();
   const [messgae, setmessgae] = useState();
   const [Reviews, setReviews] = useState();
-  const [count, setcount] = useState();
+  const [count, setCount] = useState();
   const [favdata, setfavdata] = useState();
   const navigate = useNavigate();
-  let listingID = secureLocalStorage.getItem("ListingId");
-  const loginid = secureLocalStorage.getItem("loginuserid");
+  let listingID = localStorage.getItem("ListingId");
+  const loginId = localStorage.getItem("token");
+  let { hotelId } = useParams();
+  const [amenities, setAmenities] = useState([]);
+  const [coupons, setCoupons] = useState([]);
+  const [couponCode, setCouponCode] = useState("");
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isCouponApplied, setIsCouponApplied] = useState(false);
+  const [selectedDates, setSelectedDates] = useState([null, null]);
+  const [selectedGuests, setSelectedGuests] = useState({
+    adults: 1,
+    children: 0,
+  });
+  const [selectedRooms, setSelectedRooms] = useState(1);
+
+  const handleGuestChange = (type, value) => {
+    setSelectedGuests((prev) => ({
+      ...prev,
+      [type]: value,
+    }));
+  };
+
+  const handleRoomChange = (value) => {
+    setSelectedRooms(value);
+  };
+
   useEffect(() => {
-    GetProperty();
-    window.scrollTo(0, 0);
-  }, [0]);
+    fetchHotel();
+    getReview();
+    fetchCoupons();
+  }, [hotelId]);
 
-  const GetProperty = () => {
-    const data = {
-      propertyId: listingID,
-    };
+  const fetchHotel = async () => {
+    if (!hotelId) return;
+    try {
+      const res = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}api/user/getHotelById`,
+        {
+          params: { hotelId: hotelId },
+        }
+      );
+      console.log("Hotel Data:", res);
+      setlistingData(res.data.hotel);
+    } catch (error) {
+      console.error("Error fetching hotel:", error.response?.data || error);
+    }
+  };
 
+  const getReview = () => {
     axios
-      .post("http://157.66.191.24:3089/website/get_Property_details", data)
+      .get(`${process.env.REACT_APP_BASE_URL}api/user/getReviewsByHotelId`, {
+        params: { hotelId: hotelId },
+      })
       .then((res) => {
-        setListingdata(res?.data?.data[0]);
+        if (res.status === 200) {
+          setReviews(res.data.reviews);
+          setCount(res?.data?.reviews.length);
+        }
       })
       .catch((error) => {});
   };
@@ -73,7 +107,7 @@ const PropertyDetail = () => {
 
   const ReviewDetails = (e) => {
     e.preventDefault();
-    if (!loginid) {
+    if (!loginId) {
       swal({
         title: "Please Login First!",
         icon: "error",
@@ -93,7 +127,7 @@ const PropertyDetail = () => {
 
     if (images.length > 0) {
       formData = new FormData();
-      formData.append("userId", loginid);
+      formData.append("userId", loginId);
       formData.append("propertyId", listingID);
       formData.append("message", messgae);
       formData.append("review", ratings);
@@ -103,7 +137,7 @@ const PropertyDetail = () => {
       });
     } else {
       formData = {
-        userId: loginid,
+        userId: loginId,
         propertyId: listingID,
         message: messgae,
         review: ratings,
@@ -113,7 +147,7 @@ const PropertyDetail = () => {
     axios
       .post("http://157.66.191.24:3089/website/add_review", formData)
       .then((res) => {
-        GetReview();
+        getReview();
         swal(res.data.msg, {
           icon: "success",
         });
@@ -125,24 +159,8 @@ const PropertyDetail = () => {
       });
   };
 
-  useEffect(() => {
-    GetReview();
-  }, [0]);
-  const GetReview = () => {
-    const data = {
-      propertyId: listingID,
-    };
-    axios
-      .post("http://157.66.191.24:3089/website/get_review", data)
-      .then((res) => {
-        setReviews(res.data.data);
-        setcount(res?.data?.data?.length);
-      })
-      .catch((error) => {});
-  };
-
   const addFavorite = (item) => {
-    if (!loginid) {
+    if (!loginId) {
       swal({
         title: "Please Login First!",
         icon: "error",
@@ -154,7 +172,7 @@ const PropertyDetail = () => {
       return;
     }
     const data = {
-      userId: loginid,
+      userId: loginId,
       propertyId: listingID,
       lead_status: "1",
       favourite_status: item,
@@ -163,46 +181,11 @@ const PropertyDetail = () => {
     axios
       .post(`http://157.66.191.24:3089/website/add_lead_property`, data)
       .then((res) => {
-        GetProperty();
+        fetchHotel();
         Getuserfavorite();
         toast.success("Favorite status updated");
       })
       .catch(() => {});
-  };
-
-  const addleads = (item) => {
-    if (!loginid) {
-      swal({
-        title: "Please Login First!",
-        icon: "error",
-      }).then(() => {
-        setTimeout(() => {
-          navigate("/login");
-        }, 2000);
-      });
-      return;
-    }
-    const data = {
-      userId: loginid,
-      propertyId: listingID,
-      lead_status: "1",
-      favourite_status: item,
-    };
-
-    axios
-      .post(`http://157.66.191.24:3089/website/add_lead_property`, data)
-      .then((res) => {
-        swal({
-          title: "Your Details Share With Our Expert",
-          icon: "success",
-        });
-      })
-      .catch((error) => {
-        swal({
-          title: error.response.data.msg,
-          icon: "error",
-        });
-      });
   };
 
   useEffect(() => {
@@ -210,7 +193,7 @@ const PropertyDetail = () => {
   }, [0]);
   const Getuserfavorite = () => {
     const data = {
-      userId: loginid,
+      userId: loginId,
       propertyId: listingID,
     };
     axios
@@ -221,69 +204,150 @@ const PropertyDetail = () => {
       .catch((error) => {});
   };
 
-  const [fullname, setFullName] = useState();
-  const [email, setEmail] = useState();
-  const [phonenumber, setPhoneNumber] = useState();
-  const [text, setText] = useState();
-  const contactseller = (e) => {
-    e.preventDefault();
-    const data = {
-      propertyId: listingID,
-      name: fullname,
-      email: email,
-      mobile_no: phonenumber,
-      message: text,
-    };
-
-    axios
-      .post("http://157.66.191.24:3089/website/add_seller_contact_us", data)
-      .then((res) => {
-        swal({
-          title: `${res.data.msg}`,
-          icon: "success",
-        });
-      })
-      .catch((error) => {
-        swal({
-          title: `${error.response.data.msg}`,
-          icon: "error",
-        });
-      });
-  };
-
-  const maskMobileNumber = (number) =>
-    number ? `XXXXXX${number.replace(/\D/g, "").slice(-4)}` : number;
-
   const shareUrl = window.location.href;
-  const title = Listingdata?.building_name;
+  const title = listingData?.name;
 
   const [showAll, setShowAll] = useState(false);
+  useEffect(() => {
+    if (listingData && listingData.amenities) {
+      setAmenities(listingData.amenities);
+    }
+  }, [listingData]);
+  const hasMoreThanFive = amenities?.length > 6;
 
-  const amenities = [
-    { icon: <FaTemperatureHigh />, label: "AC" },
-    { icon: <FaWifi />, label: "Free Wifi" },
-    { icon: <FaTv />, label: "TV" },
-    { icon: <FaBatteryFull />, label: "Power backup" },
-    { icon: <FaShower />, label: "Geyser" },
-    { icon: <FaCreditCard />, label: "Card payment" },
-    { icon: <FaRegCheckCircle />, label: "CCTV cameras" },
-    { icon: <FaRegCheckCircle />, label: "Ticket tour assistance" },
-    { icon: <FaRegCheckCircle />, label: "Reception" },
-    { icon: <FaRegCheckCircle />, label: "Designated smoking area" },
-    { icon: <FaRegCheckCircle />, label: "24/7 check-in" },
-    { icon: <FaRegCheckCircle />, label: "Free parking" },
-    { icon: <FaRegCheckCircle />, label: "Shuttle service" },
-    { icon: <FaRegCheckCircle />, label: "Express check-in/check-out" },
-    { icon: <FaRegCheckCircle />, label: "Private Check-in/Check-out" },
-    { icon: <FaRegCheckCircle />, label: "Luggage assistance" },
-    { icon: <FaRegCheckCircle />, label: "Taxi service" },
-    { icon: <FaRegCheckCircle />, label: "Daily housekeeping" },
-    { icon: <FaRegCheckCircle />, label: "Fire extinguisher" },
-    { icon: <FaRegCheckCircle />, label: "First-aid kit" },
-  ];
+  const amenitiesToShow = showAll ? amenities : amenities.slice(0, 6);
 
-  const visibleAmenities = amenities.slice(0, 6); // Show the first 6 amenities by default
-  const hiddenAmenities = amenities.slice(6);
+  const fetchCoupons = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}api/user/getUserCoupons`,
+        {
+          headers: {
+            Authorization: `Bearer ${loginId}`,
+          },
+        }
+      );
+
+      setCoupons(response?.data?.coupons || []);
+    } catch (error) {
+      console.error("Error fetching coupons:", error);
+    }
+  };
+
+  const originalPricePerNight = listingData?.originalPricePerNight || 6389;
+  const discountedPricePerNight = listingData?.pricePerNight || 0;
+  const discountPercentage = discountedPricePerNight
+    ? Math.round((1 - discountedPricePerNight / originalPricePerNight) * 100)
+    : 0;
+
+  // Calculate total nights
+  const checkInDate = selectedDates[0];
+  const checkOutDate = selectedDates[1];
+  let totalNights = 1;
+  if (checkInDate && checkOutDate && checkOutDate > checkInDate) {
+    totalNights = Math.round(
+      (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
+    );
+  }
+
+  const subtotal = discountedPricePerNight * totalNights;
+  const taxesAmount = listingData?.taxesAmount || 680;
+  const totalBeforeDiscount = subtotal + taxesAmount;
+  const originalTotalPrice = originalPricePerNight * totalNights;
+  const totalSavings = originalTotalPrice - subtotal;
+
+  // Apply Coupon
+  const applyCoupon = async () => {
+    try {
+      setErrorMessage("");
+      setDiscountAmount(0);
+
+      if (!couponCode) {
+        setErrorMessage("Please enter a coupon code");
+        return;
+      }
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_BASE_URL}api/user/applyUserCoupon`,
+        {
+          code: couponCode,
+          originalPrice: subtotal,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${loginId}`,
+          },
+        }
+      );
+
+      if (!response?.data?.status) {
+        setErrorMessage(
+          response?.data?.message || "Coupon could not be applied"
+        );
+        return;
+      }
+
+      setDiscountAmount(response?.data?.discountAmount);
+      setIsCouponApplied(true);
+    } catch (error) {
+      setErrorMessage(
+        error.response?.data?.message ||
+          "Something went wrong, please try again"
+      );
+      console.error("Apply Coupon Error:", error);
+    }
+  };
+
+  const finalPrice = totalBeforeDiscount - discountAmount;
+
+  const handleBooking = (id) => {
+    if (!selectedDates || !selectedDates[0] || !selectedDates[1]) {
+      toast.error("Please select check-in and check-out dates.");
+      
+      return;
+    }
+
+    if (!originalPricePerNight || !discountedPricePerNight || !taxesAmount) {
+      toast.error("Price details are missing. Please try again.");
+      return;
+    }
+
+    if (!finalPrice || finalPrice <= 0) {
+      toast.error("Invalid total price. Please check your selections.");
+      return;
+    }
+
+    if (!totalSavings && totalSavings !== 0) {
+      toast.error("Savings calculation error. Please refresh and try again.");
+      return;
+    }
+
+    if (!selectedGuests || selectedGuests.adults < 1) {
+      toast.error("Please select at least 1 adult guest.");
+      return;
+    }
+
+    if (!selectedRooms || selectedRooms < 1) {
+      toast.error("Please select at least 1 room.");
+      return;
+    }
+
+    navigate(`/bookingSummary/${id}`, {
+      state: {
+        selectedDates,
+        totalSavings,
+        finalPrice,
+        discountAmount,
+        originalPricePerNight,
+        discountedPricePerNight,
+        taxesAmount,
+        selectedGuests,
+        selectedRooms,
+        couponCode,
+        couponId: coupons?._id,
+      },
+    });
+  };
 
   return (
     <>
@@ -297,7 +361,7 @@ const PropertyDetail = () => {
                   <Link className="home fw-6 text-color-3" to="/">
                     Home
                   </Link>
-                  <span>Room Details</span>
+                  <span>Hotel Details</span>
                 </div>
               </div>
             </div>
@@ -309,38 +373,51 @@ const PropertyDetail = () => {
           <div className="row">
             <div className="col-lg-12">
               <div className="wrap-house wg-dream flex">
-              <div className="box-1">
-  <div className="title-heading fs-30 fw-7 lh-45 text-capitalize">
-    {Listingdata?.building_name}
-  </div>
+                <div className="box-1">
+                  <div className="title-heading fs-30 fw-7 lh-45 text-capitalize">
+                    {listingData?.name}
+                  </div>
 
-  <div className="inner flex">
-    <p>
-      Plot Number 77, 1st street, CLV Nagar, Kanathur, ECR, Chennai
-    </p>
-  </div>
+                  <div className="inner flex">
+                    <p>{listingData?.address}</p>
+                  </div>
 
-  {/* Rating Section */}
-  <div className="rating-section" style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-    {/* Star Icons */}
-    <div style={{ display: 'flex', marginRight: '10px' }}>
-      {[...Array(5)].map((_, index) => (
-        <span
-          key={index}
-          style={{
-            color: index < 5 ? '#f5a623' : '#ccc', // Fill stars up to 4.9
-            fontSize: '18px',
-            marginRight: '2px',
-          }}
-        >
-          ★
-        </span>
-      ))}
-    </div>
-    {/* Rating Value */}
-    <span style={{ fontSize: '16px', fontWeight: '600', color: '#0c0a15' }}>4.9</span>
-  </div>
-</div>
+                  {/* Rating Section */}
+                  <div
+                    className="rating-section"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginTop: "10px",
+                    }}
+                  >
+                    {/* Star Icons */}
+                    <div style={{ display: "flex", marginRight: "10px" }}>
+                      {[...Array(5)].map((_, index) => (
+                        <span
+                          key={index}
+                          style={{
+                            color: index < 5 ? "#f5a623" : "#ccc", // Fill stars up to 4.9
+                            fontSize: "18px",
+                            marginRight: "2px",
+                          }}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    {/* Rating Value */}
+                    <span
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        color: "#0c0a15",
+                      }}
+                    >
+                      {listingData?.rating}
+                    </span>
+                  </div>
+                </div>
 
                 <div className="box-2 text-end">
                   <div className="icon-boxs flex">
@@ -402,23 +479,28 @@ const PropertyDetail = () => {
                     {/* <ShareProperty propertyId={listingID} /> */}
                   </div>
                   <div className="moneys fs-30 fw-7 lh-45 text-color-3">
-  <span style={{ fontSize: '30px', fontWeight: '700', color: '#0c0a15' }}>
-    ₹3739
-  </span>
-  
-  <span
-    style={{
-      fontSize: '20px',
-      fontWeight: '600',
-      color: '#6d787d',
-      textDecoration: 'line-through',
-      marginLeft: '10px',
-    }}
-  >
-    ₹6389
-  </span>
-</div>
+                    <span
+                      style={{
+                        fontSize: "30px",
+                        fontWeight: "700",
+                        color: "#0c0a15",
+                      }}
+                    >
+                      ₹{listingData?.pricePerNight}
+                    </span>
 
+                    <span
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: "600",
+                        color: "#6d787d",
+                        textDecoration: "line-through",
+                        marginLeft: "10px",
+                      }}
+                    >
+                      ₹6389
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -429,13 +511,13 @@ const PropertyDetail = () => {
             <div className="col-lg-12">
               <div className="wrap-img flex">
                 <div className="box-img box-1">
-                  {Listingdata?.images[0] ? (
+                  {listingData?.images[0] ? (
                     <img
                       style={{ height: "540px", borderRadius: "5px" }}
                       className="img-1"
                       src={
-                        `http://157.66.191.24:3089/uploads/` +
-                        Listingdata?.images[0]
+                        `${process.env.REACT_APP_BASE_URL}` +
+                        listingData?.images[0]
                       }
                       alt="images"
                     />
@@ -448,7 +530,7 @@ const PropertyDetail = () => {
                   )}
                 </div>
                 <div className="box-img box-2">
-                  {Listingdata?.video ? (
+                  {listingData?.video ? (
                     <div class="text-box text-center">
                       <video
                         style={{
@@ -458,19 +540,19 @@ const PropertyDetail = () => {
                           width: "100%",
                         }}
                         src={`http://157.66.191.24:3089/uploads/${
-                          Listingdata?.video || "default-video.mp4"
+                          listingData?.video || "default-video.mp4"
                         }`}
                         controls
                         muted
                       />
                     </div>
-                  ) : Listingdata?.images[1] ? (
+                  ) : listingData?.images[1] ? (
                     <img
                       style={{ height: "262px", borderRadius: "5px" }}
                       className="img-2"
                       src={
-                        `http://157.66.191.24:3089/uploads/` +
-                        Listingdata?.images[1]
+                        `${process.env.REACT_APP_BASE_URL}` +
+                        listingData?.images[1]
                       }
                       alt="images"
                     />
@@ -483,13 +565,13 @@ const PropertyDetail = () => {
                   )}
 
                   <div className="img-box flex">
-                    {Listingdata?.images[2] ? (
+                    {listingData?.images[2] ? (
                       <img
                         style={{ height: "262px", borderRadius: "5px" }}
                         className="img-3"
                         src={
-                          `http://157.66.191.24:3089/uploads/` +
-                          Listingdata?.images[2]
+                          `${process.env.REACT_APP_BASE_URL}` +
+                          listingData?.images[2]
                         }
                         alt="images"
                       />
@@ -501,12 +583,12 @@ const PropertyDetail = () => {
                       />
                     )}
                     <div className="image">
-                      {Listingdata?.images[3] ? (
+                      {listingData?.images[3] ? (
                         <img
                           className="img-4"
                           src={
-                            `http://157.66.191.24:3089/uploads/` +
-                            Listingdata?.images[3]
+                            `${process.env.REACT_APP_BASE_URL}` +
+                            listingData?.images[3]
                           }
                           alt="images"
                         />
@@ -540,7 +622,7 @@ const PropertyDetail = () => {
                         </svg>
                         <h3 className="cursor-pointer">Show all</h3>
                         <h3 className="cursor-pointer">
-                          {Listingdata?.images?.length} Photos
+                          {listingData?.images?.length} Photos
                         </h3>
                       </div>
                     </div>
@@ -557,7 +639,7 @@ const PropertyDetail = () => {
                 <div className="wrap-text wrap-style">
                   <h3 className="titles">About this room</h3>
                   <p className="text-1 text-color-2">
-                    {Listingdata?.property_description}
+                    {listingData?.description}
                   </p>
                   {/* <p className="text-2 text-color-2">
                
@@ -568,7 +650,7 @@ const PropertyDetail = () => {
                   <h3 className="titles">Amenities</h3>
                   <div className="icon-wrap flex row">
                     {/* Visible Amenities */}
-                    {visibleAmenities.map((amenity, index) => (
+                    {amenitiesToShow.map((amenity, index) => (
                       <div
                         className="col-md-4"
                         style={{ marginBottom: 10 }}
@@ -576,57 +658,36 @@ const PropertyDetail = () => {
                       >
                         <div>
                           <div className="inner flex">
-                            <div className="icon">{amenity.icon}</div>
+                            <div className="icon">
+                              <FaRegCheckCircle />
+                            </div>
                             <div className="content Amenities_content">
-                              <div className="font-2 fw-7">{amenity.label}</div>
+                              <div className="font-2 fw-7">{amenity}</div>
                             </div>
                           </div>
                         </div>
                       </div>
                     ))}
-
-                    {/* Show More / Less Button */}
-                    {showAll && (
-                      // Hidden Amenities (show when "Show More" is clicked)
-                      <>
-                        {hiddenAmenities.map((amenity, index) => (
-                          <div
-                            className="col-md-4"
-                            style={{ marginBottom: 10 }}
-                            key={index + visibleAmenities.length}
-                          >
-                            <div>
-                              <div className="inner flex">
-                                <div className="icon">{amenity.icon}</div>
-                                <div className="content Amenities_content">
-                                  <div className="font-2 fw-7">
-                                    {amenity.label}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </>
-                    )}
                   </div>
 
                   {/* Show More / Show Less Button */}
-                  <div
-                    style={{
-                      color: "#ee2e24",
-                      fontSize: "16px",
-                      fontWeight: "600",
-                      lineHeight: "1.5",
-                      cursor: "pointer",
-                      display: "inline-block",
-                      marginBottom: "20px",
-                    }}
-                    className="text-center"
-                    onClick={() => setShowAll(!showAll)}
-                  >
-                    <span>{showAll ? "Show Less" : "Show More"}</span>
-                  </div>
+                  {hasMoreThanFive && (
+                    <div
+                      style={{
+                        color: "#ee2e24",
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        lineHeight: "1.5",
+                        cursor: "pointer",
+                        display: "inline-block",
+                        marginBottom: "20px",
+                      }}
+                      className="text-center"
+                      onClick={() => setShowAll(!showAll)}
+                    >
+                      <span>{showAll ? "Show Less" : "Show More"}</span>
+                    </div>
+                  )}
                 </div>
                 <div
                   style={{
@@ -674,7 +735,7 @@ const PropertyDetail = () => {
                         </svg>
                       </div>
                       <h3>Review</h3>
-                      <p className="fw-6">(27 review)</p>
+                      <p className="fw-6">({count} review)</p>
                     </div>
                     <div className="sort-inner flex">
                       <span className="text-color-4">Sort by </span>
@@ -682,1375 +743,62 @@ const PropertyDetail = () => {
                     </div>
                   </div>
                   <div className="comment-list">
-                    <ol className>
-                      <li className="flex">
-                        <div className="images flex-none">
-                          <img
-                            src="assets/images/author/author-review-1.jpg"
-                            alt="images"
-                          />
-                        </div>
-                        <div className="content">
-                          <div className="title-item flex justify-space align-center">
-                            <h4>Leslie Alexander</h4>
-                            <p className="fs-12 lh-18">April 5, 2023</p>
-                          </div>
-                          <div className="star flex">
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                          </div>
-                          <p className="texts text-color-2">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                            elit. Pellentesque at velit eu libero laoreet mattis
-                            ac a ipsum. Vivamus efficitur volutpat ante, sed
-                            consequat ligula ultricies in.
-                          </p>
-                          <div className="img-box">
+                    <ol>
+                      {Reviews?.map((review) => (
+                        <li key={review._id} className="flex">
+                          <div
+                            className="images flex-none"
+                            style={{ height: "70px", width: "70px" }}
+                          >
                             <img
-                              src="assets/images/img-box/review-3.jpg"
-                              alt="images"
-                            />
-                            <img
-                              src="assets/images/img-box/review-2.jpg"
-                              alt="images"
-                            />
-                            <img
-                              src="assets/images/img-box/review-3.jpg"
-                              alt="images"
+                              src={`${process.env.REACT_APP_BASE_URL}${review.user.profileImage}`}
+                              alt="author"
+                              style={{
+                                height: "100%",
+                                width: "100%",
+                                borderRadius: "50%",
+                              }}
                             />
                           </div>
-                          <div className="icon-box flex">
-                            <a className="icon flex align-center">
-                              <svg
-                                width={16}
-                                height={15}
-                                viewBox="0 0 16 15"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M11.375 5.75H9.68749M3.66949 13.0625C3.66124 13.025 3.64849 12.9875 3.63049 12.9515C3.18724 12.0515 2.93749 11.039 2.93749 9.96875C2.93587 8.89238 3.19282 7.83136 3.68674 6.875M3.66949 13.0625C3.72649 13.3362 3.53224 13.625 3.23824 13.625H2.55724C1.89049 13.625 1.27249 13.2365 1.07824 12.599C0.82399 11.7665 0.68749 10.8837 0.68749 9.96875C0.68749 8.804 0.90874 7.69175 1.31074 6.67025C1.54024 6.08975 2.12524 5.75 2.74999 5.75H3.53974C3.89374 5.75 4.09849 6.167 3.91474 6.47C3.83434 6.60234 3.7578 6.73742 3.68674 6.875M3.66949 13.0625H4.63999C5.0027 13.0623 5.36307 13.1205 5.70724 13.235L8.04274 14.015C8.38691 14.1295 8.74728 14.1877 9.10999 14.1875H12.122C12.5855 14.1875 13.0347 14.0022 13.3257 13.6407C14.6143 12.0434 15.3156 10.0523 15.3125 8C15.3125 7.6745 15.2952 7.35275 15.2615 7.03625C15.1797 6.2705 14.4905 5.75 13.721 5.75H11.3765C10.913 5.75 10.6332 5.207 10.8327 4.7885C11.191 4.03444 11.3763 3.20985 11.375 2.375C11.375 1.92745 11.1972 1.49823 10.8807 1.18176C10.5643 0.86529 10.135 0.6875 9.68749 0.6875C9.53831 0.6875 9.39523 0.746763 9.28974 0.852252C9.18425 0.957741 9.12499 1.10082 9.12499 1.25V1.72475C9.12499 2.1545 9.04249 2.57975 8.88349 2.97875C8.65549 3.54875 8.18599 3.97625 7.64374 4.265C6.81128 4.7092 6.0807 5.32228 5.49874 6.065C5.12524 6.5405 4.57924 6.875 3.97474 6.875H3.68674"
-                                  stroke="#8E8E93"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
+                          <div className="content">
+                            <div className="title-item flex justify-space align-center">
+                              <h4>{review.user.name}</h4>
+                              <p className="fs-12 lh-18">
+                                {new Date(
+                                  review.createdAt
+                                ).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="star flex">
+                              {/* Add star icons based on review.rating */}
+                              {Array.from({
+                                length: Math.round(review.rating),
+                              }).map((_, index) => (
+                                <svg
+                                  key={index}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 512 512"
+                                >
+                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 255.898,401.21 416.035,502.431 369.263,318.842" />
+                                </svg>
+                              ))}
+                            </div>
+                            <p className="texts text-color-2">
+                              {review.review}
+                            </p>
+                            <div className="img-box">
+                              {review.images?.map((image, index) => (
+                                <img
+                                  key={index}
+                                  src={`${process.env.REACT_APP_BASE_URL}${image}`}
+                                  style={{ height: "100px" }}
+                                  alt="review"
                                 />
-                              </svg>
-                              <p className="fs-12 font-2">Useful</p>
-                            </a>
-                            <a className="icon flex align-center">
-                              <svg
-                                width={16}
-                                height={15}
-                                viewBox="0 0 16 15"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M4.62501 9.25H6.31251M12.3305 1.9375C12.3388 1.975 12.3515 2.0125 12.3695 2.0485C12.8128 2.9485 13.0625 3.961 13.0625 5.03125C13.0641 6.10762 12.8072 7.16864 12.3133 8.125M12.3305 1.9375C12.2735 1.66375 12.4678 1.375 12.7618 1.375H13.4428C14.1095 1.375 14.7275 1.7635 14.9218 2.401C15.176 3.2335 15.3125 4.11625 15.3125 5.03125C15.3125 6.196 15.0913 7.30825 14.6893 8.32975C14.4598 8.91025 13.8748 9.25 13.25 9.25H12.4603C12.1063 9.25 11.9015 8.833 12.0853 8.53C12.1657 8.39766 12.2422 8.26258 12.3133 8.125M12.3305 1.9375H11.36C10.9973 1.93772 10.6369 1.87948 10.2928 1.765L7.95726 0.985001C7.61309 0.870526 7.25272 0.812279 6.89001 0.812501H3.87801C3.41451 0.812501 2.96526 0.997751 2.67426 1.35925C1.38572 2.95658 0.684409 4.94774 0.68751 7C0.68751 7.3255 0.70476 7.64725 0.73851 7.96375C0.82026 8.7295 1.50951 9.25 2.27901 9.25H4.62351C5.08701 9.25 5.36676 9.793 5.16726 10.2115C4.80897 10.9656 4.6237 11.7902 4.62501 12.625C4.62501 13.0726 4.8028 13.5018 5.11927 13.8182C5.43574 14.1347 5.86496 14.3125 6.31251 14.3125C6.46169 14.3125 6.60477 14.2532 6.71026 14.1477C6.81575 14.0423 6.87501 13.8992 6.87501 13.75V13.2753C6.87501 12.8455 6.95751 12.4203 7.11651 12.0213C7.34451 11.4513 7.81401 11.0238 8.35626 10.735C9.18872 10.2908 9.9193 9.67772 10.5013 8.935C10.8748 8.4595 11.4208 8.125 12.0253 8.125H12.3133"
-                                  stroke="#8E8E93"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                              <p className="fs-12 font-2">Not helpful</p>
-                            </a>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      </li>
-                      <li className="flex">
-                        <div className="images flex-none">
-                          <img
-                            src="assets/images/author/author-review-1.jpg"
-                            alt="images"
-                          />
-                        </div>
-                        <div className="content">
-                          <div className="title-item flex justify-space align-center">
-                            <h4>Jenny Wilson</h4>
-                            <p className="fs-12 lh-18">April 5, 2023</p>
-                          </div>
-                          <div className="star flex">
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                          </div>
-                          <p className="texts text-color-2">
-                            Proin sed tellus porttitor, varius mauris vitae,
-                            tincidunt augue. Sed consectetur magna elit, sit
-                            amet faucibus tortor sodales vitae. Maecenas quis
-                            arcu est. Nam sit amet neque vestibulum, fringilla
-                            elit sit amet, volutpat nunc.
-                          </p>
-                          <div className="icon-box flex">
-                            <a className="icon flex align-center">
-                              <svg
-                                width={16}
-                                height={15}
-                                viewBox="0 0 16 15"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M11.375 5.75H9.68749M3.66949 13.0625C3.66124 13.025 3.64849 12.9875 3.63049 12.9515C3.18724 12.0515 2.93749 11.039 2.93749 9.96875C2.93587 8.89238 3.19282 7.83136 3.68674 6.875M3.66949 13.0625C3.72649 13.3362 3.53224 13.625 3.23824 13.625H2.55724C1.89049 13.625 1.27249 13.2365 1.07824 12.599C0.82399 11.7665 0.68749 10.8837 0.68749 9.96875C0.68749 8.804 0.90874 7.69175 1.31074 6.67025C1.54024 6.08975 2.12524 5.75 2.74999 5.75H3.53974C3.89374 5.75 4.09849 6.167 3.91474 6.47C3.83434 6.60234 3.7578 6.73742 3.68674 6.875M3.66949 13.0625H4.63999C5.0027 13.0623 5.36307 13.1205 5.70724 13.235L8.04274 14.015C8.38691 14.1295 8.74728 14.1877 9.10999 14.1875H12.122C12.5855 14.1875 13.0347 14.0022 13.3257 13.6407C14.6143 12.0434 15.3156 10.0523 15.3125 8C15.3125 7.6745 15.2952 7.35275 15.2615 7.03625C15.1797 6.2705 14.4905 5.75 13.721 5.75H11.3765C10.913 5.75 10.6332 5.207 10.8327 4.7885C11.191 4.03444 11.3763 3.20985 11.375 2.375C11.375 1.92745 11.1972 1.49823 10.8807 1.18176C10.5643 0.86529 10.135 0.6875 9.68749 0.6875C9.53831 0.6875 9.39523 0.746763 9.28974 0.852252C9.18425 0.957741 9.12499 1.10082 9.12499 1.25V1.72475C9.12499 2.1545 9.04249 2.57975 8.88349 2.97875C8.65549 3.54875 8.18599 3.97625 7.64374 4.265C6.81128 4.7092 6.0807 5.32228 5.49874 6.065C5.12524 6.5405 4.57924 6.875 3.97474 6.875H3.68674"
-                                  stroke="#8E8E93"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                              <p className="fs-12 font-2">Useful</p>
-                            </a>
-                            <a className="icon flex align-center">
-                              <svg
-                                width={16}
-                                height={15}
-                                viewBox="0 0 16 15"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M4.62501 9.25H6.31251M12.3305 1.9375C12.3388 1.975 12.3515 2.0125 12.3695 2.0485C12.8128 2.9485 13.0625 3.961 13.0625 5.03125C13.0641 6.10762 12.8072 7.16864 12.3133 8.125M12.3305 1.9375C12.2735 1.66375 12.4678 1.375 12.7618 1.375H13.4428C14.1095 1.375 14.7275 1.7635 14.9218 2.401C15.176 3.2335 15.3125 4.11625 15.3125 5.03125C15.3125 6.196 15.0913 7.30825 14.6893 8.32975C14.4598 8.91025 13.8748 9.25 13.25 9.25H12.4603C12.1063 9.25 11.9015 8.833 12.0853 8.53C12.1657 8.39766 12.2422 8.26258 12.3133 8.125M12.3305 1.9375H11.36C10.9973 1.93772 10.6369 1.87948 10.2928 1.765L7.95726 0.985001C7.61309 0.870526 7.25272 0.812279 6.89001 0.812501H3.87801C3.41451 0.812501 2.96526 0.997751 2.67426 1.35925C1.38572 2.95658 0.684409 4.94774 0.68751 7C0.68751 7.3255 0.70476 7.64725 0.73851 7.96375C0.82026 8.7295 1.50951 9.25 2.27901 9.25H4.62351C5.08701 9.25 5.36676 9.793 5.16726 10.2115C4.80897 10.9656 4.6237 11.7902 4.62501 12.625C4.62501 13.0726 4.8028 13.5018 5.11927 13.8182C5.43574 14.1347 5.86496 14.3125 6.31251 14.3125C6.46169 14.3125 6.60477 14.2532 6.71026 14.1477C6.81575 14.0423 6.87501 13.8992 6.87501 13.75V13.2753C6.87501 12.8455 6.95751 12.4203 7.11651 12.0213C7.34451 11.4513 7.81401 11.0238 8.35626 10.735C9.18872 10.2908 9.9193 9.67772 10.5013 8.935C10.8748 8.4595 11.4208 8.125 12.0253 8.125H12.3133"
-                                  stroke="#8E8E93"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                              <p className="fs-12 font-2">Not helpful</p>
-                            </a>
-                          </div>
-                        </div>
-                      </li>
-                      <li className="flex">
-                        <div className="images flex-none">
-                          <img
-                            src="assets/images/author/author-review-1.jpg"
-                            alt="images"
-                          />
-                        </div>
-                        <div className="content">
-                          <div className="title-item flex justify-space align-center">
-                            <h4>Bessie Cooper</h4>
-                            <p className="fs-12 lh-18">April 5, 2023</p>
-                          </div>
-                          <div className="star flex">
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                          </div>
-                          <p className="texts text-color-2">
-                            Donec iaculis id nibh vitae consequat. Curabitur a
-                            molestie odio, id varius odio. Suspendisse
-                            sollicitudin egestas sodales. Nam semper lorem
-                            euismod molestie tempus.
-                          </p>
-                          <div className="icon-box flex">
-                            <a className="icon flex align-center">
-                              <svg
-                                width={16}
-                                height={15}
-                                viewBox="0 0 16 15"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M11.375 5.75H9.68749M3.66949 13.0625C3.66124 13.025 3.64849 12.9875 3.63049 12.9515C3.18724 12.0515 2.93749 11.039 2.93749 9.96875C2.93587 8.89238 3.19282 7.83136 3.68674 6.875M3.66949 13.0625C3.72649 13.3362 3.53224 13.625 3.23824 13.625H2.55724C1.89049 13.625 1.27249 13.2365 1.07824 12.599C0.82399 11.7665 0.68749 10.8837 0.68749 9.96875C0.68749 8.804 0.90874 7.69175 1.31074 6.67025C1.54024 6.08975 2.12524 5.75 2.74999 5.75H3.53974C3.89374 5.75 4.09849 6.167 3.91474 6.47C3.83434 6.60234 3.7578 6.73742 3.68674 6.875M3.66949 13.0625H4.63999C5.0027 13.0623 5.36307 13.1205 5.70724 13.235L8.04274 14.015C8.38691 14.1295 8.74728 14.1877 9.10999 14.1875H12.122C12.5855 14.1875 13.0347 14.0022 13.3257 13.6407C14.6143 12.0434 15.3156 10.0523 15.3125 8C15.3125 7.6745 15.2952 7.35275 15.2615 7.03625C15.1797 6.2705 14.4905 5.75 13.721 5.75H11.3765C10.913 5.75 10.6332 5.207 10.8327 4.7885C11.191 4.03444 11.3763 3.20985 11.375 2.375C11.375 1.92745 11.1972 1.49823 10.8807 1.18176C10.5643 0.86529 10.135 0.6875 9.68749 0.6875C9.53831 0.6875 9.39523 0.746763 9.28974 0.852252C9.18425 0.957741 9.12499 1.10082 9.12499 1.25V1.72475C9.12499 2.1545 9.04249 2.57975 8.88349 2.97875C8.65549 3.54875 8.18599 3.97625 7.64374 4.265C6.81128 4.7092 6.0807 5.32228 5.49874 6.065C5.12524 6.5405 4.57924 6.875 3.97474 6.875H3.68674"
-                                  stroke="#8E8E93"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                              <p className="fs-12 font-2">Useful</p>
-                            </a>
-                            <a className="icon flex align-center">
-                              <svg
-                                width={16}
-                                height={15}
-                                viewBox="0 0 16 15"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M4.62501 9.25H6.31251M12.3305 1.9375C12.3388 1.975 12.3515 2.0125 12.3695 2.0485C12.8128 2.9485 13.0625 3.961 13.0625 5.03125C13.0641 6.10762 12.8072 7.16864 12.3133 8.125M12.3305 1.9375C12.2735 1.66375 12.4678 1.375 12.7618 1.375H13.4428C14.1095 1.375 14.7275 1.7635 14.9218 2.401C15.176 3.2335 15.3125 4.11625 15.3125 5.03125C15.3125 6.196 15.0913 7.30825 14.6893 8.32975C14.4598 8.91025 13.8748 9.25 13.25 9.25H12.4603C12.1063 9.25 11.9015 8.833 12.0853 8.53C12.1657 8.39766 12.2422 8.26258 12.3133 8.125M12.3305 1.9375H11.36C10.9973 1.93772 10.6369 1.87948 10.2928 1.765L7.95726 0.985001C7.61309 0.870526 7.25272 0.812279 6.89001 0.812501H3.87801C3.41451 0.812501 2.96526 0.997751 2.67426 1.35925C1.38572 2.95658 0.684409 4.94774 0.68751 7C0.68751 7.3255 0.70476 7.64725 0.73851 7.96375C0.82026 8.7295 1.50951 9.25 2.27901 9.25H4.62351C5.08701 9.25 5.36676 9.793 5.16726 10.2115C4.80897 10.9656 4.6237 11.7902 4.62501 12.625C4.62501 13.0726 4.8028 13.5018 5.11927 13.8182C5.43574 14.1347 5.86496 14.3125 6.31251 14.3125C6.46169 14.3125 6.60477 14.2532 6.71026 14.1477C6.81575 14.0423 6.87501 13.8992 6.87501 13.75V13.2753C6.87501 12.8455 6.95751 12.4203 7.11651 12.0213C7.34451 11.4513 7.81401 11.0238 8.35626 10.735C9.18872 10.2908 9.9193 9.67772 10.5013 8.935C10.8748 8.4595 11.4208 8.125 12.0253 8.125H12.3133"
-                                  stroke="#8E8E93"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                              <p className="fs-12 font-2">Not helpful</p>
-                            </a>
-                          </div>
-                        </div>
-                      </li>
-                      <li className="flex">
-                        <div className="images flex-none">
-                          <img
-                            src="assets/images/author/author-review-1.jpg"
-                            alt="images"
-                          />
-                        </div>
-                        <div className="content">
-                          <div className="title-item flex justify-space align-center">
-                            <h4>Leslie Alexander</h4>
-                            <p className="fs-12 lh-18">April 5, 2023</p>
-                          </div>
-                          <div className="star flex">
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                          </div>
-                          <p className="texts text-color-2">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                            elit. Pellentesque at velit eu libero laoreet mattis
-                            ac a ipsum. Vivamus efficitur volutpat ante, sed
-                            consequat ligula ultricies in.
-                          </p>
-                          <div className="img-box">
-                            <img
-                              src="assets/images/img-box/review-3.jpg"
-                              alt="images"
-                            />
-                            <img
-                              src="assets/images/img-box/review-2.jpg"
-                              alt="images"
-                            />
-                            <img
-                              src="assets/images/img-box/review-3.jpg"
-                              alt="images"
-                            />
-                          </div>
-                          <div className="icon-box flex">
-                            <a className="icon flex align-center">
-                              <svg
-                                width={16}
-                                height={15}
-                                viewBox="0 0 16 15"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M11.375 5.75H9.68749M3.66949 13.0625C3.66124 13.025 3.64849 12.9875 3.63049 12.9515C3.18724 12.0515 2.93749 11.039 2.93749 9.96875C2.93587 8.89238 3.19282 7.83136 3.68674 6.875M3.66949 13.0625C3.72649 13.3362 3.53224 13.625 3.23824 13.625H2.55724C1.89049 13.625 1.27249 13.2365 1.07824 12.599C0.82399 11.7665 0.68749 10.8837 0.68749 9.96875C0.68749 8.804 0.90874 7.69175 1.31074 6.67025C1.54024 6.08975 2.12524 5.75 2.74999 5.75H3.53974C3.89374 5.75 4.09849 6.167 3.91474 6.47C3.83434 6.60234 3.7578 6.73742 3.68674 6.875M3.66949 13.0625H4.63999C5.0027 13.0623 5.36307 13.1205 5.70724 13.235L8.04274 14.015C8.38691 14.1295 8.74728 14.1877 9.10999 14.1875H12.122C12.5855 14.1875 13.0347 14.0022 13.3257 13.6407C14.6143 12.0434 15.3156 10.0523 15.3125 8C15.3125 7.6745 15.2952 7.35275 15.2615 7.03625C15.1797 6.2705 14.4905 5.75 13.721 5.75H11.3765C10.913 5.75 10.6332 5.207 10.8327 4.7885C11.191 4.03444 11.3763 3.20985 11.375 2.375C11.375 1.92745 11.1972 1.49823 10.8807 1.18176C10.5643 0.86529 10.135 0.6875 9.68749 0.6875C9.53831 0.6875 9.39523 0.746763 9.28974 0.852252C9.18425 0.957741 9.12499 1.10082 9.12499 1.25V1.72475C9.12499 2.1545 9.04249 2.57975 8.88349 2.97875C8.65549 3.54875 8.18599 3.97625 7.64374 4.265C6.81128 4.7092 6.0807 5.32228 5.49874 6.065C5.12524 6.5405 4.57924 6.875 3.97474 6.875H3.68674"
-                                  stroke="#8E8E93"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                              <p className="fs-12 font-2">Useful</p>
-                            </a>
-                            <a className="icon flex align-center">
-                              <svg
-                                width={16}
-                                height={15}
-                                viewBox="0 0 16 15"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M4.62501 9.25H6.31251M12.3305 1.9375C12.3388 1.975 12.3515 2.0125 12.3695 2.0485C12.8128 2.9485 13.0625 3.961 13.0625 5.03125C13.0641 6.10762 12.8072 7.16864 12.3133 8.125M12.3305 1.9375C12.2735 1.66375 12.4678 1.375 12.7618 1.375H13.4428C14.1095 1.375 14.7275 1.7635 14.9218 2.401C15.176 3.2335 15.3125 4.11625 15.3125 5.03125C15.3125 6.196 15.0913 7.30825 14.6893 8.32975C14.4598 8.91025 13.8748 9.25 13.25 9.25H12.4603C12.1063 9.25 11.9015 8.833 12.0853 8.53C12.1657 8.39766 12.2422 8.26258 12.3133 8.125M12.3305 1.9375H11.36C10.9973 1.93772 10.6369 1.87948 10.2928 1.765L7.95726 0.985001C7.61309 0.870526 7.25272 0.812279 6.89001 0.812501H3.87801C3.41451 0.812501 2.96526 0.997751 2.67426 1.35925C1.38572 2.95658 0.684409 4.94774 0.68751 7C0.68751 7.3255 0.70476 7.64725 0.73851 7.96375C0.82026 8.7295 1.50951 9.25 2.27901 9.25H4.62351C5.08701 9.25 5.36676 9.793 5.16726 10.2115C4.80897 10.9656 4.6237 11.7902 4.62501 12.625C4.62501 13.0726 4.8028 13.5018 5.11927 13.8182C5.43574 14.1347 5.86496 14.3125 6.31251 14.3125C6.46169 14.3125 6.60477 14.2532 6.71026 14.1477C6.81575 14.0423 6.87501 13.8992 6.87501 13.75V13.2753C6.87501 12.8455 6.95751 12.4203 7.11651 12.0213C7.34451 11.4513 7.81401 11.0238 8.35626 10.735C9.18872 10.2908 9.9193 9.67772 10.5013 8.935C10.8748 8.4595 11.4208 8.125 12.0253 8.125H12.3133"
-                                  stroke="#8E8E93"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                              <p className="fs-12 font-2">Not helpful</p>
-                            </a>
-                          </div>
-                        </div>
-                      </li>
-                      <li className="flex">
-                        <div className="images flex-none">
-                          <img
-                            src="assets/images/author/author-review-1.jpg"
-                            alt="images"
-                          />
-                        </div>
-                        <div className="content">
-                          <div className="title-item flex justify-space align-center">
-                            <h4>Jenny Wilson</h4>
-                            <p className="fs-12 lh-18">April 5, 2023</p>
-                          </div>
-                          <div className="star flex">
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                          </div>
-                          <p className="texts text-color-2">
-                            Proin sed tellus porttitor, varius mauris vitae,
-                            tincidunt augue. Sed consectetur magna elit, sit
-                            amet faucibus tortor sodales vitae. Maecenas quis
-                            arcu est. Nam sit amet neque vestibulum, fringilla
-                            elit sit amet, volutpat nunc.
-                          </p>
-                          <div className="icon-box flex">
-                            <a className="icon flex align-center">
-                              <svg
-                                width={16}
-                                height={15}
-                                viewBox="0 0 16 15"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M11.375 5.75H9.68749M3.66949 13.0625C3.66124 13.025 3.64849 12.9875 3.63049 12.9515C3.18724 12.0515 2.93749 11.039 2.93749 9.96875C2.93587 8.89238 3.19282 7.83136 3.68674 6.875M3.66949 13.0625C3.72649 13.3362 3.53224 13.625 3.23824 13.625H2.55724C1.89049 13.625 1.27249 13.2365 1.07824 12.599C0.82399 11.7665 0.68749 10.8837 0.68749 9.96875C0.68749 8.804 0.90874 7.69175 1.31074 6.67025C1.54024 6.08975 2.12524 5.75 2.74999 5.75H3.53974C3.89374 5.75 4.09849 6.167 3.91474 6.47C3.83434 6.60234 3.7578 6.73742 3.68674 6.875M3.66949 13.0625H4.63999C5.0027 13.0623 5.36307 13.1205 5.70724 13.235L8.04274 14.015C8.38691 14.1295 8.74728 14.1877 9.10999 14.1875H12.122C12.5855 14.1875 13.0347 14.0022 13.3257 13.6407C14.6143 12.0434 15.3156 10.0523 15.3125 8C15.3125 7.6745 15.2952 7.35275 15.2615 7.03625C15.1797 6.2705 14.4905 5.75 13.721 5.75H11.3765C10.913 5.75 10.6332 5.207 10.8327 4.7885C11.191 4.03444 11.3763 3.20985 11.375 2.375C11.375 1.92745 11.1972 1.49823 10.8807 1.18176C10.5643 0.86529 10.135 0.6875 9.68749 0.6875C9.53831 0.6875 9.39523 0.746763 9.28974 0.852252C9.18425 0.957741 9.12499 1.10082 9.12499 1.25V1.72475C9.12499 2.1545 9.04249 2.57975 8.88349 2.97875C8.65549 3.54875 8.18599 3.97625 7.64374 4.265C6.81128 4.7092 6.0807 5.32228 5.49874 6.065C5.12524 6.5405 4.57924 6.875 3.97474 6.875H3.68674"
-                                  stroke="#8E8E93"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                              <p className="fs-12 font-2">Useful</p>
-                            </a>
-                            <a className="icon flex align-center">
-                              <svg
-                                width={16}
-                                height={15}
-                                viewBox="0 0 16 15"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M4.62501 9.25H6.31251M12.3305 1.9375C12.3388 1.975 12.3515 2.0125 12.3695 2.0485C12.8128 2.9485 13.0625 3.961 13.0625 5.03125C13.0641 6.10762 12.8072 7.16864 12.3133 8.125M12.3305 1.9375C12.2735 1.66375 12.4678 1.375 12.7618 1.375H13.4428C14.1095 1.375 14.7275 1.7635 14.9218 2.401C15.176 3.2335 15.3125 4.11625 15.3125 5.03125C15.3125 6.196 15.0913 7.30825 14.6893 8.32975C14.4598 8.91025 13.8748 9.25 13.25 9.25H12.4603C12.1063 9.25 11.9015 8.833 12.0853 8.53C12.1657 8.39766 12.2422 8.26258 12.3133 8.125M12.3305 1.9375H11.36C10.9973 1.93772 10.6369 1.87948 10.2928 1.765L7.95726 0.985001C7.61309 0.870526 7.25272 0.812279 6.89001 0.812501H3.87801C3.41451 0.812501 2.96526 0.997751 2.67426 1.35925C1.38572 2.95658 0.684409 4.94774 0.68751 7C0.68751 7.3255 0.70476 7.64725 0.73851 7.96375C0.82026 8.7295 1.50951 9.25 2.27901 9.25H4.62351C5.08701 9.25 5.36676 9.793 5.16726 10.2115C4.80897 10.9656 4.6237 11.7902 4.62501 12.625C4.62501 13.0726 4.8028 13.5018 5.11927 13.8182C5.43574 14.1347 5.86496 14.3125 6.31251 14.3125C6.46169 14.3125 6.60477 14.2532 6.71026 14.1477C6.81575 14.0423 6.87501 13.8992 6.87501 13.75V13.2753C6.87501 12.8455 6.95751 12.4203 7.11651 12.0213C7.34451 11.4513 7.81401 11.0238 8.35626 10.735C9.18872 10.2908 9.9193 9.67772 10.5013 8.935C10.8748 8.4595 11.4208 8.125 12.0253 8.125H12.3133"
-                                  stroke="#8E8E93"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                              <p className="fs-12 font-2">Not helpful</p>
-                            </a>
-                          </div>
-                        </div>
-                      </li>
-                      <li className="flex">
-                        <div className="images flex-none">
-                          <img
-                            src="assets/images/author/author-review-1.jpg"
-                            alt="images"
-                          />
-                        </div>
-                        <div className="content">
-                          <div className="title-item flex justify-space align-center">
-                            <h4>Bessie Cooper</h4>
-                            <p className="fs-12 lh-18">April 5, 2023</p>
-                          </div>
-                          <div className="star flex">
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 512 512"
-                              style={{ "enable-background": "new 0 0 512 512" }}
-                              xmlSpace="preserve"
-                            >
-                              <g>
-                                {" "}
-                                <g>
-                                  {" "}
-                                  <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />{" "}
-                                </g>
-                              </g>
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                              <g />
-                            </svg>
-                          </div>
-                          <p className="texts text-color-2">
-                            Donec iaculis id nibh vitae consequat. Curabitur a
-                            molestie odio, id varius odio. Suspendisse
-                            sollicitudin egestas sodales. Nam semper lorem
-                            euismod molestie tempus.
-                          </p>
-                          <div className="icon-box flex">
-                            <a className="icon flex align-center">
-                              <svg
-                                width={16}
-                                height={15}
-                                viewBox="0 0 16 15"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M11.375 5.75H9.68749M3.66949 13.0625C3.66124 13.025 3.64849 12.9875 3.63049 12.9515C3.18724 12.0515 2.93749 11.039 2.93749 9.96875C2.93587 8.89238 3.19282 7.83136 3.68674 6.875M3.66949 13.0625C3.72649 13.3362 3.53224 13.625 3.23824 13.625H2.55724C1.89049 13.625 1.27249 13.2365 1.07824 12.599C0.82399 11.7665 0.68749 10.8837 0.68749 9.96875C0.68749 8.804 0.90874 7.69175 1.31074 6.67025C1.54024 6.08975 2.12524 5.75 2.74999 5.75H3.53974C3.89374 5.75 4.09849 6.167 3.91474 6.47C3.83434 6.60234 3.7578 6.73742 3.68674 6.875M3.66949 13.0625H4.63999C5.0027 13.0623 5.36307 13.1205 5.70724 13.235L8.04274 14.015C8.38691 14.1295 8.74728 14.1877 9.10999 14.1875H12.122C12.5855 14.1875 13.0347 14.0022 13.3257 13.6407C14.6143 12.0434 15.3156 10.0523 15.3125 8C15.3125 7.6745 15.2952 7.35275 15.2615 7.03625C15.1797 6.2705 14.4905 5.75 13.721 5.75H11.3765C10.913 5.75 10.6332 5.207 10.8327 4.7885C11.191 4.03444 11.3763 3.20985 11.375 2.375C11.375 1.92745 11.1972 1.49823 10.8807 1.18176C10.5643 0.86529 10.135 0.6875 9.68749 0.6875C9.53831 0.6875 9.39523 0.746763 9.28974 0.852252C9.18425 0.957741 9.12499 1.10082 9.12499 1.25V1.72475C9.12499 2.1545 9.04249 2.57975 8.88349 2.97875C8.65549 3.54875 8.18599 3.97625 7.64374 4.265C6.81128 4.7092 6.0807 5.32228 5.49874 6.065C5.12524 6.5405 4.57924 6.875 3.97474 6.875H3.68674"
-                                  stroke="#8E8E93"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                              <p className="fs-12 font-2">Useful</p>
-                            </a>
-                            <a className="icon flex align-center">
-                              <svg
-                                width={16}
-                                height={15}
-                                viewBox="0 0 16 15"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M4.62501 9.25H6.31251M12.3305 1.9375C12.3388 1.975 12.3515 2.0125 12.3695 2.0485C12.8128 2.9485 13.0625 3.961 13.0625 5.03125C13.0641 6.10762 12.8072 7.16864 12.3133 8.125M12.3305 1.9375C12.2735 1.66375 12.4678 1.375 12.7618 1.375H13.4428C14.1095 1.375 14.7275 1.7635 14.9218 2.401C15.176 3.2335 15.3125 4.11625 15.3125 5.03125C15.3125 6.196 15.0913 7.30825 14.6893 8.32975C14.4598 8.91025 13.8748 9.25 13.25 9.25H12.4603C12.1063 9.25 11.9015 8.833 12.0853 8.53C12.1657 8.39766 12.2422 8.26258 12.3133 8.125M12.3305 1.9375H11.36C10.9973 1.93772 10.6369 1.87948 10.2928 1.765L7.95726 0.985001C7.61309 0.870526 7.25272 0.812279 6.89001 0.812501H3.87801C3.41451 0.812501 2.96526 0.997751 2.67426 1.35925C1.38572 2.95658 0.684409 4.94774 0.68751 7C0.68751 7.3255 0.70476 7.64725 0.73851 7.96375C0.82026 8.7295 1.50951 9.25 2.27901 9.25H4.62351C5.08701 9.25 5.36676 9.793 5.16726 10.2115C4.80897 10.9656 4.6237 11.7902 4.62501 12.625C4.62501 13.0726 4.8028 13.5018 5.11927 13.8182C5.43574 14.1347 5.86496 14.3125 6.31251 14.3125C6.46169 14.3125 6.60477 14.2532 6.71026 14.1477C6.81575 14.0423 6.87501 13.8992 6.87501 13.75V13.2753C6.87501 12.8455 6.95751 12.4203 7.11651 12.0213C7.34451 11.4513 7.81401 11.0238 8.35626 10.735C9.18872 10.2908 9.9193 9.67772 10.5013 8.935C10.8748 8.4595 11.4208 8.125 12.0253 8.125H12.3133"
-                                  stroke="#8E8E93"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                              <p className="fs-12 font-2">Not helpful</p>
-                            </a>
-                          </div>
-                        </div>
-                      </li>
+                        </li>
+                      ))}
                     </ol>
                   </div>
                 </div>
@@ -2060,37 +808,29 @@ const PropertyDetail = () => {
                   <div class="box flex">
                     <ul>
                       <li class="flex">
-                        <span class="one fw-6">Address</span>
-                        <span class="two">150 sqft</span>
-                      </li>
-                      <li class="flex">
                         <span class="one fw-6">City</span>
-                        <span class="two">#1234</span>
+                        <span class="two">{listingData?.city}</span>
                       </li>
                       <li class="flex">
-                        <span class="one fw-6">State/county</span>
-                        <span class="two">$7,500</span>
+                        <span class="one fw-6">State</span>
+                        <span class="two">{listingData?.state}</span>
                       </li>
                     </ul>
                     <ul>
                       <li class="flex">
                         <span class="one fw-6">Postal code</span>
-                        <span class="two">7.328</span>
-                      </li>
-                      <li class="flex">
-                        <span class="one fw-6">Area</span>
-                        <span class="two">7.328</span>
+                        <span class="two">{listingData?.zipCode}</span>
                       </li>
                       <li class="flex">
                         <span class="one fw-6">Country</span>
-                        <span class="two">2022</span>
+                        <span class="two">{listingData?.country}</span>
                       </li>
                     </ul>
                   </div>
                   <iframe
-                    class="map-content"
-                    src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d7302.453092836291!2d90.47477022812872!3d23.77494577893369!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1svi!2s!4v1627293157601!5m2!1svi!2s"
-                    allowfullscreen=""
+                    className="map-content"
+                    src={`https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d7302.453092836291!2d${listingData?.longitude}!3d${listingData?.latitude}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0`}
+                    allowFullScreen=""
                     loading="lazy"
                   ></iframe>
                 </div>
@@ -2099,98 +839,6 @@ const PropertyDetail = () => {
             <div className="col-lg-4">
               <aside className="side-bar side-bar-1">
                 <div className="inner-side-bar">
-                  {/* <div className="widget-tour widget-rent">
-                    <h3 className="title-tour">Contact Us for info</h3>
-                    <div className="flat-tabs style2">
-                      {loginid ? (
-                        <div className="img-box flex align-center">
-                          <div className="flat-bt-top sc-btn-top">
-                            <a
-                              onClick={(event) => {
-                                event.preventDefault();
-                                addleads();
-                                window.open(
-                                  `https://wa.me/${Listingdata?.mobile_no}`,
-                                  "_blank"
-                                );
-                              }}
-                              href={`https://wa.me/${Listingdata?.mobile_no}`} // WhatsApp link
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="sc-buttonborder btn-icon mycolor"
-                            >
-                              <img
-                                width={20}
-                                height={20}
-                                src="assets/images/icon/whatsappicon.svg"
-                                alt="WhatsApp Icon"
-                              />
-                              <span> Whatsapp</span>
-                            </a>
-                          </div>
-
-                          <div
-                            className="flat-bt-top sc-btn-top"
-                            style={{ marginLeft: "5%" }}
-                          >
-                            <a
-                              onClick={(event) => {
-                                event.preventDefault();
-                                addleads();
-                                window.location.href = `tel:${Listingdata?.mobile_no}`; // Open call link manually
-                              }}
-                              href={`tel:${Listingdata?.mobile_no}`} // Phone number link
-                              className="sc-button btn-icon"
-                            >
-                              <img
-                                width={20}
-                                height={20}
-                                src="assets/images/icon/calls.svg"
-                                alt="Call Icon"
-                              />
-                              <span>Contact Us</span>
-                            </a>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="img-box flex align-center">
-                          <div className="flat-bt-top sc-btn-top">
-                            <a
-                              onClick={() => addleads()}
-                              className="sc-buttonborder btn-icon mycolor"
-                            >
-                              <img
-                                width={20}
-                                height={20}
-                                src="assets/images/icon/whatsappicon.svg"
-                              />
-                              <span> Whatsapp</span>
-                            </a>
-                          </div>
-                          <div
-                            className="flat-bt-top sc-btn-top"
-                            style={{ marginLeft: "5%" }}
-                          >
-                            <a
-                              onClick={() => addleads()}
-                              className="sc-button btn-icon "
-                              href="#"
-                            >
-                              <img
-                                width={20}
-                                height={20}
-                                src="assets/images/icon/calls.svg"
-                              />
-                              <span>Contact Us</span>
-                            </a>
-                          </div>
-                        </div>
-                      )}
-                      <div className="content-tab">
-                        <div className="content-inner tab-content"></div>
-                      </div>
-                    </div>
-                  </div> */}
                   <div className="widget-rent style">
                     <h3 className="widget-title title-contact">Booking Now</h3>
                     <div>
@@ -2209,7 +857,7 @@ const PropertyDetail = () => {
                             fontWeight: 600,
                           }}
                         >
-                          ₹3793
+                          ₹{discountedPricePerNight}
                         </h4>
                         <span
                           style={{
@@ -2219,7 +867,7 @@ const PropertyDetail = () => {
                             textDecoration: "line-through",
                           }}
                         >
-                          ₹6389
+                          ₹{originalPricePerNight}
                         </span>
                         <span
                           style={{
@@ -2228,106 +876,281 @@ const PropertyDetail = () => {
                             lineHeight: "25px",
                           }}
                         >
-                          40% off
+                          {discountPercentage}% off
                         </span>
                       </div>
                       <div style={{ fontSize: "10px", color: "#6d787d" }}>
-                        + taxes & fees: ₹680
+                        + taxes & fees: ₹{taxesAmount}
                       </div>
-                    </div>
 
-                    {/* Coupon Code Section */}
-                    <div style={{ marginTop: "20px" }}>
-                      <h4 style={{ fontSize: "16px", fontWeight: "600" }}>
-                        Apply Coupon
-                      </h4>
-                      <input
-                        type="text"
-                        placeholder="Enter Coupon Code"
+                      {/* Date Picker for Check-in & Check-out */}
+                      <div style={{ marginTop: "15px" }}>
+                        <h4
+                          style={{
+                            fontSize: "16px",
+                            fontWeight: "600",
+                            marginBottom: "8px",
+                          }}
+                        >
+                          Select Dates
+                        </h4>
+                        <DateRangePicker
+                          style={{ height: "100%", width: "100%" }}
+                          showOneCalendar
+                          // value={selectedDates}
+                          onChange={(range) =>
+                            setSelectedDates(range || [null, null])
+                          }
+                          placeholder="Check-in - Check-out"
+                        />
+                      </div>
+
+                      {/* guest select Section */}
+
+                      <div className="price-group style-group mt-2">
+                        <h4
+                          style={{
+                            fontSize: "16px",
+                            fontWeight: "600",
+                            marginBottom: "8px",
+                          }}
+                        >
+                          Guests
+                        </h4>
+                        <div className="inner block">
+                          {/* Adults Selection */}
+                          <div style={{ width: "calc(100% - 20px)", marginLeft: "20px", marginTop: "20px" }} className="group-select">
+                            <select
+                              className="nice-select"
+                              value={selectedGuests.adults}
+                              onChange={(e) =>
+                                handleGuestChange(
+                                  "adults",
+                                  Number(e.target.value)
+                                )
+                              }
+                            >
+                              {[...Array(11).keys()].map((num) => (
+                                <option key={num} value={num}>
+                                  {num} Adult{num !== 1 ? "s" : ""}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Children Selection */}
+                          <div style={{ width: "calc(100% - 20px)", marginLeft: "20px", marginTop: "20px" }} className="group-select">
+                            <select
+                              className="nice-select"
+                              value={selectedGuests.children}
+                              onChange={(e) =>
+                                handleGuestChange(
+                                  "children",
+                                  Number(e.target.value)
+                                )
+                              }
+                            >
+                              {[...Array(11).keys()].map((num) => (
+                                <option key={num} value={num}>
+                                  {num} Child{num !== 1 ? "ren" : ""}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="form-group-4 form-style2">
+                        <h4
+                          style={{
+                            fontSize: "16px",
+                            fontWeight: "600",
+                            marginBottom: "8px",
+                          }}
+                        >
+                          Room
+                        </h4>
+                        <div className="group-select">
+                          <select
+                            className="nice-select"
+                            value={selectedRooms}
+                            onChange={(e) =>
+                              handleRoomChange(Number(e.target.value))
+                            }
+                          >
+                            {[...Array(11).keys()].slice(1).map((num) => (
+                              <option key={num} value={num}>
+                                {num} Room{num !== 1 ? "s" : ""}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Coupon Code Section */}
+                      <div style={{ marginTop: "20px" }}>
+                        <h4
+                          style={{
+                            fontSize: "16px",
+                            fontWeight: "600",
+                            lineHeight: "34px",
+                          }}
+                        >
+                          Apply Coupon
+                        </h4>
+
+                        {/* Show available coupons */}
+                        {coupons.length > 0 && (
+                          <div style={{ marginBottom: "8px" }}>
+                            <p
+                              style={{
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                color: "#333",
+                              }}
+                            >
+                              Available Coupons:
+                            </p>
+                            <ul
+                              style={{
+                                listStyle: "none",
+                                padding: 0,
+                                margin: 0,
+                              }}
+                            >
+                              {coupons.map((coupon) => (
+                                <li
+                                  key={coupon._id}
+                                  style={{
+                                    display: "inline-block",
+                                    backgroundColor: "#f5f5f5",
+                                    padding: "5px 10px",
+                                    marginRight: "5px",
+                                    marginTop: "10px",
+                                    borderRadius: "4px",
+                                    fontSize: "12px",
+                                    cursor: "pointer",
+                                    color: "black",
+                                    fontWeight: "600",
+                                  }}
+                                  onClick={() => setCouponCode(coupon.code)}
+                                >
+                                  {coupon.code}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        <input
+                          type="text"
+                          placeholder="Enter Coupon Code"
+                          value={
+                            isCouponApplied
+                              ? `${couponCode} (Applied)`
+                              : couponCode
+                          }
+                          onChange={(e) => {
+                            setCouponCode(e.target.value);
+                            setIsCouponApplied(false);
+                          }}
+                          style={{
+                            width: "100%",
+                            padding: "10px",
+                            marginTop: "8px",
+                            fontSize: "14px",
+                            border: "1px solid #ccc",
+                            borderRadius: "4px",
+                            color: isCouponApplied ? "green" : "black",
+                            fontWeight: isCouponApplied ? "bold" : "normal",
+                          }}
+                        />
+                        <button
+                          onClick={applyCoupon}
+                          style={{
+                            marginTop: "10px",
+                            backgroundColor: isCouponApplied ? "gray" : "red",
+                            color: "#fff",
+                            border: "none",
+                            padding: "10px 20px",
+                            fontWeight: "600",
+                            borderRadius: "4px",
+                            cursor: isCouponApplied ? "not-allowed" : "pointer",
+                          }}
+                          disabled={isCouponApplied}
+                        >
+                          {isCouponApplied ? "Applied" : "Apply Coupon"}
+                        </button>
+
+                        {errorMessage && (
+                          <p style={{ color: "red", marginTop: "5px" }}>
+                            {errorMessage}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Savings & Total Price Section */}
+                      <div
                         style={{
-                          width: "100%",
-                          padding: "10px",
-                          marginTop: "8px",
-                          fontSize: "14px",
-                          border: "1px solid #ccc",
-                          borderRadius: "4px",
-                          color: "black"
-                        }}
-                      />
-                      <button
-                        style={{
-                          marginTop: "10px",
-                          backgroundColor: "red",
-                          color: "#fff",
-                          border: "none",
-                          padding: "10px 20px",
-                          fontWeight: "600",
-                          borderRadius: "4px",
-                          cursor: "pointer",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginTop: "20px",
                         }}
                       >
-                        Apply Coupon
-                      </button>
-                    </div>
-
-                    {/* Your Savings & Total Price Section */}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        marginTop: "20px",
-                      }}
-                    >
-                      <div>
-                        <p
-                          style={{
-                            fontSize: "14px",
-                            color: "#0c0a15",
-                            fontWeight: "600",
-                            marginBottom: "5px",
-                          }}
-                        >
-                          Your Savings
-                        </p>
-                        <h4
-                          style={{
-                            fontSize: "16px",
-                            color: "#f5a623",
-                            fontWeight: "600",
-                          }}
-                        >
-                          ₹1595
-                        </h4>
-                      </div>
-                      <div>
-                        <p
-                          style={{
-                            fontSize: "14px",
-                            color: "#0c0a15",
-                            fontWeight: "600",
-                            marginBottom: "5px",
-                          }}
-                        >
-                          Total Price
-                        </p>
-                        <h4
-                          style={{
-                            fontSize: "16px",
-                            color: "#0c0a15",
-                            fontWeight: "600",
-                          }}
-                        >
-                          ₹978
-                        </h4>
-                        <p
-                          style={{
-                            fontSize: "12px",
-                            color: "#6d787d",
-                            marginTop: "5px",
-                          }}
-                        >
-                          Including taxes & fees
-                        </p>
+                        <div>
+                          <p
+                            style={{
+                              fontSize: "14px",
+                              color: "#0c0a15",
+                              fontWeight: "600",
+                              marginBottom: "5px",
+                            }}
+                          >
+                            Your Savings
+                          </p>
+                          <h4
+                            style={{
+                              fontSize: "16px",
+                              color: "#f5a623",
+                              fontWeight: "600",
+                            }}
+                          >
+                            ₹
+                            {isNaN(totalSavings + discountAmount)
+                              ? 0
+                              : totalSavings + discountAmount}
+                          </h4>
+                        </div>
+                        <div>
+                          <p
+                            style={{
+                              fontSize: "14px",
+                              color: "#0c0a15",
+                              fontWeight: "600",
+                              marginBottom: "5px",
+                            }}
+                          >
+                            Total Price
+                          </p>
+                          <h4
+                            style={{
+                              fontSize: "16px",
+                              color: "#0c0a15",
+                              fontWeight: "600",
+                            }}
+                          >
+                            ₹{isNaN(finalPrice) ? 0 : finalPrice}
+                          </h4>
+                          <p
+                            style={{
+                              fontSize: "12px",
+                              color: "#6d787d",
+                              marginTop: "5px",
+                            }}
+                          >
+                            Including taxes & fees
+                          </p>
+                        </div>
                       </div>
                     </div>
 
@@ -2345,6 +1168,7 @@ const PropertyDetail = () => {
                           borderRadius: "4px",
                           cursor: "pointer",
                         }}
+                        onClick={() => handleBooking(listingData?._id)}
                       >
                         Book Now
                       </button>
@@ -2548,14 +1372,14 @@ const PropertyDetail = () => {
                         <div className="container6">
                           <div className="row">
                             {}
-                            {Listingdata?.images?.map((data) => {
+                            {listingData?.images?.map((data) => {
                               return (
                                 <div className="col-md-4 mb-3">
                                   <div className="img-box flex">
                                     <img
                                       className="img-3"
                                       src={
-                                        `http://157.66.191.24:3089/uploads/` +
+                                        `${process.env.REACT_APP_BASE_URL}` +
                                         data
                                       }
                                       alt="images"
@@ -2605,7 +1429,7 @@ const PropertyDetail = () => {
                     <video
                       style={{ objectFit: "cover", width: "100%" }}
                       src={`http://157.66.191.24:3089/uploads/${
-                        Listingdata?.video || "default-video.mp4"
+                        listingData?.video || "default-video.mp4"
                       }`}
                       height="300"
                       autoPlay

@@ -1,10 +1,10 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import secureLocalStorage from 'react-secure-storage';
+import localStorage from 'react-secure-storage';
 
 const Footer = () => {
-  let role = secureLocalStorage.getItem("roleType");
+  let role = localStorage.getItem("roleType");
   const [Cointactusdata,setCointactusdata] = useState();
 
   useEffect(()=>{

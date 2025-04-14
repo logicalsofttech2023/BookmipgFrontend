@@ -3,12 +3,12 @@ import AgentSidebar from '../NavFooter/AgentSidebar'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import swal from 'sweetalert'
-import secureLocalStorage from 'react-secure-storage'
+import localStorage from 'react-secure-storage'
 
 const DeveloperSubscriptions = () => {
   const [PlainData,setPlainData] = useState();
   const Navigate = useNavigate();
-  let loginid = secureLocalStorage.getItem("loginuserid");
+  let loginid = localStorage.getItem("loginuserid");
 
   useEffect(()=>{
     window.scrollTo(0, 0);

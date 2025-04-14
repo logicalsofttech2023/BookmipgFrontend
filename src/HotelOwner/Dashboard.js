@@ -1,313 +1,111 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FaUserTie } from "react-icons/fa";
+import Header from "./Header";
+import Sidebar from "./Sidebar";
+import Footer from "./Footer";
+import  logo  from "./assets/images/logo.svg";
+import  logo1  from "./assets/images/logo-mini.svg";
+import face1 from "./assets/images/faces/face1.jpg"
+import circle from "./assets/images/dashboard/circle.svg";
 import "./Dashboard.css";
-import  Header  from "./Header";
-import  Sidebar  from "./Sidebar";
-import  Footer  from "./Footer";
-
 
 const Dashboard = () => {
   return (
-    <div className="app-container app-theme-white body-tabs-shadow fixed-sidebar fixed-header">
+    <div className="container-scroller">  
       <Header/>
-      <div className="app-main">
-      <Sidebar/>
-        <div className="app-main__outer">
-          <div className="app-main__inner">
-            <div className="app-page-title">
-              <div className="page-title-wrapper">
-                <div className="page-title-heading">
-                  <div className="page-title-icon">
-                  <FaUserTie  />                  
-                  </div>
-                  <div>
-                    Hotel Owner
-
-                  </div>
-                </div>
-                {/* <div className="page-title-actions">
-                  <button
-                    type="button"
-                    data-toggle="tooltip"
-                    title="Example Tooltip"
-                    data-placement="bottom"
-                    className="btn-shadow mr-3 btn btn-dark"
-                  >
-                    <i className="fa fa-star" />
-                  </button>
-                  
-                </div>{" "} */}
-              </div>
-            </div>{" "}
-            <div className="row">
-              <div className="col-md-6 col-xl-4">
-                <div className="card mb-3 widget-content bg-midnight-bloom">
-                  <div className="widget-content-wrapper text-white">
-                    <div className="widget-content-left">
-                      <div className="widget-heading">Total Booking</div>
-                      <div className="widget-subheading">
-                        Last year expenses
-                      </div>
-                    </div>
-                    <div className="widget-content-right">
-                      <div className="widget-numbers text-white">
-                        <span>1896</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-6 col-xl-4">
-                <div className="card mb-3 widget-content bg-arielle-smile">
-                  <div className="widget-content-wrapper text-white">
-                    <div className="widget-content-left">
-                      <div className="widget-heading">Total Costomer</div>
-                      <div className="widget-subheading">
-                        Total Clients Profit
-                      </div>
-                    </div>
-                    <div className="widget-content-right">
-                      <div className="widget-numbers text-white">
-                        <span>$ 568</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-6 col-xl-4">
-                <div className="card mb-3 widget-content bg-grow-early">
-                  <div className="widget-content-wrapper text-white">
-                    <div className="widget-content-left">
-                      <div className="widget-heading">Total Room</div>
-                      <div className="widget-subheading">People Interested</div>
-                    </div>
-                    <div className="widget-content-right">
-                      <div className="widget-numbers text-white">
-                        <span>46%</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="d-xl-none d-lg-block col-md-6 col-xl-4">
-                <div className="card mb-3 widget-content bg-premium-dark">
-                  <div className="widget-content-wrapper text-white">
-                    <div className="widget-content-left">
-                      <div className="widget-heading">Total Revenue</div>
-                      <div className="widget-subheading">Revenue streams</div>
-                    </div>
-                    <div className="widget-content-right">
-                      <div className="widget-numbers text-warning">
-                        <span>$14M</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      <div style={{ minHeight: "100vh" }} className="container-fluid page-body-wrapper">
+        <Sidebar/>
+        <div className="main-panel">
+          <div className="content-wrapper" style={{ marginTop: "50px" }}>
+            <div className="page-header">
+              <h3 className="page-title">
+                <span className="page-title-icon bg-gradient-primary text-white me-2">
+                  <i className="mdi mdi-home" />
+                </span>{" "}
+                Hello Test
+              </h3>
+              <nav aria-label="breadcrumb">
+                <ul className="breadcrumb">
+                  <li className="breadcrumb-item active" aria-current="page">
+                    <span />
+                    Overview{" "}
+                    <i className="mdi mdi-alert-circle-outline icon-sm text-primary align-middle" />
+                  </li>
+                </ul>
+              </nav>
             </div>
             <div className="row">
-              <div className="col-md-12">
-                <div className="main-card mb-3 card">
-                  <div className="card-header">
-                    Active Users
-                    <div className="btn-actions-pane-right">
-                      <div role="group" className="btn-group-sm btn-group">
-                        <button className="active btn btn-focus">
-                          Last Week
-                        </button>
-                        <button className="btn btn-focus">All Month</button>
-                      </div>
-                    </div>
+              <div className="col-md-4 stretch-card grid-margin">
+                <div className="card bg-gradient-danger card-img-holder text-white">
+                  <div className="card-body">
+                    <img
+                      src={circle}
+                      className="card-img-absolute"
+                      alt="circle-image"
+                    />
+                    <h4 className="font-weight-normal mb-3">
+                      Total Booking{" "}
+                    </h4>
+                    <h2 className="mb-5">15,0000</h2>
                   </div>
-                  <div className="table-responsive">
-                    <table className="align-middle mb-0 table table-borderless table-striped table-hover">
-                      <thead>
-                        <tr>
-                          <th className="text-center">#</th>
-                          <th>Name</th>
-                          <th className="text-center">City</th>
-                          <th className="text-center">Status</th>
-                          <th className="text-center">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td className="text-center text-muted">#345</td>
-                          <td>
-                            <div className="widget-content p-0">
-                              <div className="widget-content-wrapper">
-                                <div className="widget-content-left mr-3">
-                                  <div className="widget-content-left">
-                                    <img
-                                      width={40}
-                                      className="rounded-circle"
-                                      src="assets/images/avatars/4.jpg"
-                                      alt
-                                    />
-                                  </div>
-                                </div>
-                                <div className="widget-content-left flex2">
-                                  <div className="widget-heading">John Doe</div>
-                                  <div className="widget-subheading opacity-7">
-                                    Web Developer
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="text-center">Madrid</td>
-                          <td className="text-center">
-                            <div className="badge badge-warning">Pending</div>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              type="button"
-                              id="PopoverCustomT-1"
-                              className="btn btn-primary btn-sm"
-                            >
-                              Details
-                            </button>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="text-center text-muted">#347</td>
-                          <td>
-                            <div className="widget-content p-0">
-                              <div className="widget-content-wrapper">
-                                <div className="widget-content-left mr-3">
-                                  <div className="widget-content-left">
-                                    <img
-                                      width={40}
-                                      className="rounded-circle"
-                                      src="assets/images/avatars/3.jpg"
-                                      alt
-                                    />
-                                  </div>
-                                </div>
-                                <div className="widget-content-left flex2">
-                                  <div className="widget-heading">
-                                    Ruben Tillman
-                                  </div>
-                                  <div className="widget-subheading opacity-7">
-                                    Etiam sit amet orci eget
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="text-center">Berlin</td>
-                          <td className="text-center">
-                            <div className="badge badge-success">Completed</div>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              type="button"
-                              id="PopoverCustomT-2"
-                              className="btn btn-primary btn-sm"
-                            >
-                              Details
-                            </button>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="text-center text-muted">#321</td>
-                          <td>
-                            <div className="widget-content p-0">
-                              <div className="widget-content-wrapper">
-                                <div className="widget-content-left mr-3">
-                                  <div className="widget-content-left">
-                                    <img
-                                      width={40}
-                                      className="rounded-circle"
-                                      src="assets/images/avatars/2.jpg"
-                                      alt
-                                    />
-                                  </div>
-                                </div>
-                                <div className="widget-content-left flex2">
-                                  <div className="widget-heading">
-                                    Elliot Huber
-                                  </div>
-                                  <div className="widget-subheading opacity-7">
-                                    Lorem ipsum dolor sic
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="text-center">London</td>
-                          <td className="text-center">
-                            <div className="badge badge-danger">
-                              In Progress
-                            </div>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              type="button"
-                              id="PopoverCustomT-3"
-                              className="btn btn-primary btn-sm"
-                            >
-                              Details
-                            </button>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="text-center text-muted">#55</td>
-                          <td>
-                            <div className="widget-content p-0">
-                              <div className="widget-content-wrapper">
-                                <div className="widget-content-left mr-3">
-                                  <div className="widget-content-left">
-                                    <img
-                                      width={40}
-                                      className="rounded-circle"
-                                      src="assets/images/avatars/1.jpg"
-                                      alt
-                                    />
-                                  </div>
-                                </div>
-                                <div className="widget-content-left flex2">
-                                  <div className="widget-heading">
-                                    Vinnie Wagstaff
-                                  </div>
-                                  <div className="widget-subheading opacity-7">
-                                    UI Designer
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="text-center">Amsterdam</td>
-                          <td className="text-center">
-                            <div className="badge badge-info">On Hold</div>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              type="button"
-                              id="PopoverCustomT-4"
-                              className="btn btn-primary btn-sm"
-                            >
-                              Details
-                            </button>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                </div>
+              </div>
+              <div className="col-md-4 stretch-card grid-margin">
+                <div className="card bg-gradient-info card-img-holder text-white">
+                  <div className="card-body">
+                    <img
+                      src={circle}
+                      className="card-img-absolute"
+                      alt="circle-image"
+                    />
+                    <h4 className="font-weight-normal mb-3">
+                      Total Rooms{" "}
+                    </h4>
+                    <h2 className="mb-5">45,6334</h2>
                   </div>
-                  <div className="d-block text-center card-footer">
-                    <button className="mr-2 btn-icon btn-icon-only btn btn-outline-danger">
-                      <i className="pe-7s-trash btn-icon-wrapper"> </i>
-                    </button>
-                    <button className="btn-wide btn btn-success">Save</button>
+                </div>
+              </div>
+              <div className="col-md-4 stretch-card grid-margin">
+                <div className="card bg-gradient-success card-img-holder text-white">
+                  <div className="card-body">
+                    <img
+                      src={circle}
+                      className="card-img-absolute"
+                      alt="circle-image"
+                    />
+                    <h4 className="font-weight-normal mb-3">
+                      Total Costomer{" "}
+                    </h4>
+                    <h2 className="mb-5">95,5741</h2>
                   </div>
                 </div>
               </div>
             </div>
             
+            
           </div>
-          <Footer/>
+          {/* content-wrapper ends */}
+          {/* partial:partials/_footer.html */}
+          <footer className="footer">
+            <div className="d-sm-flex justify-content-center justify-content-sm-between">
+              <span className="text-muted text-center text-sm-left d-block d-sm-inline-block">
+                Copyright © 2023{" "}
+                <a href="https://www.bootstrapdash.com/" target="_blank">
+                  BootstrapDash
+                </a>
+                . All rights reserved.
+              </span>
+              <span className="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">
+                Hand-crafted &amp; made with{" "}
+                <i className="mdi mdi-heart text-danger" />
+              </span>
+            </div>
+          </footer>
+          {/* partial */}
         </div>
+        {/* main-panel ends */}
       </div>
+      {/* page-body-wrapper ends */}
     </div>
   );
 };

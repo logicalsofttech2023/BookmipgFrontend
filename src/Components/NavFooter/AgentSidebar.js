@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import secureLocalStorage from "react-secure-storage";
+
 import swal from "sweetalert";
 const AgentSidebar = () => {
   const Navigate = useNavigate();
@@ -11,11 +11,11 @@ const AgentSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
   const Logout = () => {
-    secureLocalStorage.clear();
+    localStorage.clear();
   };
 
-  let role = secureLocalStorage.getItem("roleType");
-  let subscription = secureLocalStorage.getItem("subscription");
+  let role = localStorage.getItem("roleType");
+  let subscription = localStorage.getItem("subscription");
 
   const Subscriber = () => {
     swal({

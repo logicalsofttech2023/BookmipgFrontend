@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
+
 import AwesomeSlider from "react-awesome-slider";
 import swal from "sweetalert";
 import toast, { Toaster } from "react-hot-toast";
@@ -18,7 +18,7 @@ const Agentsdetails = () => {
 
   const [messgae, setmessgae] = useState();
   const [ReviewData,setReviewData] = useState();
-  const loginid = secureLocalStorage.getItem("loginuserid");
+  const loginid = localStorage.getItem("loginuserid");
 
   const handleRatingClick = (rating) => {
     setratings(rating);
@@ -42,7 +42,7 @@ const Agentsdetails = () => {
     }
 
     let formData = {
-      agentId: secureLocalStorage.getItem("agentdetailsId"),
+      agentId: localStorage.getItem("agentdetailsId"),
       userId:loginid,
       projectId: "listingID",
       message: messgae,
@@ -71,7 +71,7 @@ const Agentsdetails = () => {
   }, [0]);
   const GetAgentDetails = () => {
     const data = {
-      userId: secureLocalStorage.getItem("agentdetailsId"),
+      userId: localStorage.getItem("agentdetailsId"),
     };
     axios
       .post(`${process.env.REACT_APP_API_KEY}website/user_profile`, data)
@@ -86,7 +86,7 @@ const Agentsdetails = () => {
   }, [Buy]);
   const GetAgentPropties = () => {
     const data = {
-      userId: secureLocalStorage.getItem("agentdetailsId"),
+      userId: localStorage.getItem("agentdetailsId"),
     };
     axios
       .post(`${process.env.REACT_APP_API_KEY}website/get_user_property`, data)
@@ -115,7 +115,7 @@ const Agentsdetails = () => {
     e.preventDefault();
 
     const data = {
-      agentId: secureLocalStorage.getItem("agentdetailsId"),
+      agentId: localStorage.getItem("agentdetailsId"),
       name: Name,
       email: Email,
       mobile_no: Phone,
@@ -173,7 +173,7 @@ const Agentsdetails = () => {
   },[0])
   const Getreview =()=>{
     const data ={
-      agentId: secureLocalStorage.getItem("agentdetailsId"),
+      agentId: localStorage.getItem("agentdetailsId"),
     }
     axios.post(`${process.env.REACT_APP_API_KEY}website/get_agent_review`,data).then((res)=>{
       setReviewData(res.data.data)
@@ -203,7 +203,7 @@ const Agentsdetails = () => {
     }
     const data = {
       userId: loginid,
-      agentId: secureLocalStorage.getItem("agentdetailsId"),
+      agentId: localStorage.getItem("agentdetailsId"),
       
     };
 
@@ -541,7 +541,7 @@ const Agentsdetails = () => {
                                   <div
                                     style={{ cursor: "pointer" }}
                                     onClick={() => {
-                                      secureLocalStorage.setItem(
+                                      localStorage.setItem(
                                         "ListingId",
                                         data?.propertyId
                                       );
@@ -552,7 +552,7 @@ const Agentsdetails = () => {
                                       <Link
                                         className="text-capitalize"
                                         onClick={() => {
-                                          secureLocalStorage.setItem(
+                                          localStorage.setItem(
                                             "ListingId",
                                             data?.propertyId
                                           );
@@ -572,7 +572,7 @@ const Agentsdetails = () => {
                                       <div className="money fs-20 fw-8 font-2 text-color-3">
                                         <Link
                                           onClick={() => {
-                                            secureLocalStorage.setItem(
+                                            localStorage.setItem(
                                               "ListingId",
                                               data?.propertyId
                                             );

@@ -1,0 +1,72 @@
+.sidebar .nav .nav-item{
+  padding: 0 10px !important;
+}
+
+.sidebar .nav .nav-item .nav-link{
+  padding: 10px 0 10px 0
+}
+
+.sidebar .nav{
+  margin-top: 70px
+}
+
+h4{
+  font-size: 17px;
+  line-height: 0px;
+}
+
+h2{
+  font-size: 20px;
+}
+
+.main-panel{
+  height: auto;
+}
+
+/* .stretch-card > .card{
+  height: 140px !important;
+} */
+
+.navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu.navbar-dropdown{
+  left: "-68px"
+}
+
+.card .card-body{
+  padding: 25px 20px;
+}
+
+.css-voecp4-MuiInputBase-input-MuiFilledInput-input {
+  padding: 20px 12px 13px 13px !important;
+}
+
+
+@media screen and (max-width: 991px){
+  .sidebar{
+    margin-top: 0px
+  }
+  
+}
+
+.transition {
+  transition: all 0.3s ease-in-out;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+.rotate-0 {
+  transform: rotate(0deg);
+}
+
+.sidebar .nav .nav-item .nav-link .menu-title{
+  font-size: 13px !important;
+}
+
+
+
+
+
+
+
+

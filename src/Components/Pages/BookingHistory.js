@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import UserSidebar from "../NavFooter/UserSidebar";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
+
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 
 const BookingHistory = () => {
-  let loginid = secureLocalStorage.getItem("loginuserid");
+  let loginid = localStorage.getItem("loginuserid");
   const Navigate = useNavigate();
   const [Listingdata, setListingdata] = useState();
 

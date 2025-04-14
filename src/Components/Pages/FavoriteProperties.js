@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import AgentSidebar from "../NavFooter/AgentSidebar";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
+
 import axios from "axios";
 import swal from "sweetalert";
 
 import toast, { Toaster } from "react-hot-toast";
 const FavoriteProperties = () => {
-    let loginid = secureLocalStorage.getItem("loginuserid");
+    let loginid = localStorage.getItem("loginuserid");
     const Navigate = useNavigate();
     const [Listingdata, setListingdata] = useState();
   
@@ -98,7 +98,7 @@ const FavoriteProperties = () => {
                                       <div
                                         style={{ cursor: "pointer" }}
                                         onClick={() => {
-                                          secureLocalStorage.setItem(
+                                          localStorage.setItem(
                                             "ListingId",
                                             data?.propertyId
                                           );

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import UserSidebar from '../NavFooter/UserSidebar'
-import secureLocalStorage from 'react-secure-storage';
+import localStorage from 'react-secure-storage';
 import axios from 'axios';
 
 const DeshBoardReview = () => {
   const [ContactData, setContactData] = useState();
 
-  let loginid = secureLocalStorage.getItem("loginuserid");
+  let loginid = localStorage.getItem("loginuserid");
   useEffect(()=>{
     window.scrollTo(0, 0);
   ContactUsdata();

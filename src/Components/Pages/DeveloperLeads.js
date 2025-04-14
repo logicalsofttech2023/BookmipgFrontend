@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AgentSidebar from "../NavFooter/AgentSidebar";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
+
 import axios from "axios";
 import swal from "sweetalert";
 
@@ -11,7 +11,7 @@ const DeveloperLeads = () => {
   const [count, setcount] = useState();
   const [Dashboarddata, setDashboarddata] = useState();
   const [Leads, setLeads] = useState();
-  let loginid = secureLocalStorage.getItem("loginuserid");
+  let loginid = localStorage.getItem("loginuserid");
 const Navigate = useNavigate();
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -213,7 +213,7 @@ const Navigate = useNavigate();
                                     <td>
                                       <div className="candidates-wrap flex">
                                         <div style={{cursor:'pointer'}} onClick={() => {
-                                                secureLocalStorage.setItem(
+                                                localStorage.setItem(
                                                   "ListingId",
                                                   data?._id
                                                 );
@@ -244,7 +244,7 @@ const Navigate = useNavigate();
                                           <h4 className="link-style-1 text-capitalize">
                                             <Link
                                               onClick={() => {
-                                                secureLocalStorage.setItem(
+                                                localStorage.setItem(
                                                   "ListingId",
                                                   data?._id
                                                 );

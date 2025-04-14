@@ -4,7 +4,7 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import AwesomeSlider from "react-awesome-slider";
 import "react-awesome-slider/dist/styles.css";
 import "react-awesome-slider/dist/custom-animations/cube-animation.css";
-import secureLocalStorage from "react-secure-storage";
+
 import swal from "sweetalert";
 const ProjectsList = () => {
   const [dataofAgent, setdataofAgent] = useState();
@@ -18,7 +18,7 @@ const ProjectsList = () => {
   const [Property, setProperty] = useState([]);
 
   const Navigate = useNavigate();
-  const loginid = secureLocalStorage.getItem("loginuserid");
+  const loginid = localStorage.getItem("loginuserid");
   useEffect(() => {
     const filteredData = Property.filter(
       (property) =>
@@ -35,7 +35,7 @@ const ProjectsList = () => {
   const [cityes, setCityes] = useState(null);
 
   useEffect(() => {
-    const storedCityes = secureLocalStorage.getItem("cityname");
+    const storedCityes = localStorage.getItem("cityname");
     setCityes(storedCityes);
   });
   const [type, settype] = useState();
@@ -47,7 +47,7 @@ const ProjectsList = () => {
   }, [type]);
 
   useEffect(() => {
-    const storedtyes = secureLocalStorage.getItem("properttype");
+    const storedtyes = localStorage.getItem("properttype");
     settype(storedtyes);
   });
 
@@ -56,10 +56,10 @@ const ProjectsList = () => {
       setOrder(null);
 
       GetDataoffilter();
-      secureLocalStorage.setItem("possessionstatus");
-      secureLocalStorage.setItem("locality");
-      secureLocalStorage.setItem("project_type");
-      secureLocalStorage.setItem("project_name");
+      localStorage.setItem("possessionstatus");
+      localStorage.setItem("locality");
+      localStorage.setItem("project_type");
+      localStorage.setItem("project_name");
     }
   }, [cityes]);
 
@@ -67,10 +67,10 @@ const ProjectsList = () => {
     setOrder(selectedOrder);
   };
 
-  let possion = secureLocalStorage.getItem("possessionstatus");
-  let locallity = secureLocalStorage.getItem("locality");
-  let projecttype = secureLocalStorage.getItem("project_type");
-  let nameofproject = secureLocalStorage.getItem("project_name");
+  let possion = localStorage.getItem("possessionstatus");
+  let locallity = localStorage.getItem("locality");
+  let projecttype = localStorage.getItem("project_type");
+  let nameofproject = localStorage.getItem("project_name");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -915,7 +915,7 @@ const ProjectsList = () => {
                               <div
                                 style={{ cursor: "pointer" }}
                                 onClick={() => {
-                                  secureLocalStorage.setItem(
+                                  localStorage.setItem(
                                     "ListingId",
                                     data?.projectId
                                   );
@@ -926,7 +926,7 @@ const ProjectsList = () => {
                                   <Link
                                     className="text-capitalize"
                                     onClick={() => {
-                                      secureLocalStorage.setItem(
+                                      localStorage.setItem(
                                         "ListingId",
                                         data?.projectId
                                       );
@@ -946,7 +946,7 @@ const ProjectsList = () => {
                                   <div className="money fs-20 fw-8 font-2 text-color-3">
                                     <Link
                                       onClick={() => {
-                                        secureLocalStorage.setItem(
+                                        localStorage.setItem(
                                           "ListingId",
                                           data?.projectId
                                         );
@@ -1126,7 +1126,7 @@ const ProjectsList = () => {
                             <div
                               style={{ cursor: "pointer" }}
                               onClick={() => {
-                                secureLocalStorage.setItem(
+                                localStorage.setItem(
                                   "agencisesId",
                                   data?.developerId
                                 );
@@ -1194,7 +1194,7 @@ const ProjectsList = () => {
                             <div
                               style={{ cursor: "pointer" }}
                               onClick={() => {
-                                secureLocalStorage.setItem(
+                                localStorage.setItem(
                                   "agentdetailsId",
                                   data.agentId
                                 );
@@ -1254,7 +1254,7 @@ const ProjectsList = () => {
                       filteredProjects?.slice(0,1)?.map((data) => {
                         return (
                           <div  onClick={() => {
-                            secureLocalStorage.setItem(
+                            localStorage.setItem(
                               "ListingId",
                               data?.projectId
                             );

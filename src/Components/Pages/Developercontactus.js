@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react'
 
 import AgentSidebar from '../NavFooter/AgentSidebar'
 import axios from 'axios';
-import secureLocalStorage from 'react-secure-storage';
+import localStorage from 'react-secure-storage';
 const Developercontactus = () => {
     const [ContactData, setContactData] = useState();
 
-let loginid = secureLocalStorage.getItem("loginuserid");
+let loginid = localStorage.getItem("loginuserid");
 useEffect(()=>{
   window.scrollTo(0, 0);
 ContactUsdata();

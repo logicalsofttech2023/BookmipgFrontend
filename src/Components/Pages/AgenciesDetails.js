@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
+
 import AwesomeSlider from "react-awesome-slider";
 import swal from "sweetalert";
 function AgenciesDetails() {
@@ -12,8 +12,8 @@ function AgenciesDetails() {
   const [Message, setMessage] = useState();
   const [agenciesdata, setagenciesdata] = useState();
   const [developerdata, setdeveloperdata] = useState();
-  let agencisesId = secureLocalStorage.getItem("agencisesId");
-  const loginid = secureLocalStorage.getItem("loginuserid");
+  let agencisesId = localStorage.getItem("agencisesId");
+  const loginid = localStorage.getItem("loginuserid");
   useEffect(() => {
     window.scrollTo(0, 0);
     GetAgenciesData();
@@ -306,7 +306,7 @@ function AgenciesDetails() {
                                   <div
                                     style={{ cursor: "pointer" }}
                                     onClick={() => {
-                                      secureLocalStorage.setItem(
+                                      localStorage.setItem(
                                         "ListingId",
                                         data?.projectId
                                       );
@@ -582,7 +582,7 @@ function AgenciesDetails() {
                               backgroundImage: `url(http://157.66.191.24:3089/uploads/${data?.images[0]})`,
                             }}
                             onClick={() => {
-                              secureLocalStorage.setItem(
+                              localStorage.setItem(
                                 "ListingId",
                                 data?.projectId
                               );

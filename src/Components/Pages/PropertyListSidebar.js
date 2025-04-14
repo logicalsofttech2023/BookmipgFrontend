@@ -4,271 +4,82 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import AwesomeSlider from "react-awesome-slider";
 import "react-awesome-slider/dist/styles.css";
 import "react-awesome-slider/dist/custom-animations/cube-animation.css";
-import secureLocalStorage from "react-secure-storage";
-import swal from "sweetalert";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import { DatePicker } from "@mui/x-date-pickers";
 import TextField from "@mui/material/TextField";
 import { Button, InputAdornment } from "@mui/material";
-import { DateRangePicker } from 'rsuite';
-
+import { DateRangePicker } from "rsuite";
 
 const PropertyListSidebar = () => {
-  const [dataofAgent, setdataofAgent] = useState();
-  const [TopDevelopers, setTopDevelopers] = useState();
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [order, setOrder] = useState("");
-  const [count, setcount] = useState();
+  const [count, setCount] = useState();
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredProperties, setFilteredProperties] = useState([]);
-  const [Property, setProperty] = useState([]);
-  const Navigate = useNavigate();
-  const loginid = secureLocalStorage.getItem("loginuserid");
-  useEffect(() => {
-    const filteredData = Property.filter(
-      (property) =>
-        property?.building_name
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        property?.locality.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        property?.city_name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredProperties(filteredData);
-    setcount(filteredData.length);
-  }, [searchTerm, Property]);
+  const [hotel, setHotels] = useState([]);
+  const navigate = useNavigate();
 
-  const [cityes, setCityes] = useState(null);
+  const fetchHotel = async ({
+    search = "",
+    page = 1,
+    limit = 10,
+    hotelId,
+    city,
+    state,
+    country,
+    zipCode,
+    minPrice,
+    maxPrice,
+  } = {}) => {
+    try {
+      const queryParams = new URLSearchParams({
+        search,
+        page,
+        limit,
+        ...(hotelId && { hotelId }),
+        ...(city && { city }),
+        ...(state && { state }),
+        ...(country && { country }),
+        ...(zipCode && { zipCode }),
+        ...(minPrice && { minPrice }),
+        ...(maxPrice && { maxPrice }),
+      });
 
-  useEffect(() => {
-    const storedCityes = secureLocalStorage.getItem("cityname");
-    setCityes(storedCityes);
-  });
-  const [type, settype] = useState();
+      const response = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}api/user/getAllHotelsByFilter?${queryParams}`
+      );
 
-  useEffect(() => {
-    if (type) {
-      GetDataoffilter();
-    }
-  }, [type]);
+      if (response.status === 200) {
+        setCount(response.data.hotels.length);
+        let hotels = response.data.hotels;
 
-  useEffect(() => {
-    const storedtyes = secureLocalStorage.getItem("properttype");
-    settype(storedtyes);
-  });
-
-  useEffect(() => {
-    if (cityes) {
-      setOrder(null);
-
-      GetDataoffilter();
-    }
-  }, [cityes]);
-
-  const handleOrderChange = (selectedOrder) => {
-    setOrder(selectedOrder);
-  };
-
-  let bugdet = secureLocalStorage.getItem("selectedBajat");
-  let roomss = secureLocalStorage.getItem("rooms");
-  let type2 = secureLocalStorage.getItem("properttype2");
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    if (type2) {
-      GetDataoffilter();
-    } else if (roomss) {
-      GetDataoffilter();
-    } else if (bugdet) {
-      GetDataoffilter();
-    } else if (order) {
-      GetDataoffilter();
-    }
-  }, [cityes, type, type2, roomss, bugdet, order]);
-
-  const GetDataoffilter = () => {
-    const data = {
-      city_name: cityes,
-      property_type: type,
-      building_type_two: type2,
-      rooms: roomss,
-      budget: bugdet,
-    };
-
-    axios
-      .post("http://157.66.191.24:3089/website/search_header", data)
-      .then((response) => {
-        let propertyData = response.data.data;
-        if (order === "low-to-high") {
-          propertyData = propertyData.sort((a, b) => b.price - a.price);
-        } else if (order === "high-to-low") {
-          propertyData = propertyData.sort((a, b) => a.price - b.price);
-        } else if (order === "by-latest") {
-          propertyData = response.data.data;
+        // If search is not empty, sort results to show matches first
+        if (search.trim()) {
+          hotels = hotels.sort((a, b) => {
+            const aMatch = a.name.toLowerCase().includes(search.toLowerCase())
+              ? 1
+              : 0;
+            const bMatch = b.name.toLowerCase().includes(search.toLowerCase())
+              ? 1
+              : 0;
+            return bMatch - aMatch;
+          });
         }
 
-        if (order === "residential") {
-          propertyData = propertyData.filter(
-            (property) => property?.building_type_one === "Residential"
-          );
-        } else if (order === "commercial") {
-          propertyData = propertyData.filter(
-            (property) => property?.building_type_one === "Commercial"
-          );
-        } else if (order === "Under Construction") {
-          propertyData = propertyData.filter(
-            (property) => property?.possession_status === "Under Construction"
-          );
-        } else if (order === "Ready To Move") {
-          propertyData = propertyData.filter(
-            (property) => property?.possession_status === "Ready To Move"
-          );
-        } else if (order === "Office Space") {
-          propertyData = propertyData.filter(
-            (property) => property?.building_type_two === "Office Space"
-          );
-        } else if (order === "Shop") {
-          propertyData = propertyData.filter(
-            (property) => property?.building_type_two === "Shop"
-          );
-        } else if (order === "Land") {
-          propertyData = propertyData.filter(
-            (property) => property?.building_type_two === "Land"
-          );
-        } else if (order === "Office Space in IT/SEZ") {
-          propertyData = propertyData.filter(
-            (property) =>
-              property?.building_type_two === "Office Space in IT/SEZ"
-          );
-        } else if (order === "Showroom") {
-          propertyData = propertyData.filter(
-            (property) => property?.building_type_two === "Showroom"
-          );
-        } else if (order === "Warehouse") {
-          propertyData = propertyData.filter(
-            (property) => property?.building_type_two === "Warehouse"
-          );
-        } else if (order === "Industrial Plot") {
-          propertyData = propertyData.filter(
-            (property) => property?.building_type_two === "Industrial Plot"
-          );
-        } else if (order === "Co-Working Space") {
-          propertyData = propertyData.filter(
-            (property) => property?.building_type_two === "Co-Working Space"
-          );
-        } else if (order === "Apartment") {
-          propertyData = propertyData.filter(
-            (property) => property?.building_type_two === "Apartment"
-          );
-        } else if (order === "Villa") {
-          propertyData = propertyData.filter(
-            (property) => property?.building_type_two === "Villa"
-          );
-        } else if (order === "Builder Floor") {
-          propertyData = propertyData.filter(
-            (property) => property?.building_type_two === "Builder Floor"
-          );
-        } else if (order === "Penthouse") {
-          propertyData = propertyData.filter(
-            (property) => property?.building_type_two === "Penthouse"
-          );
-        } else if (order === "Independent House") {
-          propertyData = propertyData.filter(
-            (property) => property?.building_type_two === "Independent House"
-          );
-        } else if (order === "Plot") {
-          propertyData = propertyData.filter(
-            (property) => property?.building_type_two === "Plot"
-          );
-        } else if (order === "Semi-Furnished") {
-          propertyData = propertyData.filter(
-            (property) => property?.furnishing_status === "Semi-Furnished"
-          );
-        } else if (order === "Furnished") {
-          propertyData = propertyData.filter(
-            (property) => property?.furnishing_status === "Furnished"
-          );
-        }
-
-        setProperty(propertyData);
-
-        setcount(propertyData?.length);
-      })
-      .catch((error) => {});
+        setHotels(hotels);
+      }
+    } catch (error) {
+      console.log("Error fetching hotels:", error);
+    }
   };
 
   useEffect(() => {
-    GetallPdevelopers();
-  }, [cityes]);
+    fetchHotel();
+  }, []);
 
-  const GetallPdevelopers = () => {
-    const data = {
-      city_name: cityes ? cityes : "",
-    };
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
 
-    axios
-      .post("http://157.66.191.24:3089/website/get_city_developer", data)
-      .then((response) => {
-        setTopDevelopers(response.data.data);
-      })
-      .catch((error) => {});
+    // Fetch filtered results if search term exists, otherwise fetch all hotels
+    fetchHotel({ search: value });
   };
 
-  const GetCityAgent = () => {
-    const data = {
-      city_name: cityes,
-    };
-    axios
-      .post("http://157.66.191.24:3089/website/get_city_agent", data)
-      .then((res) => {
-        setdataofAgent(res.data.data);
-      })
-      .catch((error) => {});
-  };
-
-  useEffect(() => {
-    if (cityes) {
-      GetCityAgent();
-    }
-  }, [cityes]);
-
-  const addleads = (item) => {
-    if (!loginid) {
-      swal({
-        title: "Please Login First!",
-        icon: "error",
-      }).then(() => {
-        setTimeout(() => {
-          Navigate("/login");
-        }, 2000);
-      });
-      return;
-    }
-    const data = {
-      userId: loginid,
-      propertyId: item,
-      lead_status: "1",
-      favourite_status: "1",
-    };
-
-    axios
-      .post(`http://157.66.191.24:3089/website/add_lead_property`, data)
-      .then((res) => {
-        swal({
-          title: "Your Details Share With Our Expert",
-          icon: "success",
-        });
-      })
-      .catch((error) => {
-        swal({
-          title: error.response.data.msg,
-          icon: "error",
-        });
-      });
-  };
-  const maskMobileNumber = (number) =>
-    number ? `XXXXXX${number.replace(/\D/g, "").slice(-4)}` : number;
   return (
     <>
       <div>
@@ -290,50 +101,57 @@ const PropertyListSidebar = () => {
                   <div className="content-tab mt-5 w-100">
                     <div className="content-inner tab-content">
                       <div className="">
-                        <form method="post">
+                        <form method="post" onSubmit={""}>
                           <div
                             className="wd-find-select flex"
                             style={{ gap: 10 }}
                           >
-                            <div className="" style={{ flex: 1 }}>
-                              <TextField
+                            {/* Search Input */}
+                            <div style={{ flex: 1, width: "100%" }}>
+                              <input
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={handleSearchChange}
                                 style={{
                                   height: "100%",
                                   fontSize: 13,
                                   color: "#333",
-                                  width: "100%"
+                                  width: "100%",
                                 }}
                                 type="search"
                                 className="search-field flex align-center"
-                                placeholder="Search by Building name, Locality, city"
-                                name="s"
-                                title="Search for"
+                                placeholder="Search by Building name, Locality, City"
                                 required
                               />
                             </div>
 
-                            <div
-                              className=""
-                              style={{ flex: 1 }}
-                            >
-                              <DateRangePicker showOneCalendar />
-
+                            {/* Date Picker */}
+                            <div style={{ flex: 1 }}>
+                              <DateRangePicker
+                                style={{ height: "100%", width: "100%" }}
+                                showOneCalendar
+                              />
                             </div>
 
-                            <div style={{ flex: 1 }} className="form-group-1 search-form form-style relative flex align-center">
+                            {/* Search Button */}
+                            <div
+                              style={{ flex: 1, margin: "0px" }}
+                              className="form-group-1 search-form form-style relative flex align-center"
+                            >
                               <Button
-                                style={{ color: "red", borderColor: "red", width: "100%", height: "-webkit-fill-available" }}
+                                type="submit"
+                                style={{
+                                  color: "red",
+                                  borderColor: "red",
+                                  width: "100%",
+                                  height: "100%",
+                                }}
                                 variant="outlined"
-                                
                               >
                                 Search
                               </Button>
                             </div>
                           </div>
                         </form>
-
                         {/* End Job  Search Form*/}
                       </div>
                     </div>
@@ -359,12 +177,11 @@ const PropertyListSidebar = () => {
                     <Link className="home fw-6 text-color-3" to="/">
                       Home
                     </Link>
-                    <span>Rooms Listing</span>
+                    <span>Hotel Listing</span>
                   </div>
                   <div className="heading-listing fs-20 lh-45 fw-7">
-                    Rooms In {cityes}
+                    Hotel in india ({count})
                   </div>
-                  <div className>There are currently {count} properties.</div>
                 </div>
               </div>
             </div>
@@ -376,53 +193,6 @@ const PropertyListSidebar = () => {
               <div className="col-lg-8" style={{ backgroundColor: "#F7F7F7" }}>
                 <div className="post">
                   <div
-                    className="category-filter flex justify-space"
-                    style={{ alignContent: "start" }}
-                  >
-                    <div className="box-2 flex">
-                      <div className="wd-find-select flex">
-                        <div className="group-select">
-                          <div className="nice-select" tabIndex={0}>
-                            <span className="current">Default order</span>
-                            <ul className="list style">
-                              <li
-                                data-value="default"
-                                className="option selected"
-                                onClick={() => handleOrderChange("")}
-                              >
-                                Default order
-                              </li>
-                              <li
-                                value="1"
-                                data-value="by-latest"
-                                className="option"
-                                onClick={() => handleOrderChange("by-latest")}
-                              >
-                                All
-                              </li>
-                              <li
-                                value="2"
-                                data-value="low-to-high"
-                                className="option"
-                                onClick={() => handleOrderChange("low-to-high")}
-                              >
-                                Low to high
-                              </li>
-                              <li
-                                value="3"
-                                data-value="high-to-low"
-                                className="option"
-                                onClick={() => handleOrderChange("high-to-low")}
-                              >
-                                High to low
-                              </li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div
                     className="wrap-list"
                     style={{
                       overflow: "scroll",
@@ -431,20 +201,11 @@ const PropertyListSidebar = () => {
                       scrollbarWidth: "none",
                     }}
                   >
-                    {filteredProperties?.length > 0 ? (
-                      filteredProperties?.map((data) => {
+                    {hotel?.length > 0 ? (
+                      hotel?.map((data) => {
                         return (
                           <div className="box box-dream flex hv-one">
                             <div className="image-group relative">
-                              {/* <span class="featured fs-12 fw-6">
-                                For {data?.property_listing_type}
-                              </span>
-                              <span class="featured style fs-12 fw-6">
-                                {data?.building_type_one}
-                              </span>
-                              <span className="icon-bookmark">
-                                <i className="far fa-bookmark" />
-                              </span> */}
                               <span className="featured fs-12 fw-6">
                                 Company-Serviced
                               </span>
@@ -472,7 +233,7 @@ const PropertyListSidebar = () => {
                                     {data?.images?.map((imageName, index) => (
                                       <div
                                         key={index}
-                                        data-src={`http://157.66.191.24:3089/uploads/${imageName}`}
+                                        data-src={`${process.env.REACT_APP_BASE_URL}${imageName}`}
                                       />
                                     ))}
                                   </AwesomeSlider>
@@ -482,54 +243,37 @@ const PropertyListSidebar = () => {
                             <div className="content">
                               <div
                                 style={{ cursor: "pointer" }}
-                                onClick={() => {
-                                  secureLocalStorage.setItem(
-                                    "ListingId",
-                                    data?._id
-                                  );
-                                  Navigate("/PropertyDetail");
-                                }}
+                                to={`/hotelsDetail/${data?._id}`}
                               >
                                 <h3 className="link-style-1">
                                   <Link
                                     className="text-capitalize"
-                                    onClick={() => {
-                                      secureLocalStorage.setItem(
-                                        "ListingId",
-                                        data?._id
-                                      );
-                                    }}
-                                    to="/PropertyDetail"
+                                    to={`/hotelsDetail/${data?._id}`}
                                   >
-                                    {data?.building_name}
+                                    {data?.name}
                                   </Link>
                                 </h3>
                                 <div className="icon-box">
                                   <div className="icons icon-1 flex">
                                     <span>
-                                      {data?.building_type_two} in{" "}
-                                      {data?.locality}
+                                      {data?.address} in {data?.city}
                                     </span>
                                   </div>
                                   <div className="money fs-20 fw-8 font-2 text-color-3">
-                                    <Link
-                                      onClick={() => {
-                                        secureLocalStorage.setItem(
-                                          "ListingId",
-                                          data?._id
-                                        );
-                                      }}
-                                      to="/PropertyDetail"
-                                    >
-                                      ₹
-                                      {data?.price
-                                        ? `${(data?.price / 100000)?.toFixed(
-                                            2
-                                          )}`
-                                        : `${(
-                                            data?.rent_amount / 100000
-                                          )?.toFixed(2)}`}
+                                    <Link to={`/hotelsDetail/${data?._id}`}>
+                                      ₹{data?.pricePerNight}
                                     </Link>
+                                    <span
+                                      style={{
+                                        fontSize: "20px",
+                                        fontWeight: "600",
+                                        color: "#6d787d",
+                                        textDecoration: "line-through",
+                                        marginLeft: "10px",
+                                      }}
+                                    >
+                                      ₹6389
+                                    </span>
                                   </div>
 
                                   <div className="fs-16 fw-6 text-color-3">
@@ -552,7 +296,7 @@ const PropertyListSidebar = () => {
                                           ))}
                                         </span>
                                         <span className="rating-value">
-                                          4.9
+                                          {data?.rating}
                                         </span>
                                       </div>
                                     </Link>
@@ -560,29 +304,26 @@ const PropertyListSidebar = () => {
                                   {/* Services Section */}
                                   <div className="services">
                                     <ul className="service-list">
-                                      <li>
-                                        <i className="fas fa-wifi"></i> Free
-                                        Wifi
-                                      </li>
-                                      <li>
-                                        <i className="fas fa-tv"></i> AV TV
-                                      </li>
-                                      <li>
-                                        <i className="fas fa-sun"></i> Geyser
-                                      </li>
-                                      <li>
-                                        <i className="fas fa-plug"></i> Power
-                                        Backup
-                                      </li>
+                                      {data?.amenities?.map(
+                                        (amenity, index) => (
+                                          <li key={index}>
+                                            <i
+                                              className="fas fa-check"
+                                              style={{
+                                                color: "green",
+                                                marginRight: "5px",
+                                              }}
+                                            ></i>
+                                            {amenity}
+                                          </li>
+                                        )
+                                      )}
                                     </ul>
                                   </div>
 
                                   <div className="text-address mt-3">
                                     <p className="p-12">
-                                      {data?.property_description?.slice(
-                                        0,
-                                        100
-                                      )}
+                                      {data?.description?.slice(0, 100)}
                                     </p>
                                   </div>
                                 </div>
@@ -591,14 +332,7 @@ const PropertyListSidebar = () => {
                               <div className="img-box flex align-center">
                                 <div className="flat-bt-top sc-btn-top">
                                   <Link
-                                    onClick={() => {
-                                      secureLocalStorage.setItem(
-                                        "ListingId",
-                                        data?._id
-                                      );
-                                    }}
-                                    to="/PropertyDetail"
-                                    target="_blank"
+                                    to={`/hotelsDetail/${data?._id}`}
                                     rel="noopener noreferrer"
                                     className="sc-buttonborder mycolor btn-icon"
                                   >
@@ -625,22 +359,19 @@ const PropertyListSidebar = () => {
                           <img
                             width={100}
                             src="https://themesflat.co/html/dreamhomehtml/assets/images/icon/footer-icon-2.png"
-                            alt="No Property Found"
+                            alt="No Hotels Found"
                           />
                         </h2>
-                        <h3 className="mt-3">No Property Found</h3>
+                        <h3 className="mt-3">No Hotels Found</h3>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
-              <div className="col-lg-4">
+              <div className="col-lg-4 p-0">
                 <aside className="side-bar">
                   <div className="inner-side-bar">
-                    <div
-                      style={{ marginTop: "30px", border: "none" }}
-                      className="widget-rent"
-                    >
+                    <div style={{ border: "none" }} className="widget-rent">
                       <div className="flat-tabs style2">
                         <div className="content-tab">
                           <div className="content-inner tab-content" style={{}}>
@@ -979,153 +710,6 @@ const PropertyListSidebar = () => {
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="widget widget-contact">
-                      <h3 className="widget-title title-contact">
-                        Contact Agents
-                      </h3>
-                      {dataofAgent?.length > 0 ? (
-                        dataofAgent?.slice(0, 3)?.map((data) => {
-                          return (
-                            <div
-                              style={{ cursor: "pointer" }}
-                              onClick={() => {
-                                secureLocalStorage.setItem(
-                                  "agentdetailsId",
-                                  data.agentId
-                                );
-                                Navigate("/agentsdetails");
-                              }}
-                              className="box-contact flex align-center"
-                            >
-                              <div className="img-author">
-                                {data?.user_image ? (
-                                  <img
-                                    style={{
-                                      borderRadius: "100%",
-                                      height: 65,
-
-                                      width: 65,
-                                    }}
-                                    src={
-                                      `http://157.66.191.24:3089/uploads/` +
-                                      data?.user_image
-                                    }
-                                    alt="images"
-                                  />
-                                ) : (
-                                  <img
-                                    src="assets/images/author/author-sidebar-2.jpg"
-                                    alt="images"
-                                  />
-                                )}
-                              </div>
-                              <div className="content">
-                                <p className="text-capitalize">
-                                  {data?.user_name}
-                                </p>
-                                <Link className="fw-6" to="tel:012345678">
-                                  {maskMobileNumber(data?.mobile_no)}
-                                </Link>
-                              </div>
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <div style={{ textAlign: "center" }}>
-                          <h2>
-                            <img
-                              width={100}
-                              src="https://themesflat.co/html/dreamhomehtml/assets/images/icon/footer-icon-2.png"
-                              alt="No Property Found"
-                            />
-                          </h2>
-                          <h3 className="mt-3">No Agent Found</h3>
-                        </div>
-                      )}
-                    </div>
-                    <div className="widget widget-ads">
-                      {filteredProperties?.length > 0 ? (
-                        filteredProperties?.slice(0, 1)?.map((data) => {
-                          return (
-                            <div
-                              onClick={() => {
-                                secureLocalStorage.setItem(
-                                  "ListingId",
-                                  data?._id
-                                );
-                                Navigate("/PropertyDetail");
-                              }}
-                              className="box-ads"
-                              style={{
-                                cursor: "pointer",
-                                backgroundImage: `url(http://157.66.191.24:3089/uploads/${data?.images[0]})`,
-                              }}
-                            >
-                              <div className="content relative z-2">
-                                <h3 className="link-style-3">
-                                  <Link to="#">{data?.building_name}</Link>
-                                </h3>
-                                <div className="text-addres">
-                                  <p className="p-12 text-color-1 icon-p">
-                                    {data?.building_type_two} in{" "}
-                                    {data?.locality} {data?.city_name}
-                                  </p>
-                                </div>
-                                <div className="star flex">
-                                  {[...Array(data?.rating)]?.map((_, index) => (
-                                    <svg
-                                      key={index}
-                                      version="1.1"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      xmlnsXlink="http://www.w3.org/1999/xlink"
-                                      x="0px"
-                                      y="0px"
-                                      viewBox="0 0 512 512"
-                                      style={{
-                                        enableBackground: "new 0 0 512 512",
-                                      }}
-                                      xmlSpace="preserve"
-                                    >
-                                      <g>
-                                        <g>
-                                          <polygon points="512,197.816 325.961,185.585 255.898,9.569 185.835,185.585 0,197.816 142.534,318.842 95.762,502.431 			255.898,401.21 416.035,502.431 369.263,318.842 		" />
-                                        </g>
-                                      </g>
-                                      <g />
-                                      <g />
-                                      <g />
-                                      <g />
-                                      <g />
-                                      <g />
-                                      <g />
-                                      <g />
-                                      <g />
-                                      <g />
-                                      <g />
-                                      <g />
-                                      <g />
-                                      <g />
-                                      <g />
-                                    </svg>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <div style={{ textAlign: "center" }}>
-                          <h2>
-                            <img
-                              width={100}
-                              src="https://themesflat.co/html/dreamhomehtml/assets/images/icon/footer-icon-2.png"
-                              alt="No Property Found"
-                            />
-                          </h2>
-                          <h3 className="mt-3">No Property Found</h3>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </aside>

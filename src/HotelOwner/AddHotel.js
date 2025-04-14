@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useRef } from "react"; // useRef import karein
 import {
   TextField,
   Button,
@@ -14,329 +15,454 @@ import {
   CardContent,
   CardActions,
   MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Chip,
+  ListItemText,
+  Box,
 } from "@mui/material";
 import { AddPhotoAlternate, Delete } from "@mui/icons-material";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 import axios from "axios";
+import DeleteIcon from "@mui/icons-material/Delete";
+import toast, { Toaster } from 'react-hot-toast';
 
-// List of amenities
-const amenityOptions = [
-  "Free WiFi",
-  "Swimming Pool",
-  "Gym",
-  "Spa",
-  "Parking",
-  "Restaurant",
-  "Room Service",
-  "Bar",
-  "Airport Shuttle",
-];
 
 const AddHotel = () => {
-  // State for form fields
   const [hotelName, setHotelName] = useState("");
   const [city, setCity] = useState("");
+  const [address, setAddress] = useState("");
+  const [room, setRoom] = useState("");
+  const [state, setState] = useState("");
+  const [country, setCountry] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [latitude, setLatitude] = useState("22.7323");
+  const [longitude, setLongitude] = useState("75.8265");
   const [description, setDescription] = useState("");
   const [rating, setRating] = useState("");
   const [amenities, setAmenities] = useState([]);
+  const [facilities, setFacilities] = useState([]);
   const [images, setImages] = useState([]);
+  const [pricePerNight, setPricePerNight] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-  const API_KEY = "ak_m70aywkkQRnwqoYUd3czG0BXrehYc";
+  const fileInputRef = useRef(null);
+  let token = localStorage.getItem("token");
 
-  // Handle Checkbox Selection
-  const handleCheckboxChange = (event) => {
-    const { value, checked } = event.target;
-    setAmenities((prev) =>
-      checked ? [...prev, value] : prev.filter((item) => item !== value)
-    );
-  };
 
-  // Handle Image Upload
-  const handleImageUpload = (event) => {
+  const handleImageChange = (event) => {
     const files = Array.from(event.target.files);
-    setImages([...images, ...files]);
+    setImages((prevImages) => [...prevImages, ...files]);
+
+    // Input field reset
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
-  // Handle Image Removal
-  const handleRemoveImage = (index) => {
-    setImages(images.filter((_, i) => i !== index));
+  const handleImageDelete = (index) => {
+    setImages((prevImages) => {
+      const newImages = prevImages.filter((_, i) => i !== index);
+
+      // Agar saari images delete ho gayi toh file input bhi reset karein
+      if (newImages.length === 0 && fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      return newImages;
+    });
   };
 
-  // Handle Form Submission
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+  
+    // FormData object create करें
+    const formData = new FormData();
+    formData.append("name", hotelName);
+    formData.append("city", city);
+    formData.append("address", address);
+    formData.append("state", state);
+    formData.append("country", country);
+    formData.append("zipCode", pincode);
+    formData.append("latitude", latitude);
+    formData.append("longitude", longitude);
+    formData.append("description", description);
+    formData.append("rating", rating);
+    formData.append("pricePerNight", pricePerNight);
+    formData.append("room", room);
+    formData.append("amenities",amenities);
+    formData.append("facilities",facilities);
+  
+    images.forEach((image) => {
+      formData.append("images", image);
+    });
+  
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_BASE_URL}api/admin/addHotel`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );      
+      if (response.status === 200) {
+        toast.success(response?.data?.message)
+      }
+    } catch (error) {
+      toast.error("Error adding hotel");
+      console.error("Error adding hotel:", error.response?.data || error.message);
+    }
+  };
+  
 
-    // Prepare form data
-    const formData = {
-      hotelName,
-      city,
-      description,
-      rating,
-      amenities,
-      images,
-    };
-
-    console.log("Hotel Data Submitted:", formData);
-    alert("Hotel added successfully!");
-
-    // Reset Form
-    setHotelName("");
-    setCity("");
-    setDescription("");
-    setRating("");
-    setAmenities([]);
-    setImages([]);
+  const handleAmenitiesChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setAmenities(typeof value === "string" ? value.split(",") : value);
   };
 
-  useEffect(() => {
-    if (city.length > 2) {
-      console.log(city);
-
-      fetchAddressSuggestions(city);
-    } else {
-      setSuggestions([]);
-    }
-  }, [city]);
-
-  const fetchAddressSuggestions = async (query) => {
-    try {
-      const response = await axios.get(
-        `https://api.ideal-postcodes.co.uk/v1/places?api_key=${API_KEY}`,
-        {
-          params: { query },
-        }
-      );
-      console.log(response);
-
-      setSuggestions(response.data.result.hits || []);
-    } catch (error) {
-      console.error("Error fetching addresses:", error);
-    }
+  const handleFacilitiesChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setFacilities(typeof value === "string" ? value.split(",") : value);
   };
 
   return (
-    <div className="app-container app-theme-white body-tabs-shadow fixed-sidebar fixed-header">
+    <div className="container-scroller">
       <Header />
-      <div className="app-main">
+      <div className="container-fluid page-body-wrapper">
         <Sidebar />
-        <div className="app-main__outer">
-          <div className="app-main__inner">
-            <Container maxWidth="md">
-              <Card elevation={3} sx={{ mt: 3, mb: 3 }}>
-                <CardContent>
-                  <Typography
-                    variant="h5"
-                    fontWeight="bold"
-                    align="center"
-                    gutterBottom
-                    sx={{ marginBottom: "30px" }}
-                  >
-                    Add New Hotel
-                  </Typography>
-                  <form onSubmit={handleSubmit}>
-                    <Grid container spacing={3}>
-                      {/* Hotel Name */}
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          label="Hotel Name"
-                          fullWidth
-                          value={hotelName}
-                          onChange={(e) => setHotelName(e.target.value)}
-                          required
-                          variant="outlined"
-                        />
-                      </Grid>
+        
+        <div className="main-panel">
+        <Toaster />
 
-                      {/* city */}
-                      <Grid
-                        item
-                        xs={12}
-                        sm={6}
-                        style={{ position: "relative" }}
-                      >
-                        <TextField
-                          label="Select City"
-                          fullWidth
-                          value={city}
-                          onChange={(e) => setCity(e.target.value)}
-                          required
-                          variant="outlined"
-                          autoComplete="off"
-                        />
+          <div className="content-wrapper" style={{ marginTop: "50px" }}>
+            <div className="page-header">Add Hotel</div>
+            <div class="row" data-select2-id="11">
+              <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title mb-5">Add Hotel</h4>
+                    <Card
+                      elevation={3}
+                      style={{ boxShadow: "none" }}
+                      sx={{ mt: 3, mb: 3 }}
+                    >
+                      <CardContent>
+                        <form onSubmit={handleSubmit}>
+                          <Grid container spacing={3}>
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                id="filled-basic"
+                                label="Hotel Name"
+                                variant="filled"
+                                fullWidth
+                                value={hotelName}
+                                onChange={(e) => setHotelName(e.target.value)}
+                                required
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                id="filled-basic"
+                                label="City"
+                                variant="filled"
+                                fullWidth
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                required
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                id="filled-basic"
+                                label="Address"
+                                variant="filled"
+                                fullWidth
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
+                                required
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                id="filled-basic"
+                                label="Rating"
+                                variant="filled"
+                                fullWidth
+                                value={rating}
+                                onChange={(e) => setRating(e.target.value)}
+                                required
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                              <TextField
+                                id="filled-basic"
+                                label="State"
+                                variant="filled"
+                                fullWidth
+                                value={state}
+                                onChange={(e) => setState(e.target.value)}
+                                required
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                              <TextField
+                                id="filled-basic"
+                                label="Country"
+                                variant="filled"
+                                fullWidth
+                                value={country}
+                                onChange={(e) => setCountry(e.target.value)}
+                                required
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                              <TextField
+                                id="filled-basic"
+                                label="Pincode"
+                                variant="filled"
+                                fullWidth
+                                value={pincode}
+                                onChange={(e) => setPincode(e.target.value)}
+                                required
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                id="filled-basic"
+                                label="Price Per Night"
+                                variant="filled"
+                                fullWidth
+                                value={pricePerNight}
+                                onChange={(e) =>
+                                  setPricePerNight(e.target.value)
+                                }
+                                required
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                id="filled-basic"
+                                label="Rooms"
+                                variant="filled"
+                                fullWidth
+                                value={room}
+                                onChange={(e) => setRoom(e.target.value)}
+                                required
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <FormControl fullWidth variant="filled">
+                                <InputLabel>Amenities</InputLabel>
+                                <Select
+                                  multiple
+                                  value={amenities}
+                                  onChange={handleAmenitiesChange}
+                                  renderValue={(selected) => (
+                                    <Box
+                                      sx={{
+                                        display: "flex",
+                                        flexWrap: "wrap",
+                                        gap: 1,
+                                      }}
+                                    >
+                                      {selected.map((value) => (
+                                        <Chip
+                                          key={value}
+                                          label={value}
+                                          sx={{
+                                            backgroundColor: "#ff7043", // Warm orange
+                                            color: "white",
+                                            fontWeight: "bold",
+                                            "&:hover": {
+                                              backgroundColor: "#ff5722",
+                                            }, // Darker on hover
+                                          }}
+                                        />
+                                      ))}
+                                    </Box>
+                                  )}
+                                >
+                                  {[
+                                    "Free WiFi",
+                                    "Swimming Pool",
+                                    "Parking",
+                                    "Restaurant",
+                                    "Gym",
+                                    "Air Conditioning",
+                                    "Breakfast Included",
+                                  ].map((amenity) => (
+                                    <MenuItem key={amenity} value={amenity}>
+                                      <Checkbox
+                                        checked={
+                                          amenities.indexOf(amenity) > -1
+                                        }
+                                        color="primary"
+                                      />
+                                      <ListItemText primary={amenity} />
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                            </Grid>
 
-                        {suggestions.length > 0 && (
-                          <Paper
-                            style={{
-                              position: "absolute",
-                              top: "100%",
-                              left: 0,
-                              width: "100%",
-                              zIndex: 10,
-                              background: "#fff",
-                              border: "1px solid #ccc",
-                              borderRadius: 4,
-                              boxShadow: "0px 4px 6px rgba(0,0,0,0.1)",
-                              maxHeight: "200px",
-                              overflowY: "auto",
+                            <Grid item xs={12} sm={6}>
+                              <FormControl fullWidth variant="filled">
+                                <InputLabel>Facilities</InputLabel>
+                                <Select
+                                  multiple
+                                  value={facilities}
+                                  onChange={handleFacilitiesChange}
+                                  renderValue={(selected1) => (
+                                    <Box
+                                      sx={{
+                                        display: "flex",
+                                        flexWrap: "wrap",
+                                        gap: 1,
+                                      }}
+                                    >
+                                      {selected1.map((value) => (
+                                        <Chip
+                                          key={value}
+                                          label={value}
+                                          sx={{
+                                            backgroundColor: "#ff7043", // Warm orange
+                                            color: "white",
+                                            fontWeight: "bold",
+                                            "&:hover": {
+                                              backgroundColor: "#ff5722",
+                                            }, // Darker on hover
+                                          }}
+                                        />
+                                      ))}
+                                    </Box>
+                                  )}
+                                >
+                                  {[
+                                    "Bed",
+                                    "Bath",
+                                    "Reception",
+                                    "Parking",
+                                  ].map((facility) => (
+                                    <MenuItem key={facility} value={facility}>
+                                      <Checkbox
+                                        checked={
+                                          facilities.indexOf(facility) > -1
+                                        }
+                                        color="primary"
+                                      />
+                                      <ListItemText primary={facility} />
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                            </Grid>
+                            <Grid item xs={12}>
+                              <TextField
+                                id="filled-basic"
+                                label="Description"
+                                variant="filled"
+                                fullWidth
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                required
+                              />
+                            </Grid>
+                            <Grid item xs={12}>
+                              <Button
+                                variant="contained"
+                                component="label"
+                                sx={{
+                                  backgroundColor: "#fe5757",
+                                  color: "white",
+                                  padding: "10px 20px",
+                                  borderRadius: "5px",
+                                  fontWeight: 700,
+                                  "&:hover": {
+                                    backgroundColor: "black",
+                                  },
+                                }}
+                              >
+                                Upload Images
+                                <input
+                                  type="file"
+                                  multiple
+                                  hidden
+                                  ref={fileInputRef}
+                                  onChange={handleImageChange}
+                                  accept="image/*"
+                                />
+                              </Button>
+
+                              {/* Image Preview with Delete Button */}
+                              <Grid container spacing={2} sx={{ mt: 2 }}>
+                                {images.map((image, index) => (
+                                  <Grid item key={index}>
+                                    <div
+                                      style={{
+                                        position: "relative",
+                                        display: "inline-block",
+                                        height: "100%",
+                                      }}
+                                    >
+                                      <img
+                                        src={URL.createObjectURL(image)}
+                                        alt="Preview"
+                                        width={100}
+                                        style={{
+                                          objectFit: "cover",
+                                          borderRadius: 5,
+                                          height: "100%",
+                                        }}
+                                      />
+                                      <IconButton
+                                        onClick={() => handleImageDelete(index)}
+                                        sx={{
+                                          position: "absolute",
+                                          top: 0,
+                                          right: 0,
+                                          backgroundColor: "rgba(0, 0, 0, 0.5)",
+                                          color: "white",
+                                        }}
+                                      >
+                                        <DeleteIcon />
+                                      </IconButton>
+                                    </div>
+                                  </Grid>
+                                ))}
+                              </Grid>
+                            </Grid>
+                          </Grid>
+                          <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                            sx={{
+                              mt: 3,
+                              backgroundColor: "#fe5757",
+                              fontWeight: 700,
                             }}
                           >
-                            {suggestions.map((suggestion, index) => (
-                              <MenuItem
-                                key={index}
-                                onClick={() => {
-                                  setCity(suggestion.descriptive_name);
-                                  setSuggestions([]); // Suggestions list ko empty karne ka code
-                                }}
-                              >
-                                {suggestion.descriptive_name}
-                              </MenuItem>
-                            ))}
-                          </Paper>
-                        )}
-                      </Grid>
-
-                      {/* Description */}
-                      <Grid item xs={12}>
-                        <TextField
-                          label="Description"
-                          fullWidth
-                          multiline
-                          rows={3}
-                          value={description}
-                          onChange={(e) => setDescription(e.target.value)}
-                          required
-                          variant="outlined"
-                        />
-                      </Grid>
-
-                      {/* Rating */}
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          label="Rating (1-5 Stars)"
-                          type="number"
-                          fullWidth
-                          inputProps={{ min: 0, max: 5 }}
-                          value={rating}
-                          onChange={(e) => {
-                            const value = Math.min(
-                              5,
-                              Math.max(0, Number(e.target.value))
-                            );
-                            setRating(value);
-                          }}
-                          required
-                          variant="outlined"
-                        />
-                      </Grid>
-
-                      {/* Amenities (Multi-Select Checkboxes) */}
-                      <Grid item xs={12}>
-                        <Typography variant="subtitle1" fontWeight="bold">
-                          Select Amenities:
-                        </Typography>
-                        <Paper variant="outlined" sx={{ p: 2 }}>
-                          <FormGroup row>
-                            {amenityOptions.map((option) => (
-                              <FormControlLabel
-                                key={option}
-                                control={
-                                  <Checkbox
-                                    value={option}
-                                    checked={amenities.includes(option)}
-                                    onChange={handleCheckboxChange}
-                                  />
-                                }
-                                label={option}
-                              />
-                            ))}
-                          </FormGroup>
-                        </Paper>
-                      </Grid>
-
-                      {/* Image Upload */}
-                      <Grid item xs={12}>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          style={{ display: "none" }}
-                          id="image-upload"
-                          onChange={handleImageUpload}
-                        />
-                        <label htmlFor="image-upload">
-                          <Button
-                            variant="contained"
-                            component="span"
-                            startIcon={<AddPhotoAlternate />}
-                            fullWidth
-                          >
-                            Upload Images
+                            Add Hotel
                           </Button>
-                        </label>
-
-                        {/* Image Previews */}
-                        <Grid container spacing={2} mt={2}>
-                          {images.map((image, index) => (
-                            <Grid item key={index} xs={4}>
-                              <Paper
-                                elevation={3}
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                  padding: 1,
-                                  position: "relative",
-                                  borderRadius: "10px",
-                                  overflow: "hidden",
-                                }}
-                              >
-                                <img
-                                  src={URL.createObjectURL(image)}
-                                  alt="Preview"
-                                  style={{
-                                    width: "100%",
-                                    height: "120px",
-                                    objectFit: "cover",
-                                    borderRadius: "10px",
-                                  }}
-                                />
-                                <IconButton
-                                  onClick={() => handleRemoveImage(index)}
-                                  sx={{
-                                    position: "absolute",
-                                    top: 0,
-                                    right: 0,
-                                  }}
-                                  color="error"
-                                >
-                                  <Delete />
-                                </IconButton>
-                              </Paper>
-                            </Grid>
-                          ))}
-                        </Grid>
-                      </Grid>
-
-                      {/* Submit Button */}
-                      <Grid item xs={12}>
-                        <Button
-                          type="submit"
-                          variant="contained"
-                          color="primary"
-                          fullWidth
-                          sx={{ py: 1.5, fontSize: "1rem" }}
-                        >
-                          Add Hotel
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </form>
-                </CardContent>
-              </Card>
-            </Container>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+
           <Footer />
         </div>
       </div>

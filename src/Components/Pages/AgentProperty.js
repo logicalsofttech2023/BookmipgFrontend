@@ -3,7 +3,7 @@ import AgentSidebar from '../NavFooter/AgentSidebar'
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 import { Navigate, useNavigate } from 'react-router-dom';
-import secureLocalStorage from 'react-secure-storage';
+import localStorage from 'react-secure-storage';
 import cities from '../Auth/cities';
 import swal from 'sweetalert';
 const AgentProperty = () => {
@@ -666,7 +666,7 @@ const AgentProperty = () => {
 
   const [statese ,setstatese] = useState(false)
   
-  let loginuserId = secureLocalStorage.getItem("loginuserid");
+  let loginuserId = localStorage.getItem("loginuserid");
 
   const Propertiesdata = (e) => {
     e.preventDefault();

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AgentSidebar from "../NavFooter/AgentSidebar";
 import { Link } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
+
 import axios from "axios";
 import swal from "sweetalert";
 
@@ -12,8 +12,8 @@ const Leads = () => {
   const [Dashboarddata, setDashboarddata] = useState();
 const [Leads, setLeads] = useState();
 
-  let loginid = secureLocalStorage.getItem("loginuserid");
-  let listingID = secureLocalStorage.getItem("ListingId");
+  let loginid = localStorage.getItem("loginuserid");
+  let listingID = localStorage.getItem("ListingId");
   useEffect(()=>{
     window.scrollTo(0, 0);
     GetDashboard()

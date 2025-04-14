@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import UserSidebar from "../NavFooter/UserSidebar";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
+
 import axios from "axios";
 import swal from "sweetalert";
 
@@ -12,7 +12,7 @@ const DashBoard = () => {
   const Navigate = useNavigate();
   const [MessageData, setMessageData] = useState();
   const [length,setlength] = useState();
-  const loginid = secureLocalStorage.getItem("loginuserid");
+  const loginid = localStorage.getItem("loginuserid");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -413,7 +413,7 @@ const DashBoard = () => {
                                         <div
                                           style={{ cursor: "pointer" }}
                                           onClick={() => {
-                                            secureLocalStorage.setItem(
+                                            localStorage.setItem(
                                               "ListingId",
                                               data?._id
                                             );
@@ -446,7 +446,7 @@ const DashBoard = () => {
                                             <h4 className="link-style-1 text-capitalize">
                                               <Link
                                                 onClick={() => {
-                                                  secureLocalStorage.setItem(
+                                                  localStorage.setItem(
                                                     "ListingId",
                                                     data?._id
                                                   );

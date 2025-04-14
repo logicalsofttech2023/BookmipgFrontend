@@ -46,7 +46,7 @@ import DeveloperprojectDetails from "./Components/Pages/DeveloperprojectDetails"
 import Agentcitylistinglead from "./Components/Pages/Agentcitylistinglead";
 import UserSelfListingLead from "./Components/Pages/UserSelfListingLead";
 import DeveloperProjectLeads from "./Components/Pages/DeveloperProjectLeads";
-import secureLocalStorage from "react-secure-storage";
+
 import Agentcontactus from "./Components/Pages/Agentcontactus";
 import Developercontactus from "./Components/Pages/Developercontactus";
 import Edituserproperty from "./Components/Pages/Edituserproperty";
@@ -168,7 +168,7 @@ const App1 = () => {
   ];
 
   const Navigate = useNavigate();
-  let role = secureLocalStorage.getItem("roleType");
+  let role = localStorage.getItem("roleType");
 
   return (
     <div className="body counter-scroll">

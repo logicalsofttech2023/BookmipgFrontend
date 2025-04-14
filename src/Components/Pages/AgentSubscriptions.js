@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react'
 import AgentSidebar from '../NavFooter/AgentSidebar'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import secureLocalStorage from 'react-secure-storage'
+import localStorage from 'react-secure-storage'
 import swal from 'sweetalert'
 const AgentSubscriptions = () => {
   const [PlainData,setPlainData] = useState();
   const Navigate = useNavigate();
-  let loginid = secureLocalStorage.getItem("loginuserid");
+  let loginid = localStorage.getItem("loginuserid");
   useEffect(()=>{
     window.scrollTo(0, 0);
     GepPlains();

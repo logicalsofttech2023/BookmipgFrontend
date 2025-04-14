@@ -3,7 +3,7 @@ import AgentSidebar from "../NavFooter/AgentSidebar";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { Navigate, useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
+
 import cities from "../Auth/cities";
 import swal from "sweetalert";
 
@@ -503,8 +503,8 @@ const Developerprojectupdate = () => {
     ],
   };
 
-  let listingID = secureLocalStorage.getItem("ListingId");
-  const loginid = secureLocalStorage.getItem("loginuserid");
+  let listingID = localStorage.getItem("ListingId");
+  const loginid = localStorage.getItem("loginuserid");
   const handleCheckboxChang = (event) => {
     const { value, checked } = event.target;
     setsuitables((prevState) => {
@@ -604,7 +604,7 @@ const Developerprojectupdate = () => {
   const states = Object?.keys(citiesByState);
 
   const [statese, setstatese] = useState(false);
-  let loginuserId = secureLocalStorage.getItem("loginuserid");
+  let loginuserId = localStorage.getItem("loginuserid");
 
   const Propertiesdata = (e) => {
     e.preventDefault();

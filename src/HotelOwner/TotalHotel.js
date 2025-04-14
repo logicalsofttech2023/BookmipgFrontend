@@ -1,217 +1,280 @@
-import React from "react";
-import { FaUserTie } from "react-icons/fa";
-import "./Dashboard.css";
+import React, { useEffect, useState } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
+import "./Dashboard.css";
+import Pagination from "@mui/material/Pagination";
+import Stack from "@mui/material/Stack";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+// const hotels = Array.from({ length: 50 }, (_, index) => ({
+//   id: index + 1,
+//   name: `The Grand Hotel ${index + 1}`,
+//   city: "Mumbai",
+//   status: "Active",
+//   image:
+//     "https://images.oyoroomscdn.com/uploads/hotel_image/92094/medium/xttqmtbllawt.jpg",
+//   description: "Luxury hotel with sea view and all.",
+// }));
 
 const TotalHotel = () => {
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 5;
+  let token = localStorage.getItem("token");
+  const [hotels, setHotels] = useState([]);
+  const navigate = useNavigate();
+
+  const handleChange = (event, value) => {
+    setPage(value);
+  };
+
+  const paginatedHotels = hotels.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
+
+  useEffect(() => {
+    fetchHotel();
+  }, []);
+
+  const fetchHotel = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}api/admin/getHotelsByOwnerId`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        setHotels(response?.data?.hotels);
+      } 
+    } catch (error) {
+      console.log(error);
+      
+    }
+  };
+
   return (
-    <div className="app-container app-theme-white body-tabs-shadow fixed-sidebar fixed-header">
+    <div className="container-scroller">
       <Header />
-      <div className="app-main">
+      <div className="container-fluid page-body-wrapper">
         <Sidebar />
-        <div className="app-main__outer">
-          <div className="app-main__inner">
-            <div className="row">
-              <div className="col-md-12">
-                <div className="main-card mb-3 card">
-                  <div className="card-header">
-                    Hotel List
-                    <div className="btn-actions-pane-right">
-                      <div role="group" className="btn-group-sm btn-group">
-                        <button className="active btn btn-focus">
-                          Last Week
-                        </button>
-                        <button className="btn btn-focus">All Month</button>
-                      </div>
+        <div className="main-panel">
+          <div className="content-wrapper" style={{ marginTop: "50px" }}>
+            <div className="page-header">Hotel List</div>
+            <div class="row" data-select2-id="11">
+              <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title mb-5">Hotel List</h4>
+                    <div className="table-responsive">
+                      <table
+                        className="table table-image table-bordered"
+                        style={{ border: "1px solid #dee2e6" }}
+                      >
+                        <thead>
+                          <tr>
+                            <th
+                              scope="col"
+                              style={{
+                                fontWeight: "500",
+                                border: "1px solid #dee2e6",
+                              }}
+                            >
+                              #
+                            </th>
+                            <th
+                              scope="col"
+                              style={{
+                                fontWeight: "500",
+                                fontSize: "16px",
+                                border: "1px solid #dee2e6",
+                              }}
+                            >
+                              Image
+                            </th>
+                            <th
+                              scope="col"
+                              style={{
+                                fontWeight: "500",
+                                fontSize: "16px",
+                                border: "1px solid #dee2e6",
+                              }}
+                            >
+                              Hotel Name
+                            </th>
+                            <th
+                              scope="col"
+                              style={{
+                                fontWeight: "500",
+                                fontSize: "16px",
+                                border: "1px solid #dee2e6",
+                              }}
+                            >
+                              City
+                            </th>
+                            <th
+                              scope="col"
+                              style={{
+                                fontWeight: "500",
+                                fontSize: "16px",
+                                border: "1px solid #dee2e6",
+                              }}
+                            >
+                              State
+                            </th>
+                            <th
+                              scope="col"
+                              style={{
+                                fontWeight: "500",
+                                fontSize: "16px",
+                                border: "1px solid #dee2e6",
+                              }}
+                            >
+                              Country
+                            </th>
+                            <th
+                              scope="col"
+                              style={{
+                                fontWeight: "500",
+                                fontSize: "16px",
+                                border: "1px solid #dee2e6",
+                              }}
+                            >
+                              Price/Night
+                            </th>
+                            <th
+                              scope="col"
+                              style={{
+                                fontWeight: "500",
+                                fontSize: "16px",
+                                border: "1px solid #dee2e6",
+                              }}
+                            >
+                              Rating
+                            </th>
+                            <th
+                              scope="col"
+                              style={{
+                                fontWeight: "500",
+                                fontSize: "16px",
+                                border: "1px solid #dee2e6",
+                              }}
+                            >
+                              Rooms
+                            </th>
+                            <th
+                              scope="col"
+                              style={{
+                                fontWeight: "500",
+                                fontSize: "16px",
+                                border: "1px solid #dee2e6",
+                              }}
+                            >
+                              Status
+                            </th>
+                            <th
+                              scope="col"
+                              style={{
+                                fontWeight: "500",
+                                fontSize: "16px",
+                                border: "1px solid #dee2e6",
+                              }}
+                            >
+                              Action
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+  {hotels.length === 0 ? (
+    <tr>
+      <td colSpan="11" style={{ textAlign: "center", padding: "20px" }}>
+        <strong>No hotels found</strong>
+      </td>
+    </tr>
+  ) : (
+    hotels.map((hotel, index) => (
+      <tr key={hotel._id}>
+        <th scope="row" style={{ border: "1px solid #dee2e6" }}>
+          {index + 1}
+        </th>
+        <td className="w-25" style={{ border: "1px solid #dee2e6" }}>
+          <img
+            src={`${process.env.REACT_APP_BASE_URL}${hotel.images[0]}`}
+            className="img-thumbnail"
+            alt={hotel.name}
+            style={{
+              height: "150px",
+              width: "200px",
+              objectFit: "cover",
+              minWidth: "200px",
+              display: "block",
+              borderRadius: "unset",
+            }}
+          />
+        </td>
+        <td style={{ border: "1px solid #dee2e6", alignContent: "center" }}>
+          {hotel.name}
+        </td>
+        <td style={{ border: "1px solid #dee2e6", alignContent: "center" }}>
+          {hotel.city}
+        </td>
+        <td style={{ border: "1px solid #dee2e6", alignContent: "center" }}>
+          {hotel.state}
+        </td>
+        <td style={{ border: "1px solid #dee2e6", alignContent: "center" }}>
+          {hotel.country}
+        </td>
+        <td style={{ border: "1px solid #dee2e6", alignContent: "center" }}>
+          ₹{hotel.pricePerNight}
+        </td>
+        <td style={{ border: "1px solid #dee2e6", alignContent: "center" }}>
+          {hotel.rating}
+        </td>
+        <td style={{ border: "1px solid #dee2e6", alignContent: "center" }}>
+          {hotel.room}
+        </td>
+        <td style={{ border: "1px solid #dee2e6", alignContent: "center" }}>
+          <span
+            className={`badge ${hotel.isAvailable ? "bg-success" : "bg-danger"}`}
+          >
+            {hotel.isAvailable ? "Available" : "Not Available"}
+          </span>
+        </td>
+        <td style={{ border: "1px solid #dee2e6", alignContent: "center" }}>
+          <button
+            onClick={() => navigate(`/updateHotel/${hotel._id}`)}
+            className="btn btn-primary btn-sm"
+          >
+            Edit
+          </button>
+        </td>
+      </tr>
+    ))
+  )}
+</tbody>
+
+                      </table>
                     </div>
-                  </div>
-                  <div className="table-responsive">
-                    <table className="align-middle mb-0 table table-borderless table-striped table-hover">
-                      <thead>
-                        <tr>
-                          <th className="text-center">#</th>
-                          <th>Name</th>
-                          <th className="text-center">City</th>
-                          <th className="text-center">Status</th>
-                          <th className="text-center">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td className="text-center text-muted">#345</td>
-                          <td>
-                            <div className="widget-content p-0">
-                              <div className="widget-content-wrapper">
-                                <div className="widget-content-left mr-3">
-                                  <div className="widget-content-left">
-                                    <img
-                                      width={40}
-                                      className="rounded-circle"
-                                      src="assets/images/avatars/4.jpg"
-                                      alt
-                                    />
-                                  </div>
-                                </div>
-                                <div className="widget-content-left flex2">
-                                  <div className="widget-heading">John Doe</div>
-                                  <div className="widget-subheading opacity-7">
-                                    Web Developer
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="text-center">Madrid</td>
-                          <td className="text-center">
-                            <div className="badge badge-warning">Pending</div>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              type="button"
-                              id="PopoverCustomT-1"
-                              className="btn btn-primary btn-sm"
-                            >
-                              Details
-                            </button>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="text-center text-muted">#347</td>
-                          <td>
-                            <div className="widget-content p-0">
-                              <div className="widget-content-wrapper">
-                                <div className="widget-content-left mr-3">
-                                  <div className="widget-content-left">
-                                    <img
-                                      width={40}
-                                      className="rounded-circle"
-                                      src="assets/images/avatars/3.jpg"
-                                      alt
-                                    />
-                                  </div>
-                                </div>
-                                <div className="widget-content-left flex2">
-                                  <div className="widget-heading">
-                                    Ruben Tillman
-                                  </div>
-                                  <div className="widget-subheading opacity-7">
-                                    Etiam sit amet orci eget
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="text-center">Berlin</td>
-                          <td className="text-center">
-                            <div className="badge badge-success">Completed</div>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              type="button"
-                              id="PopoverCustomT-2"
-                              className="btn btn-primary btn-sm"
-                            >
-                              Details
-                            </button>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="text-center text-muted">#321</td>
-                          <td>
-                            <div className="widget-content p-0">
-                              <div className="widget-content-wrapper">
-                                <div className="widget-content-left mr-3">
-                                  <div className="widget-content-left">
-                                    <img
-                                      width={40}
-                                      className="rounded-circle"
-                                      src="assets/images/avatars/2.jpg"
-                                      alt
-                                    />
-                                  </div>
-                                </div>
-                                <div className="widget-content-left flex2">
-                                  <div className="widget-heading">
-                                    Elliot Huber
-                                  </div>
-                                  <div className="widget-subheading opacity-7">
-                                    Lorem ipsum dolor sic
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="text-center">London</td>
-                          <td className="text-center">
-                            <div className="badge badge-danger">
-                              In Progress
-                            </div>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              type="button"
-                              id="PopoverCustomT-3"
-                              className="btn btn-primary btn-sm"
-                            >
-                              Details
-                            </button>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="text-center text-muted">#55</td>
-                          <td>
-                            <div className="widget-content p-0">
-                              <div className="widget-content-wrapper">
-                                <div className="widget-content-left mr-3">
-                                  <div className="widget-content-left">
-                                    <img
-                                      width={40}
-                                      className="rounded-circle"
-                                      src="assets/images/avatars/1.jpg"
-                                      alt
-                                    />
-                                  </div>
-                                </div>
-                                <div className="widget-content-left flex2">
-                                  <div className="widget-heading">
-                                    Vinnie Wagstaff
-                                  </div>
-                                  <div className="widget-subheading opacity-7">
-                                    UI Designer
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="text-center">Amsterdam</td>
-                          <td className="text-center">
-                            <div className="badge badge-info">On Hold</div>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              type="button"
-                              id="PopoverCustomT-4"
-                              className="btn btn-primary btn-sm"
-                            >
-                              Details
-                            </button>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className="d-block text-center card-footer">
-                    <button className="mr-2 btn-icon btn-icon-only btn btn-outline-danger">
-                      <i className="pe-7s-trash btn-icon-wrapper"> </i>
-                    </button>
-                    <button className="btn-wide btn btn-success">Save</button>
+
+                    <div className="card-footer d-flex justify-content-center">
+                      <Stack spacing={2}>
+                        <Pagination
+                          count={Math.ceil(hotels.length / rowsPerPage)}
+                          page={page}
+                          onChange={handleChange}
+                          color="primary"
+                        />
+                      </Stack>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
           <Footer />
         </div>
       </div>

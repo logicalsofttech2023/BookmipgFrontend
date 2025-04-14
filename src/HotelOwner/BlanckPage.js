@@ -1,33 +1,38 @@
-import React from "react";
-import { FaUserTie } from "react-icons/fa";
-import "./Dashboard.css";
-import  Header  from "./Header";
-import  Sidebar  from "./Sidebar";
-import  Footer  from "./Footer";
+import React, { useState } from "react";
+import Header from "./Header";
+import Sidebar from "./Sidebar";
+import Footer from "./Footer";
 
 const BlanckPage = () => {
-    return (
-        <div className="app-container app-theme-white body-tabs-shadow fixed-sidebar fixed-header">
-          <Header/>
-          <div className="app-main">
-          <Sidebar/>
-            <div className="app-main__outer">
-              <div className="app-main__inner">
-                <div className="row">
-                  <div className="col-md-12">
-                    <div className="main-card mb-3 card">
-                      <div className="card-header">
-                        Active Users
-                      </div>
-                    </div>
+
+  return (
+    <div className="container-scroller">
+      <Header />
+      <div className="container-fluid page-body-wrapper">
+        <Sidebar />
+        <div className="main-panel">
+          <div className="content-wrapper" style={{ marginTop: "50px" }}>
+            <div className="page-header">Contact Us</div>
+            <div class="row" data-select2-id="11">
+              <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title mb-5">Contact Us</h4>
+
+
+
+                    
                   </div>
                 </div>
               </div>
-              <Footer/>
             </div>
           </div>
-        </div>
-      );
-}
 
-export default BlanckPage
+          <Footer />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BlanckPage;
