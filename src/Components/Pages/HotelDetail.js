@@ -41,6 +41,9 @@ const HotelDetail = () => {
   });
   const [selectedRooms, setSelectedRooms] = useState(1);
   const [isFavorite, setIsFavorite] = useState(true);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [pricePerNight, setPricePerNight] = useState();
+  const [originalPrice, setOriginalPricePerNight] = useState();
 
   const handleGuestChange = (type, value) => {
     setSelectedGuests((prev) => ({
@@ -76,6 +79,8 @@ const HotelDetail = () => {
 
       setlistingData(res.data.hotel);
       setIsFavorite(res?.data?.hotel?.isFavorite || false);
+      setPricePerNight(res?.data?.hotel?.pricePerNight || 0);
+      setOriginalPricePerNight(res?.data?.hotel?.originalPricePerNight || 0);
     } catch (error) {
       console.error("Error fetching hotel:", error.response?.data || error);
     }
@@ -253,8 +258,8 @@ const HotelDetail = () => {
     }
   };
 
-  const originalPricePerNight = listingData?.originalPricePerNight;
-  const discountedPricePerNight = listingData?.pricePerNight || 0;
+  const originalPricePerNight = originalPrice || 0;
+  const discountedPricePerNight = pricePerNight || 0;
   const discountPercentage = discountedPricePerNight
     ? Math.round((1 - discountedPricePerNight / originalPricePerNight) * 100)
     : 0;
@@ -375,6 +380,19 @@ const HotelDetail = () => {
         couponId: coupons?._id,
       },
     });
+  };
+
+  const handleRoomSelect = (room) => {
+    if (selectedRoom?._id === room._id) {
+      // Unselect room
+      setSelectedRoom(null);
+      setPricePerNight(listingData?.pricePerNight);
+      setOriginalPricePerNight(listingData?.originalPricePerNight);
+    } else {
+      // Select new room
+      setSelectedRoom(room);
+      setPricePerNight(room.price);
+      setOriginalPricePerNight(room.originalPrice);}
   };
 
   return (
@@ -513,7 +531,7 @@ const HotelDetail = () => {
                         color: "#0c0a15",
                       }}
                     >
-                      ₹{listingData?.pricePerNight}
+                      ₹{pricePerNight}
                     </span>
 
                     <span
@@ -525,7 +543,7 @@ const HotelDetail = () => {
                         marginLeft: "10px",
                       }}
                     >
-                      ₹{listingData?.originalPricePerNight}
+                      ₹{originalPrice}
                     </span>
                   </div>
                 </div>
@@ -689,9 +707,6 @@ const HotelDetail = () => {
                   <p className="text-1 text-color-2">
                     {listingData?.description}
                   </p>
-                  {/* <p className="text-2 text-color-2">
-               
-              </p> */}
                 </div>
 
                 <div className="wrap-overview wrap-style">
@@ -737,6 +752,150 @@ const HotelDetail = () => {
                     </div>
                   )}
                 </div>
+
+                <div className="wrap-text wrap-style container mt-5">
+                  <h3 className="titles mb-4" style={{ color: "#000" }}>
+                    Choose your room
+                  </h3>
+
+                  {listingData?.roomTypes?.map((room, index) => {
+                    const visibleAmenities = showAll
+                      ? room.typeAmenities
+                      : room.typeAmenities.slice(0, 5);
+                    const hasMoreThanFive = room.typeAmenities.length > 5;
+
+                    return (
+                      <div
+                        key={room._id}
+                        className="card shadow-sm p-4 border-0 mb-5"
+                        itemProp="containsPlace"
+                        itemScope
+                        itemType="http://schema.org/HotelRoom"
+                      >
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                          <h4
+                            className="fw-bold mb-0"
+                            itemProp="name"
+                            style={{ color: "#000" }}
+                          >
+                            {room.type} Room
+                          </h4>
+                          <span
+                            className="badge fs-6"
+                            style={{
+                              backgroundColor:
+                                selectedRoom?._id === room._id
+                                  ? "#ee2e24"
+                                  : "#000",
+                              color: "#fff",
+                            }}
+                          >
+                            {selectedRoom?._id === room._id
+                              ? "SELECTED ✅"
+                              : "SELECT"}
+                          </span>
+                        </div>
+
+                        <div className="room-details mb-3">
+  <span>
+    Room size: <strong>{room.size} sqm</strong>
+  </span>
+  <span className="separator">|</span>
+  <span>
+    Bed Type: <strong>{room.bedType}</strong>
+  </span>
+  <span className="separator">|</span>
+  <span>
+    Capacity: <strong>{room.capacity} persons</strong>
+  </span>
+</div>
+
+                        <div
+                          className="mb-2 room-details"
+                          style={{ color: "#000" }}
+                        >
+                          Smoking Allowed:{" "}
+                          <strong>{room.smokingAllowed ? "Yes" : "No"}</strong>
+                        </div>
+                        <hr />
+
+                        {/* Amenities */}
+                        <div className="d-flex flex-wrap gap-3 mb-4">
+                          {visibleAmenities.map((amenity, i) => (
+                            <div className="d-flex align-items-center" key={i}>
+                              <FaRegCheckCircle className="text-danger fs-5 me-2" />
+                              <span style={{ color: "#000" }}>{amenity}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {hasMoreThanFive && (
+                          <div
+                            style={{
+                              color: "#ee2e24",
+                              fontSize: "16px",
+                              fontWeight: "600",
+                              cursor: "pointer",
+                              marginBottom: "15px",
+                            }}
+                            onClick={() => setShowAll(!showAll)}
+                          >
+                            {showAll ? "Show Less" : "Show More"}
+                          </div>
+                        )}
+
+                        {/* Room Image & Price */}
+                        <div className="row align-items-center">
+                          <div className="col-md-6 mb-3 mb-md-0">
+                            <img
+                              className="img-fluid rounded shadow-sm"
+                              src="https://images.oyoroomscdn.com/uploads/hotel_image/81704/thumb/jmieoomddkua.jpg"
+                              alt="Room"
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <div className="border p-3 rounded bg-light">
+                              <div className="mb-2">
+                                <span
+                                  className="fs-4 fw-bold"
+                                  style={{ color: "#ee2e24" }}
+                                >
+                                  ₹{room.price}
+                                </span>
+                                <span className="text-muted ms-2 fs-4 fw-bold">
+                                  <del>₹{room.originalPrice}</del>
+                                  
+                                </span>
+                              </div>
+                              
+
+                              <button
+                                className={`btn w-100 ${
+                                  selectedRoom?._id === room._id
+                                    ? "text-white"
+                                    : "text-danger border-danger"
+                                }`}
+                                style={{
+                                  backgroundColor:
+                                    selectedRoom?._id === room._id
+                                      ? "#ee2e24"
+                                      : "#fff",
+                                  border: "2px solid #ee2e24",
+                                }}
+                                onClick={() => handleRoomSelect(room)}
+                              >
+                                {selectedRoom?._id === room._id
+                                  ? "SELECTED ✅"
+                                  : "SELECT"}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
                 <div
                   style={{
                     overflow: "scroll",
@@ -915,7 +1074,7 @@ const HotelDetail = () => {
                             textDecoration: "line-through",
                           }}
                         >
-                          ₹{originalPricePerNight}
+                          ₹{originalPrice}
                         </span>
                         <span
                           style={{

@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import face1 from "./assets/images/faces/face1.jpg";
+import axios from "axios";
 
 const Sidebar = () => {
   const location = useLocation();
+  const [ownerData, setOwnerData] = useState("");
+  const [totalHotel, setTotalHotel] = useState(0);
+  const token = localStorage.getItem("token");
 
   const getInitialMenuState = () => {
     const savedState = localStorage.getItem("sidebarMenus");
@@ -25,6 +29,31 @@ const Sidebar = () => {
     localStorage.setItem("sidebarMenus", JSON.stringify(openMenus));
   }, [location.pathname]);
 
+  useEffect(() => {
+    const fetchOwnerData = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_BASE_URL}api/user/getOwnerById`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.status === 200) {
+          console.log("Owner data fetched successfully:", response.data);
+
+          setOwnerData(response.data.data);
+          setTotalHotel(response.totalHotel);
+        }
+      } catch (error) {
+        console.error("Error fetching owner data:", error);
+      }
+    };
+
+    fetchOwnerData();
+  }, [token]);
+
   return (
     <nav className="sidebar sidebar-offcanvas" id="sidebar">
       <ul className="nav">
@@ -35,8 +64,7 @@ const Sidebar = () => {
               <span className="login-status online" />
             </div>
             <div className="nav-profile-text d-flex flex-column">
-              <span className="font-weight-bold mb-2">Hello Test</span>
-              <span className="text-secondary text-small">Hotel Owner</span>
+              <span className="font-weight-bold mb-2">Hello {ownerData.name}</span>
             </div>
           </div>
         </li>
@@ -76,16 +104,19 @@ const Sidebar = () => {
             }}
           >
             <ul className="nav flex-column sub-menu">
-              <li className="nav-item">
-                <Link
-                  className={`nav-link ${
-                    location.pathname === "/addHotel" ? "active" : ""
-                  }`}
-                  to={"/addHotel"}
-                >
-                  Add Hotel
-                </Link>
-              </li>
+              {totalHotel < 1 ? (
+                <li className="nav-item">
+                  <Link
+                    className={`nav-link ${
+                      location.pathname === "/addHotel" ? "active" : ""
+                    }`}
+                    to={"/addHotel"}
+                  >
+                    Add Hotel
+                  </Link>
+                </li>
+              ) : null}
+
               <li className="nav-item">
                 <Link
                   className={`nav-link ${
@@ -99,8 +130,6 @@ const Sidebar = () => {
             </ul>
           </div>
         </li>
-
-        
 
         {/* Booking Management */}
         <li className="nav-item">
@@ -173,7 +202,7 @@ const Sidebar = () => {
         <li
           className={`nav-item ${
             location.pathname === "/hotelOwnerContactUs" ? "active" : ""
-          }` }
+          }`}
         >
           <Link
             className={`nav-link ${

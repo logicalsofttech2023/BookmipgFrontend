@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -13,6 +13,12 @@ import {
   useMediaQuery,
   Box,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -30,7 +36,6 @@ import logo from "./assets/raw-logo-bookmipg-original.png";
 import EventIcon from "@mui/icons-material/Event";
 import LogoutIcon from "@mui/icons-material/Logout";
 
-
 const Header = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState({});
@@ -38,6 +43,8 @@ const Header = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const location = useLocation();
   const navigate = useNavigate();
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const token = localStorage.getItem("token");
 
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
@@ -47,10 +54,30 @@ const Header = () => {
     setOpenSubmenu((prev) => ({ ...prev, [menu]: !prev[menu] }));
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
+  const handleLogoutClick = () => {
+    setLogoutDialogOpen(true);
   };
+
+  const handleLogoutConfirm = () => {
+    localStorage.clear();
+    navigate("/vendorLogin");
+  };
+
+  const handleLogoutCancel = () => {
+    setLogoutDialogOpen(false);
+  };
+
+  let role = localStorage.getItem("roleType");
+
+  useEffect(() => {
+    if (role === "user") {
+      navigate("/dashboard");
+    }
+
+    if (!token) {
+      navigate("/vendorLogin");
+    }
+  }, [0]);
 
   return (
     <>
@@ -78,9 +105,15 @@ const Header = () => {
             <Avatar src={face1} alt="User" />
           </IconButton>
 
-          <IconButton color="inherit" onClick={handleLogout} title="Logout">
-            <LogoutIcon />
-          </IconButton>
+          {token && (
+            <IconButton
+              color="inherit"
+              onClick={handleLogoutClick}
+              title="Logout"
+            >
+              <LogoutIcon />
+            </IconButton>
+          )}
         </Toolbar>
       </AppBar>
 
@@ -211,6 +244,22 @@ const Header = () => {
           </ListItem>
         </List>
       </Drawer>
+      <Dialog open={logoutDialogOpen} onClose={handleLogoutCancel}>
+        <DialogTitle>Logout Confirmation</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Kya aap sach me logout karna chahte hain?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleLogoutCancel} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleLogoutConfirm} color="error" autoFocus>
+            Logout
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

@@ -11161,6 +11161,27 @@ body .dribbble img {
   height: 50vh;
 }
 
+.room-details {
+  color: #1a1a1a;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  line-height: 1.6;
+}
+
+.room-details strong {
+  color: #ee2e24; /* red accent */
+  font-weight: 600;
+}
+
+.separator {
+  margin: 0 6px;
+  color: #888; /* subtle separator color */
+}
+
+
 
 
 

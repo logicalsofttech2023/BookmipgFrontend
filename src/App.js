@@ -35,6 +35,7 @@ import HotelOwnerAboutUs from "./HotelOwner/HotelOwnerAboutUs";
 import AddCostomer from "./HotelOwner/AddCostomer";
 import UpdateHotel from "./HotelOwner/UpdateHotel";
 import UpcomingBooking from "./HotelOwner/UpcomingBooking";
+import VendorLogin from "./HotelOwner/VendorLogin";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -43,7 +44,7 @@ import TermsAndCondition from "./Components/Pages/TermsAndCondition";
 import GuestPolicy from "./Components/Pages/GuestPolicy";
 import PrivacyPolicy from "./Components/Pages/PrivacyPolicy";
 import MyFavorites from "./Components/Pages/MyFavorites";
-// import Loader from "./SvgPathLoader";
+import Loader from "./tube-spinner (1).svg";
 // import HousePolicy from "./HotelOwner/HousePolicy";
 // import RulesAndRestrictions from "./HotelOwner/RulesAndRestrictions";
 // import CancellationPolicy from "./HotelOwner/CancellationPolicy";
@@ -83,6 +84,8 @@ const App = () => {
       "/bookingconfirmed/",
       "/hotelownerprivacypolicy",
       "/hotelownertermsandcondition",
+      "/vendorlogin",
+      
     ];
 
     const shouldHide =
@@ -99,16 +102,20 @@ const App = () => {
     <div className="body counter-scroll">
       {isLoading ? (
         <div
-          style={{
-            height: "100vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          loder
-          {/* <Loader /> */}
-        </div>
+        style={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <img
+          src={Loader}
+          alt="Loading..."
+          style={{ width: "80px", height: "80px", color: "red" }} // Adjust size here
+        />
+      </div>
+      
       ) : (
         <>
           {showNavbarFooter && <Navbar />}
@@ -172,6 +179,10 @@ const App = () => {
             <Route
               path="/hotelOwnerTermsAndCondition"
               element={<HotelOwnerTermsAndCondition />}
+            />
+            <Route
+              path="/vendorLogin"
+              element={<VendorLogin />}
             />
           </Routes>
           {showNavbarFooter && <Footer />}

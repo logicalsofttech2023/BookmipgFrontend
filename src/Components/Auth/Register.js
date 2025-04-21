@@ -3,13 +3,14 @@ import React, { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import cities from "./cities";
-import Sidebar  from "./Sidebar";
+import Sidebar from "./Sidebar";
 
 const Register = () => {
   const Navigate = useNavigate();
   const [name, setName] = useState();
   const [email, setEmail] = useState();
   const [roleType, setRoleType] = useState("user");
+  const [password, setPassword] = useState("");
 
   const handleRoleChange = (role) => {
     setRoleType(role);
@@ -29,6 +30,7 @@ const Register = () => {
       name: name,
       email: email,
       role: roleType,
+      ...(roleType === "vendor" && { password }),
     };
 
     axios
@@ -48,7 +50,7 @@ const Register = () => {
             }, 3000);
           } else {
             setTimeout(() => {
-              Navigate("/dashboard");
+              Navigate("/vendorLogin");
             }, 3000);
           }
         }
@@ -95,9 +97,21 @@ const Register = () => {
                             }`}
                             onClick={() => handleRoleChange("user")}
                           >
-                            <i className="far fa-check-circle" />
+                            <i
+                              style={{ color: "black" }}
+                              className="far fa-check-circle"
+                            />
                             <h6 style={{ marginTop: "2px" }} className="inner">
-                              <Link style={{ fontSize: 12, color: "white", textDecoration: "none", fontWeight: "700" }}>Costomer</Link>
+                              <Link
+                                style={{
+                                  fontSize: 12,
+                                  color: "Black",
+                                  textDecoration: "none",
+                                  fontWeight: "700",
+                                }}
+                              >
+                                Costomer
+                              </Link>
                             </h6>
                           </li>
                           <li
@@ -111,9 +125,21 @@ const Register = () => {
                             }`}
                             onClick={() => handleRoleChange("vendor")}
                           >
-                            <i className="far fa-check-circle" />
+                            <i
+                              style={{ color: "black" }}
+                              className="far fa-check-circle"
+                            />
                             <h6 style={{ marginTop: "2px" }} className="inner">
-                              <Link style={{ fontSize: 12, color: "white", textDecoration: "none", fontWeight: "700" }}>Hotel Owner</Link>
+                              <Link
+                                style={{
+                                  fontSize: 12,
+                                  color: "black",
+                                  textDecoration: "none",
+                                  fontWeight: "700",
+                                }}
+                              >
+                                Hotel Owner
+                              </Link>
                             </h6>
                           </li>
                           &nbsp;
@@ -171,6 +197,25 @@ const Register = () => {
                       />
                     </div>
 
+                    {roleType === "vendor" && (
+                      <div
+                        className="form-group-1 search-form form-style"
+                        style={{ marginBottom: 15 }}
+                      >
+                        <label style={{ marginBottom: 5 }} className="fw-6">
+                          Password
+                        </label>
+                        <input
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          type="password"
+                          className="search-field"
+                          placeholder="Enter Password"
+                          required
+                        />
+                      </div>
+                    )}
+
                     <div
                       className="form-group-1 search-form form-style"
                       style={{
@@ -180,7 +225,11 @@ const Register = () => {
                       }}
                     >
                       <button
-                        style={{ backgroundColor: "red", color: "white", fontWeight: "600" }}
+                        style={{
+                          backgroundColor: "red",
+                          color: "white",
+                          fontWeight: "600",
+                        }}
                         className="search-field"
                         type="submit"
                       >

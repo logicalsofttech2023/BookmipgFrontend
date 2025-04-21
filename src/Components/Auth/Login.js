@@ -27,22 +27,28 @@ const Login = () => {
     axios
       .post(`${process.env.REACT_APP_BASE_URL}api/auth/generateOtp`, userdata)
       .then((response) => {
-        console.log(response.data.data.phone);
-
         if (response.status === 200) {
-          toast.success(response.data.message);
-          localStorage.setItem("loginOtp", response.data.data.otp);
-          localStorage.setItem("loginMobileNumber", response.data.data.phone);
-          setLoading(true);
-          setTimeout(() => {
-            Navigate("/VeryfyOtp");
-          }, 3000);
+          console.log(response.data);
+          
+          if (response.data.data.role == "vendor") {
+            localStorage.setItem("roleType", response.data.data.role);
+            setTimeout(() => {
+              Navigate("/vendorLogin");
+            }, 3000);
+          } else {
+            toast.success(response.data.message);
+            localStorage.setItem("loginOtp", response.data.data.otp);
+            localStorage.setItem("loginMobileNumber", response.data.data.phone);
+            setLoading(true);
+            setTimeout(() => {
+              Navigate("/VeryfyOtp");
+            }, 3000);
+          }
         }
       })
       .catch((error) => {
         if (error.response && error.response.status === 400) {
           toast.error(error.response.data.message);
-        } else {
         }
       });
   };
@@ -110,7 +116,7 @@ const Login = () => {
                             style={{
                               backgroundColor: "black",
                               color: "white",
-                              fontWeight: "600"
+                              fontWeight: "600",
                             }}
                             type="submit"
                             className="search-field"
@@ -127,7 +133,7 @@ const Login = () => {
                             style={{
                               backgroundColor: "red",
                               color: "white",
-                              fontWeight: "600"
+                              fontWeight: "600",
                             }}
                             type="submit"
                             className="search-field"

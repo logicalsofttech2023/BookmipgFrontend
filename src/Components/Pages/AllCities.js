@@ -560,6 +560,7 @@ const AllCities = () => {
                       minWidth: "20px",
                       paddingLeft: "25px",
                     }}
+                    to={`/hotelList?city=${city}`}
                   >
                     {city}
                   </Link>

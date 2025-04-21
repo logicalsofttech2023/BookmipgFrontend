@@ -37,6 +37,16 @@ const Navbar = () => {
 
   const loginId = localStorage.getItem("token");
 
+  useEffect(() => {
+    if (role === "vendor") {
+      Navigate("/dashboard");
+    }
+    else{
+      Navigate("/");
+    }
+  }, [])
+  
+
   let Logout = () => {
     swal({
       title: "Are you sure?",

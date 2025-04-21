@@ -102,7 +102,7 @@ const BookingSummary = () => {
         room: selectedRooms.toString(),
         adults: selectedGuests.adults,
         children: selectedGuests.children,
-        totalPrice: finalPrice
+        totalPrice: finalPrice,
       };
 
       try {
@@ -114,7 +114,7 @@ const BookingSummary = () => {
               Authorization: `Bearer ${token}`,
             },
           }
-        );        
+        );
 
         if (response.status === 201) {
           toast.success("Booking Successful!");
@@ -421,26 +421,28 @@ const BookingSummary = () => {
                               >
                                 {loading && (
                                   <div
-                                  style={{
-                                    position: "fixed",
-                                    top: 0,
-                                    left: 0,
-                                    width: "100vw",
-                                    height: "100vh",
-                                    backgroundColor: "rgba(0, 0, 0, 0.7)",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    zIndex: 9999,
-                                    color: "#ffffff",
-                                    fontSize: "20px",
-                                    fontWeight: "bold",
-                                  }}
-                                >
-                                  <ClipLoader color="#ffffff" size={80} />
-                                  <p style={{ marginTop: "20px" }}>Your Room booking is in progress...</p>
-                                </div>
+                                    style={{
+                                      position: "fixed",
+                                      top: 0,
+                                      left: 0,
+                                      width: "100vw",
+                                      height: "100vh",
+                                      backgroundColor: "rgba(0, 0, 0, 0.7)",
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      zIndex: 9999,
+                                      color: "#ffffff",
+                                      fontSize: "20px",
+                                      fontWeight: "bold",
+                                    }}
+                                  >
+                                    <ClipLoader color="#ffffff" size={80} />
+                                    <p style={{ marginTop: "20px" }}>
+                                      Your Room booking is in progress...
+                                    </p>
+                                  </div>
                                 )}
                                 <button
                                   type="button"
@@ -605,13 +607,6 @@ const BookingSummary = () => {
                                   </div>
 
                                   {/* Room Details */}
-                                  <div style={{ margin: "10px 0" }}>
-                                    <h3
-                                      style={{ margin: "0", fontSize: "16px" }}
-                                    >
-                                      Classic Room
-                                    </h3>
-                                  </div>
 
                                   {/* Pricing Details */}
                                   <div
@@ -623,68 +618,33 @@ const BookingSummary = () => {
                                     }}
                                   >
                                     <div>
-                                      <p>Room price:</p>
-                                      <p>Instant discount:</p>
-                                      <p>
-                                        {couponCode
-                                          ? `${couponCode} Coupon Discount:`
-                                          : "Coupon Discount:"}
-                                      </p>
-                                      <p>Taxes & Fees:</p>
-                                      <h3
+                                      <h5
                                         style={{
                                           margin: "10px 0",
                                           color: "#d32f2f",
                                         }}
                                       >
                                         Payable Amount:
-                                      </h3>
+                                      </h5>
                                     </div>
                                     <div style={{ textAlign: "right" }}>
-                                      <p
-                                        style={{
-                                          textDecoration: "line-through",
-                                          color: "black",
-                                          fontWeight: "600",
-                                        }}
-                                      >
-                                        ₹{originalPricePerNight}
-                                      </p>
-                                      <p
-                                        style={{
-                                          textDecoration: "line-through",
-                                          color: "black",
-                                          fontWeight: "600",
-                                        }}
-                                      >
-                                        -₹{discountAmount}
-                                      </p>
-                                      <p
-                                        style={{
-                                          textDecoration: "line-through",
-                                          color: "black",
-                                          fontWeight: "600",
-                                        }}
-                                      >
-                                        -₹{totalSavings}
-                                      </p>
-                                      <p
-                                        style={{
-                                          color: "black",
-                                          fontWeight: "600",
-                                        }}
-                                      >
-                                        ₹{taxesAmount}
-                                      </p>
                                       <h3
                                         style={{
-                                          margin: "10px 0",
                                           color: "rgb(211, 47, 47)",
                                           fontWeight: "600",
                                         }}
                                       >
                                         ₹{finalPrice}
                                       </h3>
+                                      <div
+                                        style={{
+                                          fontSize: "12px",
+                                          color: "#666",
+                                          marginTop: "-5px",
+                                        }}
+                                      >
+                                        Includes all taxes and fees
+                                      </div>
                                     </div>
                                   </div>
                                 </div>

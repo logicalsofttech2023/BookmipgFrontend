@@ -53,6 +53,19 @@ const AddHotel = () => {
   const fileInputRef = useRef(null);
   let token = localStorage.getItem("token");
   const navigate = useNavigate();
+  const [roomTypes, setRoomTypes] = useState([
+    {
+      type: "",
+      typeAmenities: [],
+      size: "",
+      bedType: "",
+      capacity: "",
+      price: "",
+      originalPrice: "",
+      description: "",
+      smokingAllowed: false,
+    },
+  ]);
 
   const handleImageChange = (event) => {
     const files = Array.from(event.target.files);
@@ -98,6 +111,7 @@ const AddHotel = () => {
     formData.append("room", room);
     formData.append("amenities", amenities);
     formData.append("facilities", facilities);
+    formData.append("roomTypes", JSON.stringify(roomTypes));
 
     images.forEach((image) => {
       formData.append("images", image);
@@ -139,6 +153,40 @@ const AddHotel = () => {
       target: { value },
     } = event;
     setFacilities(typeof value === "string" ? value.split(",") : value);
+  };
+
+  const handleRoomTypeChange = (index, field, value) => {
+    const updated = [...roomTypes];
+    updated[index][field] = value;
+    setRoomTypes(updated);
+  };
+
+  const handleRoomTypeAmenityChange = (index, amenities) => {
+    const updated = [...roomTypes];
+    updated[index].typeAmenities = amenities;
+    setRoomTypes(updated);
+  };
+
+  const addRoomType = () => {
+    setRoomTypes([
+      ...roomTypes,
+      {
+        type: "",
+        typeAmenities: [],
+        size: "",
+        bedType: "",
+        capacity: "",
+        price: "",
+        description: "",
+        smokingAllowed: false,
+      },
+    ]);
+  };
+
+  const removeRoomType = (index) => {
+    const updated = [...roomTypes];
+    updated.splice(index, 1);
+    setRoomTypes(updated);
   };
 
   return (
@@ -262,7 +310,9 @@ const AddHotel = () => {
                                 variant="filled"
                                 fullWidth
                                 value={originalPricePerNight}
-                                onChange={(e) => setOriginalPricePerNight(e.target.value)}
+                                onChange={(e) =>
+                                  setOriginalPricePerNight(e.target.value)
+                                }
                                 required
                               />
                             </Grid>
@@ -393,7 +443,7 @@ const AddHotel = () => {
                                 required
                               />
                             </Grid>
-                            
+
                             <Grid item xs={12}>
                               <fieldset class="message-wrap">
                                 <textarea
@@ -405,13 +455,14 @@ const AddHotel = () => {
                                   onChange={(e) =>
                                     setDescription(e.target.value)
                                   }
-                                  style={{ padding: "13px 15px 13px 13px", borderBottom: "1px solid black" }}
+                                  style={{
+                                    padding: "13px 15px 13px 13px",
+                                    borderBottom: "1px solid black",
+                                  }}
                                 ></textarea>
                               </fieldset>
-                              
                             </Grid>
 
-                            
                             <Grid item xs={12}>
                               <Button
                                 variant="contained"
@@ -475,6 +526,228 @@ const AddHotel = () => {
                                   </Grid>
                                 ))}
                               </Grid>
+                            </Grid>
+
+                            <Grid item xs={12}>
+                              <Typography variant="h6" gutterBottom>
+                                Room Types
+                              </Typography>
+                              {roomTypes.map((room, index) => (
+                                <Box
+                                  key={index}
+                                  mb={3}
+                                  p={2}
+                                  border="1px solid #ccc"
+                                  borderRadius={2}
+                                >
+                                  <Grid container spacing={2}>
+                                    <Grid item xs={12} sm={4}>
+                                      <TextField
+                                        label="Room Type"
+                                        select
+                                        fullWidth
+                                        variant="filled"
+                                        value={room.type}
+                                        onChange={(e) =>
+                                          handleRoomTypeChange(
+                                            index,
+                                            "type",
+                                            e.target.value
+                                          )
+                                        }
+                                      >
+                                        {["Deluxe", "Classic"].map((type) => (
+                                          <MenuItem key={type} value={type}>
+                                            {type}
+                                          </MenuItem>
+                                        ))}
+                                      </TextField>
+                                    </Grid>
+                                    <Grid item xs={12} sm={8}>
+                                      <FormControl fullWidth variant="filled">
+                                        <InputLabel>Room Amenities</InputLabel>
+                                        <Select
+                                          multiple
+                                          value={room.typeAmenities}
+                                          onChange={(e) =>
+                                            handleRoomTypeAmenityChange(
+                                              index,
+                                              e.target.value
+                                            )
+                                          }
+                                          renderValue={(selected) => (
+                                            <Box
+                                              sx={{
+                                                display: "flex",
+                                                flexWrap: "wrap",
+                                                gap: 1,
+                                              }}
+                                            >
+                                              {selected.map((value) => (
+                                                <Chip
+                                                  key={value}
+                                                  label={value}
+                                                />
+                                              ))}
+                                            </Box>
+                                          )}
+                                        >
+                                          {[
+                                            "TV",
+                                            "Mini Fridge",
+                                            "Balcony",
+                                            "Heater",
+                                            "Work Desk",
+                                          ].map((amenity) => (
+                                            <MenuItem
+                                              key={amenity}
+                                              value={amenity}
+                                            >
+                                              <Checkbox
+                                                checked={room.typeAmenities.includes(
+                                                  amenity
+                                                )}
+                                              />
+                                              <ListItemText primary={amenity} />
+                                            </MenuItem>
+                                          ))}
+                                        </Select>
+                                      </FormControl>
+                                    </Grid>
+                                    <Grid item xs={12} sm={4}>
+                                      <TextField
+                                        label="Size"
+                                        variant="filled"
+                                        fullWidth
+                                        value={room.size}
+                                        onChange={(e) =>
+                                          handleRoomTypeChange(
+                                            index,
+                                            "size",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </Grid>
+                                    <Grid item xs={12} sm={4}>
+                                      <TextField
+                                        label="Bed Type"
+                                        variant="filled"
+                                        fullWidth
+                                        value={room.bedType}
+                                        onChange={(e) =>
+                                          handleRoomTypeChange(
+                                            index,
+                                            "bedType",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </Grid>
+                                    <Grid item xs={12} sm={4}>
+                                      <TextField
+                                        label="Capacity"
+                                        variant="filled"
+                                        type="number"
+                                        fullWidth
+                                        value={room.capacity}
+                                        onChange={(e) =>
+                                          handleRoomTypeChange(
+                                            index,
+                                            "capacity",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                      <TextField
+                                        label="Price"
+                                        variant="filled"
+                                        fullWidth
+                                        value={room.price}
+                                        onChange={(e) =>
+                                          handleRoomTypeChange(
+                                            index,
+                                            "price",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </Grid>
+
+                                    <Grid item xs={12} sm={6}>
+                                      <TextField
+                                        label="Original Price"
+                                        variant="filled"
+                                        fullWidth
+                                        value={room.originalPrice}
+                                        onChange={(e) =>
+                                          handleRoomTypeChange(
+                                            index,
+                                            "originalPrice",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                      <FormControlLabel
+                                        control={
+                                          <Checkbox
+                                            checked={room.smokingAllowed}
+                                            onChange={(e) =>
+                                              handleRoomTypeChange(
+                                                index,
+                                                "smokingAllowed",
+                                                e.target.checked
+                                              )
+                                            }
+                                          />
+                                        }
+                                        label="Smoking Allowed"
+                                      />
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                      <TextField
+                                        label="Room Description"
+                                        multiline
+                                        rows={3}
+                                        fullWidth
+                                        variant="filled"
+                                        value={room.description}
+                                        onChange={(e) =>
+                                          handleRoomTypeChange(
+                                            index,
+                                            "description",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                      <Button
+                                        variant="outlined"
+                                        color="error"
+                                        onClick={() => removeRoomType(index)}
+                                      >
+                                        Remove Room Type
+                                      </Button>
+                                    </Grid>
+                                  </Grid>
+                                </Box>
+                              ))}
+                              <Button
+                                variant="contained"
+                                onClick={addRoomType}
+                                sx={{
+                                  backgroundColor: "#ff7043",
+                                  color: "white",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                + Add Another Room Type
+                              </Button>
                             </Grid>
                           </Grid>
                           <Button
