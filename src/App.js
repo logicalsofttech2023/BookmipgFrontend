@@ -50,6 +50,7 @@ import Loader from "./tube-spinner (1).svg";
 // import CancellationPolicy from "./HotelOwner/CancellationPolicy";
 import HotelOwnerPrivacyPolicy from "./HotelOwner/HotelOwnerPrivacyPolicy";
 import HotelOwnerTermsAndCondition from "./HotelOwner/HotelOwnerTermsAndCondition";
+import TransactionList from "./HotelOwner/TransactionList";
 
 const App = () => {
   const location = useLocation();
@@ -85,7 +86,7 @@ const App = () => {
       "/hotelownerprivacypolicy",
       "/hotelownertermsandcondition",
       "/vendorlogin",
-      
+      "/transactionlist",
     ];
 
     const shouldHide =
@@ -102,20 +103,19 @@ const App = () => {
     <div className="body counter-scroll">
       {isLoading ? (
         <div
-        style={{
-          height: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <img
-          src={Loader}
-          alt="Loading..."
-          style={{ width: "80px", height: "80px", color: "red" }} // Adjust size here
-        />
-      </div>
-      
+          style={{
+            height: "100vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <img
+            src={Loader}
+            alt="Loading..."
+            style={{ width: "80px", height: "80px", color: "red" }} // Adjust size here
+          />
+        </div>
       ) : (
         <>
           {showNavbarFooter && <Navbar />}
@@ -180,10 +180,9 @@ const App = () => {
               path="/hotelOwnerTermsAndCondition"
               element={<HotelOwnerTermsAndCondition />}
             />
-            <Route
-              path="/vendorLogin"
-              element={<VendorLogin />}
-            />
+            <Route path="/vendorLogin" element={<VendorLogin />} />
+
+            <Route path="/transactionList" element={<TransactionList />} />
           </Routes>
           {showNavbarFooter && <Footer />}
         </>

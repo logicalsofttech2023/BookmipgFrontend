@@ -71,7 +71,7 @@ const Header = () => {
 
   useEffect(() => {
     if (role === "user") {
-      navigate("/dashboard");
+      navigate("/");
     }
 
     if (!token) {

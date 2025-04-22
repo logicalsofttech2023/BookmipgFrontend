@@ -6,8 +6,9 @@ import axios from "axios";
 const Sidebar = () => {
   const location = useLocation();
   const [ownerData, setOwnerData] = useState("");
-  const [totalHotel, setTotalHotel] = useState(0);
+  const [totalHotel, setTotalHotel] = useState(null);
   const token = localStorage.getItem("token");
+  const [loading, setLoading] = useState(true);
 
   const getInitialMenuState = () => {
     const savedState = localStorage.getItem("sidebarMenus");
@@ -45,6 +46,7 @@ const Sidebar = () => {
 
           setOwnerData(response.data.data);
           setTotalHotel(response.totalHotel);
+          setLoading(false);
         }
       } catch (error) {
         console.error("Error fetching owner data:", error);
@@ -64,7 +66,9 @@ const Sidebar = () => {
               <span className="login-status online" />
             </div>
             <div className="nav-profile-text d-flex flex-column">
-              <span className="font-weight-bold mb-2">Hello {ownerData.name}</span>
+              <span className="font-weight-bold mb-2">
+                Hello {ownerData.name}
+              </span>
             </div>
           </div>
         </li>
@@ -103,31 +107,32 @@ const Sidebar = () => {
               transition: "max-height 0.4s ease-in-out",
             }}
           >
-            <ul className="nav flex-column sub-menu">
-              {totalHotel < 1 ? (
+            {!loading && (
+              <ul className="nav flex-column sub-menu">
+                {totalHotel < 1 && (
+                  <li className="nav-item">
+                    <Link
+                      className={`nav-link ${
+                        location.pathname === "/addHotel" ? "active" : ""
+                      }`}
+                      to={"/addHotel"}
+                    >
+                      Add Hotel
+                    </Link>
+                  </li>
+                )}
                 <li className="nav-item">
                   <Link
                     className={`nav-link ${
-                      location.pathname === "/addHotel" ? "active" : ""
+                      location.pathname === "/totalHotel" ? "active" : ""
                     }`}
-                    to={"/addHotel"}
+                    to={"/totalHotel"}
                   >
-                    Add Hotel
+                    Hotel List
                   </Link>
                 </li>
-              ) : null}
-
-              <li className="nav-item">
-                <Link
-                  className={`nav-link ${
-                    location.pathname === "/totalHotel" ? "active" : ""
-                  }`}
-                  to={"/totalHotel"}
-                >
-                  Hotel List
-                </Link>
-              </li>
-            </ul>
+              </ul>
+            )}
           </div>
         </li>
 
@@ -194,6 +199,45 @@ const Sidebar = () => {
                   Completed Booking List
                 </Link>
               </li>
+            </ul>
+          </div>
+        </li>
+
+        {/* Transition  */}
+        <li className="nav-item">
+          <div
+            className="nav-link d-flex justify-content-between"
+            onClick={(e) => toggleMenu("transaction", e)}
+            style={{ cursor: "pointer" }}
+          >
+            <span className="menu-title">Billing Management</span>
+            <i
+              className={`menu-arrow transition ${
+                openMenus.transaction ? "rotate-180" : "rotate-0"
+              }`}
+            />
+          </div>
+          <div
+            className="submenu-container"
+            style={{
+              maxHeight: openMenus.transaction ? "200px" : "0px",
+              overflow: "hidden",
+              transition: "max-height 0.4s ease-in-out",
+            }}
+          >
+            <ul className="nav flex-column sub-menu">
+              <li className="nav-item">
+              <Link
+  className={`nav-link ${
+    location.pathname === "/transactionList" ? "active" : ""
+  }`}
+  to={"/transactionList"}
+>
+  Booking List
+</Link>
+
+              </li>
+              
             </ul>
           </div>
         </li>

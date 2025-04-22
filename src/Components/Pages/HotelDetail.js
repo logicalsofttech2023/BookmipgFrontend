@@ -315,11 +315,16 @@ const HotelDetail = () => {
       setDiscountAmount(response?.data?.discountAmount);
       setIsCouponApplied(true);
     } catch (error) {
-      setErrorMessage(
-        error.response?.data?.message ||
-          "Something went wrong, please try again"
-      );
-      console.error("Apply Coupon Error:", error);
+      if (error?.response?.data?.msg === "Invalid token") {
+        swal({
+          title: "Please Login First!",
+          icon: "error",
+        }).then(() => {
+          setTimeout(() => {
+            navigate("/login");
+          }, 2000);
+        });
+      }
     }
   };
 
@@ -392,7 +397,8 @@ const HotelDetail = () => {
       // Select new room
       setSelectedRoom(room);
       setPricePerNight(room.price);
-      setOriginalPricePerNight(room.originalPrice);}
+      setOriginalPricePerNight(room.originalPrice);
+    }
   };
 
   return (
@@ -797,18 +803,18 @@ const HotelDetail = () => {
                         </div>
 
                         <div className="room-details mb-3">
-  <span>
-    Room size: <strong>{room.size} sqm</strong>
-  </span>
-  <span className="separator">|</span>
-  <span>
-    Bed Type: <strong>{room.bedType}</strong>
-  </span>
-  <span className="separator">|</span>
-  <span>
-    Capacity: <strong>{room.capacity} persons</strong>
-  </span>
-</div>
+                          <span>
+                            Room size: <strong>{room.size} sqm</strong>
+                          </span>
+                          <span className="separator">|</span>
+                          <span>
+                            Bed Type: <strong>{room.bedType}</strong>
+                          </span>
+                          <span className="separator">|</span>
+                          <span>
+                            Capacity: <strong>{room.capacity} persons</strong>
+                          </span>
+                        </div>
 
                         <div
                           className="mb-2 room-details"
@@ -864,10 +870,8 @@ const HotelDetail = () => {
                                 </span>
                                 <span className="text-muted ms-2 fs-4 fw-bold">
                                   <del>₹{room.originalPrice}</del>
-                                  
                                 </span>
                               </div>
-                              
 
                               <button
                                 className={`btn w-100 ${
@@ -1581,67 +1585,48 @@ const HotelDetail = () => {
         role="dialog"
         aria-hidden="true"
       >
-        <div className="modal-dialog modal-dialog-centered" role="document">
+        <div
+          className="modal-dialog modal-dialog-centered modal-xl"
+          role="document"
+        >
           <div className="modal-content">
             <button
               type="button"
-              className="close"
+              className="close position-absolute end-0 m-3"
               data-dismiss="modal"
               aria-label="Close"
+              style={{ zIndex: 9999 }}
             >
-              <span aria-hidden="true">×</span>
+              <span aria-hidden="true">&times;</span>
             </button>
-            <div className="modal-body space-y-20 pd-40 style2">
-              <div className="wrap-modal flex">
-                <div
-                  className="content"
-                  style={{ height: "700px", overflow: "scroll" }}
-                >
-                  <div className="title-login fs-30 fw-7 lh-45">Views</div>
-                  <div className="comments">
-                    <div className="respond-comment">
-                      <form
-                        method="post"
-                        className="comment-form form-submit"
-                        action="#"
-                        acceptCharset="utf-8"
-                        noValidate="novalidate"
-                      >
-                        <div className="container6">
-                          <div className="row">
-                            {}
-                            {listingData?.images?.map((data) => {
-                              return (
-                                <div className="col-md-12 mb-3">
-                                  <div className="img-box flex">
-                                    <img
-                                      className="img-3"
-                                      style={{
-                                        width: "100%",
-                                        borderRadius: "5px",
-                                        objectFit: "cover",
-                                      }}
-                                      src={
-                                        `${process.env.REACT_APP_BASE_URL}` +
-                                        data
-                                      }
-                                      alt="images"
-                                    />
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      </form>
+            <div
+              className="modal-body p-4 overflow-auto"
+              style={{ maxHeight: "80vh" }}
+            >
+              <div className="title-login fs-30 fw-bold mb-4">Gallery</div>
+              <div className="row">
+                {listingData?.images?.map((data, index) => (
+                  <div className="col-md-4 col-sm-6 mb-4" key={index}>
+                    <div className="img-box border rounded shadow-sm h-100">
+                      <img
+                        src={`${process.env.REACT_APP_BASE_URL}${data}`}
+                        alt={`Image ${index + 1}`}
+                        className="img-fluid rounded"
+                        style={{
+                          objectFit: "cover",
+                          height: "100%",
+                          width: "100%",
+                        }}
+                      />
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </div>
+
       <div
         class="modal fade popup "
         id="popup_bid"

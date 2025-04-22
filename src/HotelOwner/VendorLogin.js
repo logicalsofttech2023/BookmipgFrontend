@@ -96,8 +96,8 @@ const VendorLogin = () => {
             </Typography>
             <form onSubmit={handleLogin}>
               <TextField
-                label="Email"
-                type="email"
+                label="Email/Phone"
+                type="text"
                 fullWidth
                 margin="normal"
                 variant="outlined"
