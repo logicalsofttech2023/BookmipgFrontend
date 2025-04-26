@@ -56,16 +56,18 @@ const VeryfyOtp = () => {
     axios
       .post(`${process.env.REACT_APP_BASE_URL}api/auth/verifyOtp`, userdata)
       .then((response) => {
-        if (response.data.token == "") {
+        if (response.data.userExit === false) {
+          console.log(response);
+          
           toast.success(response.data.message);
           setTimeout(() => {
-            Navigate("/register");
+            Navigate("/Register");
           }, 3000);
         } else {
           if (response.data.data.role == "user") {
             localStorage.setItem("token", response.data.token);
             localStorage.setItem("role", response.data.data.role);
-
+            localStorage.setItem("userExit", response.data.userExit);
             toast.success(response.data.message);
             setTimeout(() => {
               Navigate("/");

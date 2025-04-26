@@ -163,7 +163,7 @@ const BookingConfirmed = () => {
           >
             You will soon receive an email confirmation on{" "}
             <span style={{ fontWeight: "700", color: "#1a73e8" }}>
-              {bookingData?.user?.email}
+              {bookingData?.user?.userEmail}
             </span>
           </div>
         </div>
@@ -277,7 +277,7 @@ const BookingConfirmed = () => {
                 </p>
                 <p className="mb-4">
                   <strong className="d-block text-dark">Email Address:</strong>
-                  {bookingData?.user?.email}
+                  {bookingData?.user?.userEmail}
                 </p>
               </div>
 

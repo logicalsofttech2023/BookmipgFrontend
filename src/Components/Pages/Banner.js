@@ -128,6 +128,7 @@ const Banner = () => {
                               display: "flex",
                               alignItems: "center",
                               position: "relative",
+                              margin: "0px",
                             }}
                           >
                             {/* Search Input Field */}
@@ -189,7 +190,7 @@ const Banner = () => {
                           <button
                             type="submit"
                             className="sc-button skude"
-                            style={{ borderStyle: "none", height: "52px" }}
+                            style={{ borderStyle: "none", height: "52px", width: "50%" }}
                           >
                             <div type="submit" class="button-search sc-btn-top">
                               <CiSearch style={{ margin: "0px" }} /> Search Now

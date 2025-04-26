@@ -68,9 +68,10 @@ const Header = () => {
   };
 
   let role = localStorage.getItem("roleType");
+  let userExit = localStorage.getItem("userExit");
 
   useEffect(() => {
-    if (role === "user") {
+    if (role === "user" && userExit === true) {
       navigate("/");
     }
 

@@ -53,6 +53,11 @@ const AddHotel = () => {
   const fileInputRef = useRef(null);
   let token = localStorage.getItem("token");
   const navigate = useNavigate();
+  const [defaultBedType, setDefaultBedType] = useState("");
+  const [defaultSize, setDefaultSize] = useState("");
+  const [defaultCapacity, setDefaultCapacity] = useState("");
+  const [defaultTypeChange, setDefaultTypeChange] = useState(false);
+
   const [roomTypes, setRoomTypes] = useState([
     {
       type: "",
@@ -112,6 +117,11 @@ const AddHotel = () => {
     formData.append("amenities", amenities);
     formData.append("facilities", facilities);
     formData.append("roomTypes", JSON.stringify(roomTypes));
+    formData.append("bedType", defaultBedType);
+    formData.append("capacity", defaultSize);
+    formData.append("size", defaultCapacity);
+    formData.append("type", "Classic");
+    formData.append("smokingAllowed", defaultTypeChange);
 
     images.forEach((image) => {
       formData.append("images", image);
@@ -290,6 +300,59 @@ const AddHotel = () => {
                                 required
                               />
                             </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                id="bed-type"
+                                label="Bed Type"
+                                variant="filled"
+                                fullWidth
+                                value={defaultBedType}
+                                onChange={(e) =>
+                                  setDefaultBedType(e.target.value)
+                                }
+                                required
+                              />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                id="room-size"
+                                label="Size"
+                                variant="filled"
+                                fullWidth
+                                value={defaultSize}
+                                onChange={(e) => setDefaultSize(e.target.value)}
+                                required
+                              />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                id="Capacity"
+                                label="Capacity"
+                                variant="filled"
+                                fullWidth
+                                value={defaultCapacity}
+                                onChange={(e) =>
+                                  setDefaultCapacity(e.target.value)
+                                }
+                                required
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={defaultTypeChange}
+                                    onChange={(e) =>
+                                      setDefaultTypeChange(e.target.checked)
+                                    }
+                                  />
+                                }
+                                label="Smoking Allowed"
+                              />
+                            </Grid>
                             <Grid item xs={12} sm={6}>
                               <TextField
                                 id="filled-basic"
@@ -370,7 +433,6 @@ const AddHotel = () => {
                                 </Select>
                               </FormControl>
                             </Grid>
-
                             <Grid item xs={12} sm={6}>
                               <FormControl fullWidth variant="filled">
                                 <InputLabel>Facilities</InputLabel>
@@ -556,7 +618,7 @@ const AddHotel = () => {
                                           )
                                         }
                                       >
-                                        {["Deluxe", "Classic"].map((type) => (
+                                        {["Deluxe", "luxury"].map((type) => (
                                           <MenuItem key={type} value={type}>
                                             {type}
                                           </MenuItem>

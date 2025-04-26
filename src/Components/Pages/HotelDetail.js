@@ -388,7 +388,10 @@ const HotelDetail = () => {
   };
 
   const handleRoomSelect = (room) => {
-    if (selectedRoom?._id === room._id) {
+    const isSelected =
+      (selectedRoom && selectedRoom._id === room._id) ||
+      (!selectedRoom && room._id === listingData._id);
+    if (isSelected) {
       // Unselect room
       setSelectedRoom(null);
       setPricePerNight(listingData?.pricePerNight);
@@ -400,6 +403,8 @@ const HotelDetail = () => {
       setOriginalPricePerNight(room.originalPrice);
     }
   };
+  
+  
 
   return (
     <>
@@ -787,19 +792,28 @@ const HotelDetail = () => {
                             {room.type} Room
                           </h4>
                           <span
-                            className="badge fs-6"
-                            style={{
-                              backgroundColor:
-                                selectedRoom?._id === room._id
-                                  ? "#ee2e24"
-                                  : "#000",
-                              color: "#fff",
-                            }}
-                          >
-                            {selectedRoom?._id === room._id
-                              ? "SELECTED ✅"
-                              : "SELECT"}
-                          </span>
+  className="badge fs-6"
+  style={{
+    backgroundColor:
+      selectedRoom
+        ? selectedRoom._id === room._id
+          ? "#ee2e24"
+          : "#000"
+        : room._id === listingData._id
+          ? "#ee2e24"
+          : "#000",
+    color: "#fff",
+  }}
+>
+  {selectedRoom
+    ? selectedRoom._id === room._id
+      ? "SELECTED ✅"
+      : "SELECT"
+    : room._id === listingData._id
+      ? "SELECTED ✅"
+      : "SELECT"}
+</span>
+
                         </div>
 
                         <div className="room-details mb-3">
@@ -874,24 +888,26 @@ const HotelDetail = () => {
                               </div>
 
                               <button
-                                className={`btn w-100 ${
-                                  selectedRoom?._id === room._id
-                                    ? "text-white"
-                                    : "text-danger border-danger"
-                                }`}
-                                style={{
-                                  backgroundColor:
-                                    selectedRoom?._id === room._id
-                                      ? "#ee2e24"
-                                      : "#fff",
-                                  border: "2px solid #ee2e24",
-                                }}
-                                onClick={() => handleRoomSelect(room)}
-                              >
-                                {selectedRoom?._id === room._id
-                                  ? "SELECTED ✅"
-                                  : "SELECT"}
-                              </button>
+  className={`btn w-100 ${
+    (selectedRoom ? selectedRoom._id === room._id : room._id === listingData._id)
+      ? "text-white"
+      : "text-danger border-danger"
+  }`}
+  style={{
+    backgroundColor:
+      (selectedRoom ? selectedRoom._id === room._id : room._id === listingData._id)
+        ? "#ee2e24"
+        : "#fff",
+    border: "2px solid #ee2e24",
+  }}
+  onClick={() => handleRoomSelect(room)}
+>
+  {(selectedRoom ? selectedRoom._id === room._id : room._id === listingData._id)
+    ? "SELECTED ✅"
+    : "SELECT"}
+</button>
+
+
                             </div>
                           </div>
                         </div>

@@ -28,7 +28,7 @@ const Register = () => {
       phone: loginMobileNumber,
       countryCode: "91",
       name: name,
-      email: email,
+      userEmail: email,
       role: roleType,
       ...(roleType === "vendor" && { password }),
     };
@@ -39,7 +39,6 @@ const Register = () => {
         userdata
       )
       .then((response) => {
-        console.log(response);
         if (response.status === 201) {
           toast.success(response.data.message);
           localStorage.setItem("token", response.data.token);

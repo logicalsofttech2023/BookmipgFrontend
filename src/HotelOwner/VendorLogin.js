@@ -32,10 +32,9 @@ const VendorLogin = () => {
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_BASE_URL}api/auth/vendorLogin`,
-        { email, password }
+        { userEmail: email, password }
       );
 
-      console.log(response);
       if (response.status === 200) {
         toast.success("Login successful!");
         localStorage.setItem("token", response.data.token);

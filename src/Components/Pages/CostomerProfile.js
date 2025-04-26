@@ -34,7 +34,7 @@ const CostomerProfile = () => {
       .then((response) => {
   
         setName(response?.data?.data?.name);
-        setEmail(response?.data?.data?.email);
+        setEmail(response?.data?.data?.userEmail);
         setMobile(response?.data?.data?.phone);
         setUserImage(response?.data?.data?.profileImage);
         
@@ -58,7 +58,7 @@ const CostomerProfile = () => {
     const formData = new FormData();
     formData.append("profileImage", userImage);
     formData.append("name", name);
-    formData.append("email", email);
+    formData.append("userEmail", email);
     formData.append("gender", gender);
     formData.append("dob", dob);
     formData.append("maritalStatus", maritalStatus); // ✅ Add this

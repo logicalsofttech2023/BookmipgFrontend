@@ -36,12 +36,14 @@ const Navbar = () => {
   let role = localStorage.getItem("roleType");
 
   const loginId = localStorage.getItem("token");
+  let userExit = localStorage.getItem("userExit");
+
 
   useEffect(() => {
     if (role === "vendor") {
       Navigate("/dashboard");
     }
-    else{
+    else if (role === "user" && userExit === true) {
       Navigate("/");
     }
   }, [])

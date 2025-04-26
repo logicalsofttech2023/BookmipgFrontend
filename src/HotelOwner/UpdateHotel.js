@@ -49,7 +49,10 @@ const UpdateHotel = () => {
   const [pricePerNight, setPricePerNight] = useState("");
   const [originalPricePerNight, setOriginalPricePerNight] = useState("");
   const [taxesAmount, setTaxesAmount] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
+  const [bedType, setBedType] = useState("");
+  const [size, setSize] = useState("");
+  const [capacity, setCapacity] = useState("");
+  const [defaultTypeChange, setDefaultTypeChange] = useState(false);
   const fileInputRef = useRef(null);
   let token = localStorage.getItem("token");
   const [loading, setLoading] = useState(true);
@@ -103,6 +106,10 @@ const UpdateHotel = () => {
         setFacilities(data.facilities || []);
         setImages(data.images || []);
         setRoomTypes(data.roomTypes || []);
+        setBedType(data.bedType);
+        setSize(data.size);
+        setCapacity(data.capacity);
+        setDefaultTypeChange(data.smokingAllowed);
       }
     } catch (error) {
       toast.error("Error fetching hotel data");
@@ -201,12 +208,15 @@ const UpdateHotel = () => {
     formData.append("facilities", facilities);
     formData.append("roomTypes", JSON.stringify(roomTypes));
     formData.append("hotelId", id);
+    formData.append("bedType", bedType);
+    formData.append("size", size);
+    formData.append("type", "Classic");
+    formData.append("capacity", capacity);
+    formData.append("smokingAllowed", defaultTypeChange);
 
     images.forEach((image) => {
-      formData.append("images", image.file); // 🔥 Corrected
+      formData.append("images", image.file);
     });
-
-    
 
     try {
       const response = await axios.post(
@@ -384,6 +394,57 @@ const UpdateHotel = () => {
                                 required
                               />
                             </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                id="bed-type"
+                                label="Bed Type"
+                                variant="filled"
+                                fullWidth
+                                value={bedType}
+                                onChange={(e) => setBedType(e.target.value)}
+                                required
+                              />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                id="room-size"
+                                label="Size"
+                                variant="filled"
+                                fullWidth
+                                value={size}
+                                onChange={(e) => setSize(e.target.value)}
+                                required
+                              />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                id="Capacity"
+                                label="Capacity"
+                                variant="filled"
+                                fullWidth
+                                value={capacity}
+                                onChange={(e) => setCapacity(e.target.value)}
+                                required
+                              />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={defaultTypeChange}
+                                    onChange={(e) =>
+                                      setDefaultTypeChange(e.target.checked)
+                                    }
+                                  />
+                                }
+                                label="Smoking Allowed"
+                              />
+                            </Grid>
+
                             <Grid item xs={12} sm={6}>
                               <TextField
                                 id="filled-basic"
@@ -408,7 +469,6 @@ const UpdateHotel = () => {
                                 required
                               />
                             </Grid>
-
                             <Grid item xs={12} sm={6}>
                               <TextField
                                 id="filled-basic"
@@ -420,7 +480,6 @@ const UpdateHotel = () => {
                                 required
                               />
                             </Grid>
-
                             <Grid item xs={12} sm={6}>
                               <TextField
                                 id="filled-basic"
@@ -648,7 +707,7 @@ const UpdateHotel = () => {
                                           )
                                         }
                                       >
-                                        {["Deluxe", "Classic"].map((type) => (
+                                        {["Deluxe", "luxury"].map((type) => (
                                           <MenuItem key={type} value={type}>
                                             {type}
                                           </MenuItem>
