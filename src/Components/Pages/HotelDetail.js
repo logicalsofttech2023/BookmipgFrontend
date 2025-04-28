@@ -41,7 +41,7 @@ const HotelDetail = () => {
   });
   const [selectedRooms, setSelectedRooms] = useState(1);
   const [isFavorite, setIsFavorite] = useState(true);
-  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [selectedRoom, setSelectedRoom] = useState();
   const [pricePerNight, setPricePerNight] = useState();
   const [originalPrice, setOriginalPricePerNight] = useState();
 
@@ -75,7 +75,6 @@ const HotelDetail = () => {
           },
         }
       );
-      console.log("Hotel Data:", res);
 
       setlistingData(res.data.hotel);
       setIsFavorite(res?.data?.hotel?.isFavorite || false);
@@ -383,6 +382,7 @@ const HotelDetail = () => {
         selectedRooms,
         couponCode,
         couponId: coupons?._id,
+        roomType: selectedRoom?.type,
       },
     });
   };
@@ -393,7 +393,7 @@ const HotelDetail = () => {
       (!selectedRoom && room._id === listingData._id);
     if (isSelected) {
       // Unselect room
-      setSelectedRoom(null);
+      setSelectedRoom();
       setPricePerNight(listingData?.pricePerNight);
       setOriginalPricePerNight(listingData?.originalPricePerNight);
     } else {
@@ -403,8 +403,6 @@ const HotelDetail = () => {
       setOriginalPricePerNight(room.originalPrice);
     }
   };
-  
-  
 
   return (
     <>
@@ -792,28 +790,26 @@ const HotelDetail = () => {
                             {room.type} Room
                           </h4>
                           <span
-  className="badge fs-6"
-  style={{
-    backgroundColor:
-      selectedRoom
-        ? selectedRoom._id === room._id
-          ? "#ee2e24"
-          : "#000"
-        : room._id === listingData._id
-          ? "#ee2e24"
-          : "#000",
-    color: "#fff",
-  }}
->
-  {selectedRoom
-    ? selectedRoom._id === room._id
-      ? "SELECTED ✅"
-      : "SELECT"
-    : room._id === listingData._id
-      ? "SELECTED ✅"
-      : "SELECT"}
-</span>
-
+                            className="badge fs-6"
+                            style={{
+                              backgroundColor: selectedRoom
+                                ? selectedRoom._id === room._id
+                                  ? "#ee2e24"
+                                  : "#000"
+                                : room._id === listingData._id
+                                ? "#ee2e24"
+                                : "#000",
+                              color: "#fff",
+                            }}
+                          >
+                            {selectedRoom
+                              ? selectedRoom._id === room._id
+                                ? "SELECTED ✅"
+                                : "SELECT"
+                              : room._id === listingData._id
+                              ? "SELECTED ✅"
+                              : "SELECT"}
+                          </span>
                         </div>
 
                         <div className="room-details mb-3">
@@ -888,26 +884,35 @@ const HotelDetail = () => {
                               </div>
 
                               <button
-  className={`btn w-100 ${
-    (selectedRoom ? selectedRoom._id === room._id : room._id === listingData._id)
-      ? "text-white"
-      : "text-danger border-danger"
-  }`}
-  style={{
-    backgroundColor:
-      (selectedRoom ? selectedRoom._id === room._id : room._id === listingData._id)
-        ? "#ee2e24"
-        : "#fff",
-    border: "2px solid #ee2e24",
-  }}
-  onClick={() => handleRoomSelect(room)}
->
-  {(selectedRoom ? selectedRoom._id === room._id : room._id === listingData._id)
-    ? "SELECTED ✅"
-    : "SELECT"}
-</button>
-
-
+                                className={`btn w-100 ${
+                                  (
+                                    selectedRoom
+                                      ? selectedRoom._id === room._id
+                                      : room._id === listingData._id
+                                  )
+                                    ? "text-white"
+                                    : "text-danger border-danger"
+                                }`}
+                                style={{
+                                  backgroundColor: (
+                                    selectedRoom
+                                      ? selectedRoom._id === room._id
+                                      : room._id === listingData._id
+                                  )
+                                    ? "#ee2e24"
+                                    : "#fff",
+                                  border: "2px solid #ee2e24",
+                                }}
+                                onClick={() => handleRoomSelect(room)}
+                              >
+                                {(
+                                  selectedRoom
+                                    ? selectedRoom._id === room._id
+                                    : room._id === listingData._id
+                                )
+                                  ? "SELECTED ✅"
+                                  : "SELECT"}
+                              </button>
                             </div>
                           </div>
                         </div>

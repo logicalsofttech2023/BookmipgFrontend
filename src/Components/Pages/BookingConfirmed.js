@@ -185,14 +185,12 @@ const BookingConfirmed = () => {
               <span style={{ color: "#1a73e8" }}>{bookingData?.bookingId}</span>
             </p>
             <p>
-              Booked by {bookingData?.user?.name} on {new Date(bookingData?.checkInDate).toLocaleDateString(
-                    "en-GB",
-                    {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    }
-                  )}
+              Booked by {bookingData?.user?.name} on{" "}
+              {new Date(bookingData?.checkInDate).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
             </p>
           </div>
           <div
@@ -222,7 +220,7 @@ const BookingConfirmed = () => {
                 style={{
                   fontSize: "22px",
                   fontWeight: "bold",
-                  color: "#333",
+                  color: "black", // Updated color to black
                   lineHeight: "30px",
                 }}
               >
@@ -233,7 +231,10 @@ const BookingConfirmed = () => {
                 {bookingData?.hotel?.address}
               </p>
               <p style={{ fontSize: "14px", color: "#444", marginTop: "10px" }}>
-                <strong>City:</strong> {bookingData?.hotel?.city}
+                <strong style={{ color: "red" }}>City:</strong>{" "}
+                <span style={{ color: "black" }}>
+                  {bookingData?.hotel?.city}
+                </span>
               </p>
             </div>
             <div
@@ -259,71 +260,214 @@ const BookingConfirmed = () => {
           </div>
 
           <div
+            style={{
+              border: "1px solid #d6d6d6",
+              margin: "24px 0px",
+            }}
+          ></div>
+
+          <div
             style={{ border: "1px solid #d6d6d6", margin: "24px 0px" }}
           ></div>
 
-          {/* Guest & Stay Details Section */}
-          <div className="container mt-4 p-3 bg-white">
-            <div className="row g-3">
+          {/* Guest Booking Details */}
+          <div className="container mt-4 p-4 bg-white rounded-3 shadow-sm">
+            <h4 style={{ color: "red" }} className="mb-4 border-bottom pb-2">
+              Guest & Booking Details
+            </h4>
+
+            <div className="row g-4">
               {/* Primary Guest Details */}
               <div className="col-md-4 col-6">
-                <p className="mb-4">
-                  <strong className="d-block text-dark">Primary Guest:</strong>
-                  {bookingData?.user?.name}
-                </p>
-                <p className="mb-4">
-                  <strong className="d-block text-dark">Mobile Number:</strong>
-                  {bookingData?.user?.phone}
-                </p>
-                <p className="mb-4">
-                  <strong className="d-block text-dark">Email Address:</strong>
-                  {bookingData?.user?.userEmail}
-                </p>
+                <div className="mb-4">
+                  <small style={{ color: "red" }} className="d-block">
+                    Primary Guest
+                  </small>
+                  <span style={{ color: "black", fontWeight: "bold" }}>
+                    {bookingData?.user?.name}
+                  </span>
+                </div>
+                <div className="mb-4">
+                  <small style={{ color: "red" }} className="d-block">
+                    Mobile Number
+                  </small>
+                  <span style={{ color: "black", fontWeight: "bold" }}>
+                    {bookingData?.user?.phone}
+                  </span>
+                </div>
+                <div className="mb-4">
+                  <small style={{ color: "red" }} className="d-block">
+                    Email Address
+                  </small>
+                  <span style={{ color: "black", fontWeight: "bold" }}>
+                    {bookingData?.user?.userEmail}
+                  </span>
+                </div>
               </div>
 
               {/* Check-in & Stay Details */}
               <div className="col-md-4 col-6">
-                <p className="mb-4">
-                  <strong className="d-block text-dark">Check In:</strong>
-                  {new Date(bookingData?.checkInDate).toLocaleDateString(
-                    "en-GB",
-                    {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    }
-                  )}
-                </p>
-                <p className="mb-4">
-                  <strong className="d-block text-dark">Check Out:</strong>
-                  {new Date(bookingData?.checkOutDate).toLocaleDateString(
-                    "en-GB",
-                    {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    }
-                  )}
-                </p>
-                <p className="mb-4">
-                  <strong className="d-block text-dark">Stay Duration:</strong>1
-                  Night
-                </p>
+                <div className="mb-4">
+                  <small style={{ color: "red" }} className="d-block">
+                    Check In
+                  </small>
+                  <span style={{ color: "black", fontWeight: "bold" }}>
+                    {new Date(bookingData?.checkInDate).toLocaleDateString(
+                      "en-GB",
+                      {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      }
+                    )}
+                  </span>
+                </div>
+                <div className="mb-4">
+                  <small style={{ color: "red" }} className="d-block">
+                    Check Out
+                  </small>
+                  <span style={{ color: "black", fontWeight: "bold" }}>
+                    {new Date(bookingData?.checkOutDate).toLocaleDateString(
+                      "en-GB",
+                      {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      }
+                    )}
+                  </span>
+                </div>
+                <div className="mb-4">
+                  <small style={{ color: "red" }} className="d-block">
+                    Stay Duration
+                  </small>
+                  <span className="badge bg-danger text-white fw-semibold">
+                    1 Night
+                  </span>
+                </div>
               </div>
 
               {/* Guest & Room Details */}
               <div className="col-md-4 col-6">
-                <p className="mb-4">
-                  <strong className="d-block text-dark">Guests:</strong>
-                  {bookingData?.adults + bookingData?.children} Guest
-                </p>
-                <p className="mb-4">
-                  <strong className="d-block text-dark">Room:</strong>
-                  {bookingData?.room}
-                </p>
+                <div className="mb-4">
+                  <small style={{ color: "red" }} className="d-block">
+                    Guests
+                  </small>
+                  <span style={{ color: "black", fontWeight: "bold" }}>
+                    {bookingData?.adults + bookingData?.children} Guest
+                  </span>
+                </div>
+                <div className="mb-4">
+                  <small style={{ color: "red" }} className="d-block">
+                    Room
+                  </small>
+                  <span className="badge bg-dark text-danger fw-semibold">
+                    {bookingData?.room}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Matched Room Type Container */}
+          {bookingData?.matchedRoomType && (
+            <div className="container mt-4 p-4 bg-white rounded-3 shadow-sm">
+              <h4 style={{ color: "red" }} className="mb-4 border-bottom pb-2">
+                Room Details
+              </h4>
+
+              <div className="row g-4">
+                <div className="col-md-6">
+                  <div className="mb-3">
+                    <small style={{ color: "red" }} className="d-block">
+                      Type
+                    </small>
+                    <span style={{ color: "black", fontWeight: "bold" }}>
+                      {bookingData.matchedRoomType.type}
+                    </span>
+                  </div>
+                  <div className="mb-3">
+                    <small style={{ color: "red" }} className="d-block">
+                      Size
+                    </small>
+                    <span style={{ color: "black", fontWeight: "bold" }}>
+                      {bookingData.matchedRoomType.size} m²
+                    </span>
+                  </div>
+
+                  <div className="mb-3">
+                    <small style={{ color: "red" }} className="d-block">
+                      Smoking Allowed
+                    </small>
+                    <span
+                      className={`badge ${
+                        bookingData.matchedRoomType.smokingAllowed
+                          ? "bg-success"
+                          : "bg-dark text-danger"
+                      } fw-semibold`}
+                    >
+                      {bookingData.matchedRoomType.smokingAllowed
+                        ? "Yes"
+                        : "No"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="col-md-6">
+                  <div className="mb-3">
+                    <small style={{ color: "red" }} className="d-block">
+                      Bed Type
+                    </small>
+                    <span style={{ color: "black", fontWeight: "bold" }}>
+                      {bookingData.matchedRoomType.bedType}
+                    </span>
+                  </div>
+                  <div className="mb-3">
+                    <small style={{ color: "red" }} className="d-block">
+                      Capacity
+                    </small>
+                    <span style={{ color: "black", fontWeight: "bold" }}>
+                      {bookingData.matchedRoomType.capacity} Person
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              {bookingData.matchedRoomType.description && (
+                <div className="mt-4">
+                  <h6 style={{ color: "red" }} className="mb-2">
+                    Description
+                  </h6>
+                  <p style={{ color: "black" }}>
+                    {bookingData.matchedRoomType.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Amenities */}
+              {bookingData.matchedRoomType.typeAmenities?.length > 0 && (
+                <div className="mt-4">
+                  <h6 style={{ color: "red" }} className="mb-2">
+                    Amenities
+                  </h6>
+                  <ul className="list-unstyled d-flex flex-wrap gap-2">
+                    {bookingData.matchedRoomType.typeAmenities.map(
+                      (amenity, index) => (
+                        <li
+                          key={index}
+                          className="badge bg-light fw-normal p-2 border"
+                          style={{ color: "black", borderColor: "red" }}
+                        >
+                          {amenity}
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
 
           <div
             style={{ border: "1px solid #d6d6d6", margin: "24px 0px" }}
@@ -401,37 +545,56 @@ const BookingConfirmed = () => {
               </p>
 
               {/* Pay Now Button */}
-              <button
-                style={{
-                  backgroundColor: "red",
-                  color: "#fff",
-                  padding: "10px 20px",
-                  border: "none",
-                  borderRadius: "5px",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  minWidth: "120px",
-                  justifyContent: "center",
-                  fontWeight: "800",
-                }}
-              >
-                Pay Now
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  id="chevron"
-                  viewBox="0 0 8 14"
-                  width="12"
-                  height="12"
-                  style={{ marginLeft: "5px" }}
+              {bookingData?.status === "cancelled" ? (
+                <span
+                  style={{
+                    backgroundColor: "#f8d7da",
+                    color: "#721c24",
+                    padding: "10px 20px",
+                    borderRadius: "5px",
+                    fontSize: "16px",
+                    fontWeight: "800",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    minWidth: "120px",
+                    justifyContent: "center",
+                  }}
                 >
-                  <path
-                    d="M.68-.04c.173 0 .346.066.48.2L8 7l-6.84 6.84a.677.677 0 01-.96 0 .677.677 0 010-.96L6.08 7 .2 1.12a.675.675 0 010-.96c.13-.134.305-.2.48-.2z"
-                    fill="#fff"
-                  />
-                </svg>
-              </button>
+                  Already Cancelled
+                </span>
+              ) : (
+                <button
+                  style={{
+                    backgroundColor: "red",
+                    color: "#fff",
+                    padding: "10px 20px",
+                    border: "none",
+                    borderRadius: "5px",
+                    fontSize: "16px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    minWidth: "120px",
+                    justifyContent: "center",
+                    fontWeight: "800",
+                  }}
+                >
+                  Pay Now
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    id="chevron"
+                    viewBox="0 0 8 14"
+                    width="12"
+                    height="12"
+                    style={{ marginLeft: "5px" }}
+                  >
+                    <path
+                      d="M.68-.04c.173 0 .346.066.48.2L8 7l-6.84 6.84a.677.677 0 01-.96 0 .677.677 0 010-.96L6.08 7 .2 1.12a.675.675 0 010-.96c.13-.134.305-.2.48-.2z"
+                      fill="#fff"
+                    />
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
 
@@ -439,7 +602,11 @@ const BookingConfirmed = () => {
             style={{ border: "1px solid #d6d6d6", margin: "24px 0px" }}
           ></div>
 
-          <div
+         
+        </div>
+      </div>
+
+       <div
             style={{
               display: "flex",
               flexWrap: "wrap",
@@ -466,15 +633,15 @@ const BookingConfirmed = () => {
             >
               <p>
                 <strong>Something not right?</strong>{" "}
-                <Link
-                  target="_blank" 
-                  to={`https://wa.me/1234567890?text=${encodeURIComponent(
+                <a
+                  target="_blank"
+                  href={`https://wa.me/1234567890?text=${encodeURIComponent(
                     "Hello, I want to book a room for 2024-02-24 with ID AT669537"
                   )}`}
                   style={{ color: "#1a73e8", textDecoration: "none" }}
                 >
                   Chat with us
-                </Link>{" "}
+                </a>{" "}
                 for help.
               </p>
               <p
@@ -492,13 +659,11 @@ const BookingConfirmed = () => {
                   to="/termsAndCondition"
                   style={{ color: "#1a73e8", textDecoration: "none" }}
                 >
-                  Read OYO's Terms and Conditions
+                  Read Bookmipg Terms and Conditions
                 </Link>
               </p>
             </div>
           </div>
-        </div>
-      </div>
       <Dialog
         style={{ height: "80%", top: "100px" }}
         open={open}

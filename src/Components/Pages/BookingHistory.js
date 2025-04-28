@@ -209,7 +209,10 @@ const BookingHistory = () => {
                                     </td>
 
                                     {/* Action Column */}
-                                    <td className="action-column">
+                                    <td
+                                      className="action-column"
+                                      style={{ display: "grid" }}
+                                    >
                                       {status !== "cancelled" ? (
                                         <button
                                           className="btn btn-danger btn-sm"
@@ -230,6 +233,13 @@ const BookingHistory = () => {
                                           Already Cancelled
                                         </span>
                                       )}
+                                      <Link
+                                        to={`/bookingConfirmed/${booking._id}`}
+                                        className="btn btn-primary btn-sm"
+                                        style={{ marginTop: "5px" }}
+                                      >
+                                        View Details
+                                      </Link>
                                     </td>
                                   </tr>
                                 );
@@ -258,7 +268,7 @@ const BookingHistory = () => {
         </section>
         {openCancelModal && (
           <div className="cancel-modal">
-            <div className="modal-content" >
+            <div className="modal-content">
               <h4>Cancel Booking</h4>
               <p>Please select a reason for cancellation:</p>
               <select

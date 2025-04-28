@@ -17,16 +17,11 @@ const BookingSummary = () => {
   const location = useLocation();
   const {
     selectedDates,
-    totalSavings,
     finalPrice,
-    discountAmount,
-    originalPricePerNight,
-    discountedPricePerNight,
-    taxesAmount,
-    couponCode,
     selectedGuests,
     selectedRooms,
     couponId,
+    roomType,
   } = location.state || {};
 
   useEffect(() => {
@@ -61,6 +56,9 @@ const BookingSummary = () => {
         `${process.env.REACT_APP_BASE_URL}api/user/getHotelById`,
         {
           params: { hotelId: id },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       console.log("Hotel Data:", res);
@@ -103,7 +101,9 @@ const BookingSummary = () => {
         adults: selectedGuests.adults,
         children: selectedGuests.children,
         totalPrice: finalPrice,
+        roomType: roomType || "Classic",
       };
+      
 
       try {
         const response = await axios.post(
