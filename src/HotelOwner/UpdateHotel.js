@@ -80,7 +80,7 @@ const UpdateHotel = () => {
   const fetchHotelData = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}api/user/getHotelById?hotelId=${id}`,
+        `${process.env.REACT_APP_BASE_URL}api/user/getHotelByIdForVendor?hotelId=${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

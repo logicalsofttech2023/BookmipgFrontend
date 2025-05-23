@@ -41,11 +41,12 @@ const Sidebar = () => {
             },
           }
         );
+        
         if (response.status === 200) {
           console.log("Owner data fetched successfully:", response.data);
 
           setOwnerData(response.data.data);
-          setTotalHotel(response.totalHotel);
+          setTotalHotel(response.data.totalHotel);
           setLoading(false);
         }
       } catch (error) {
